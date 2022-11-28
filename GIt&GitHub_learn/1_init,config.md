@@ -1,0 +1,50 @@
+# git
+
+### 外部资源
+
+[猴子都能懂的git入门](https://backlog.com/git-tutorial/cn/)
+[GitHub漫游指南](https://github.phodal.com/#/chapter/Github%E6%BC%AB%E6%B8%B8%E6%8C%87%E5%8D%97)
+[开源指北](https://oschina.gitee.io/opensource-guide/)
+[Git官方文档](https://git-scm.com/book/zh/v2)
+[GitHub官方文档](https://docs.github.com/cn)
+
+---
+
+## 在windows中使用
+右键 Git Bash Here
+![](2022-11-25-16-30-55.png)
+#### ```git init``` 命令，用来初始化
+![](2022-11-25-16-33-40.png)
+目录下的隐藏文件夹 .git
+![](2022-11-25-16-34-56.png)
+#### ```git config``` 命令，用来配置git签名
+注意这里的签名和登录GitHub的账号、密码没有关系
+![](2022-11-25-16-50-20.png)
+##### 不同层级
+
+Git 自带一个 git config 的工具来帮助设置控制 Git 外观和行为的配置变量。 这些变量存储在三个不同的位置：
+
+1. /etc/gitconfig 文件: 包含系统上每一个用户及他们仓库的通用配置。 如果在执行 git config 时带上 ```--system``` 选项，那么它就会读写该文件中的配置变量。 （由于它是系统配置文件，因此你需要管理员或超级用户权限来修改它。）
+
+2. ~/.gitconfig 或 ~/.config/git/config 文件：只针对当前用户。 你可以传递 ```--global``` 选项让 Git 读写此文件，这会对你系统上 所有 的仓库生效。
+![](2022-11-25-16-56-52.png)
+
+3. 当前使用仓库的 Git 目录中的 config 文件（即 .git/config）：针对该仓库。 你可以传递 ```--local``` 选项让 Git 强制读写此文件，虽然默认情况下用的就是它。 （当然，你需要进入某个 Git 仓库中才能让该选项生效。）
+![](2022-11-25-16-55-26.png)
+
+每一个级别会覆盖上一级别的配置（局部优先），所以 .git/config 的配置变量会覆盖 /etc/gitconfig 中的配置变量。
+
+---
+
+## 在linux中使用
+
+#### 初始化
+
+```
+git init
+$ git clone https://github.com/libgit2/libgit2
+```
+
+```git config``` 命令与windows中同理
+
+
