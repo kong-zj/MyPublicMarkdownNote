@@ -130,7 +130,7 @@ mybatis-config.xml的文件内容形式如下
                 <!--driver：驱动内容-->
                 <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
                 <!--连接数据库的url-->
-                <property name="url" value="jdbc:mysql://172.23.215.121:3306/SSM?serverTimezone=UTC"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/SSM?serverTimezone=UTC"/>
                 <!--用户名-->
                 <property name="username" value="root"/>
                 <!-- 密码 -->
@@ -294,12 +294,12 @@ log4j.xml文件内容如下
 </log4j:configuration>
  ```
 
- 再次执行测试类，会输出日志信息
- ![](2022-12-22-23-06-46.png)
+再次执行测试类，会输出日志信息
+![](2022-12-22-23-06-46.png)
 
- #### 日志级别
+#### 日志级别
  
- ![](2022-12-22-23-41-59.png)
+![](2022-12-22-23-41-59.png)
 
 ### 源码验证：代理实现类对象userMapper的insertUser方法的实现方式
 
@@ -333,6 +333,170 @@ sqlSession.insert方法，通过提供sql语句的唯一标识，找到sql并执
 
 ### 加入修改、删除、查询功能
 
-P12
+#### 创建工具类，封装获取sqlSession的过程
+
+之前在测试类中实现插入功能比较麻烦，所以我们把获取sqlSession的过程封装到工具类
+
+在目录main/java/com/example/mybatis下新建文件夹utils，utils里新建工具类SqlSessionUtil.java，内容如下
+```java
+package com.example.mybatis.utils;
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+public class SqlSessionUtil {
+
+    public static SqlSession getSqlSession() {
+        SqlSession sqlSession = null;
+        try {
+            // 获取核心配置文件mybatis-config.xml的输入流
+            InputStream is = Resources.getResourceAsStream("mybatis-config.xml");
+            // 获取SqlSessionFactoryBuilder对象
+            SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+            // 获取SqlSessionFactory对象(传入字节输入流)
+            SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(is);
+            // 获取SqlSession对象(自动提交事务)
+            sqlSession = sqlSessionFactory.openSession(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sqlSession;
+    }
+
+}
+```
+
+注意这里不要抛出异常，要捕获，在快速修复里能快捷创建代码
+![](2022-12-23-09-54-52.png)
+
+##### 以后用了Spring框架，获取SqlSession对象更简单
+
+1. 这里写了一个静态方法，用来提供SqlSession对象
+2. 以后用Spring整合MyBatis时，可以直接通过Spring获取SqlSession对象
+3. 甚至连SqlSession也可以不获取，可以直接获取mapper接口的代理实现类对象，直接来操作这个对象也是可以的
+
+#### 在mapper接口文件（UserMapper.java）中加入抽象方法
+
+UserMapper.java文件内容如下
+```java
+package com.example.mybatis.mapper;
+import java.util.List;
+import com.example.mybatis.pojo.User;
+
+public interface UserMapper {
+    int insertUser();
+    void updateUser();
+    void deleteUser();
+    User getUserById();
+    List<User> getAllUser();
+}
+```
+
+#### 在mapper映射文件（UserMapper.xml）中加入对应的sql语句
+
+UserMapper.xml文件内容如下
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.UserMapper">
+    <insert id="insertUser">
+        insert into t_user values(null, 'admin', '123456', 23, '男', '12345@qq.com')
+    </insert>
+
+    <update id="updateUser">
+        update t_user set username='root',password='123' where id = 34
+    </update>
+
+    <delete id="deleteUser">
+        delete from t_user where id = 34
+    </delete>
+
+    <select id="getUserById" resultType="com.example.mybatis.pojo.User">
+        select * from t_user where id = 35
+    </select>
+
+    <select id="getAllUser" resultType="com.example.mybatis.pojo.User">
+        select * from t_user
+    </select>
+    <!--
+        id：Mapper接口中的方法名称
+        resultType：Java对象的全限定名称(告诉MyBatis，执行sql语句，把数据赋值给哪个类型的Java对象)(是从src/main/java/路径开启的)(注意是用.分隔而不是/)
+        resultMap：自定义映射，处理多对一或一对多的映射关系
+        注意：resultType属性和resultMap属性只能二选一设置一个
+    -->
+</mapper>
+```
+
+#### 在mybatis测试类（MyBatisTest.java）中加入测试方法
+
+MyBatisTest.java文件内容如下
+```java
+package com.example.mybatis.test;
+import java.io.IOException;
+import java.util.List;
+import org.apache.ibatis.session.SqlSession;
+import org.junit.Test;
+import com.example.mybatis.mapper.UserMapper;
+import com.example.mybatis.pojo.User;
+import com.example.mybatis.utils.SqlSessionUtil;
+
+public class MyBatisTest {
+    
+    @Test
+    public void testInsert() throws IOException{
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        // 获取UserMapper的代理实现类对象
+        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+        // 调用Mapper接口中的方法，实现添加用户信息的功能
+        int result = userMapper.insertUser();
+        System.out.println("结果：" + result);
+        sqlSession.close();
+    }
+
+    @Test
+    public void testUpdate() {
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        mapper.updateUser();
+        sqlSession.close();
+    }
+
+    @Test
+    public void testDelete() {
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        mapper.deleteUser();
+        sqlSession.close();
+    }
+
+    @Test
+    public void TestSelect() {
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        User user = mapper.getUserById();
+        System.out.println(user);
+    }
+
+    @Test
+    public void TestGetAllUser() {
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        List<User> list = mapper.getAllUser();
+        // 需要在pom.xml文件中指定<maven.compiler.source>和<maven.compiler.target>为1.8版本
+        list.forEach(System.out::println);
+    }
+}
+```
+
+当前数据库中内容为
+![](2022-12-23-13-29-46.png)
+
+分别测试insert、update、delete、select方法后，数据库中内容为
+![](2022-12-23-13-44-19.png)
 
 
