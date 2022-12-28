@@ -33,3 +33,5 @@
 # 简写
 
 1. ```System.out.println();```的简写为```syso```然后回车
+2. ```public static void main(String[] args) {}```的简写为```psvm```然后回车
+
