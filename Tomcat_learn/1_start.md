@@ -23,14 +23,14 @@ Tomcat 服务器是一个免费的开放源代码的Web 应用服务器，属于
 太麻烦，直接用docker中的tomcat镜像
 ![](2022-12-16-16-22-26.png)
 
-在当前目录下创建test文件夹
+在当前目录下创建test文件夹（可以不提前创建，添加容器数据卷命令会帮我们创建）
 
 运行容器
 ```docker run --name tomcat -p 8080:8080 -v $PWD/test:/usr/local/tomcat/webapps/test -d tomcat```
 ![](2022-12-16-16-26-35.png)
 命令说明：
--p 8080:8080：将主机的 8080 端口映射到容器的 8080 端口。
--v $PWD/test:/usr/local/tomcat/webapps/test：将主机中当前目录下的 test 挂载到容器的 /test。
+```-p 8080:8080```：将主机的 8080 端口映射到容器的 8080 端口。
+```-v $PWD/test:/usr/local/tomcat/webapps/test```：将主机中当前目录下的```test```目录挂载到容器的 ```/usr/local/tomcat/webapps/test```目录。
 
 日志信息为
 ![](2022-12-16-16-33-03.png)
