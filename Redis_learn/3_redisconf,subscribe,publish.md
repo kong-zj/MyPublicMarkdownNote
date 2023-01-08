@@ -285,15 +285,15 @@ aof-rewrite-incremental-fsync yes
 
 # Redis的发布和订阅
 
-![](2023-01-08-17-01-21.png)
+![](resources/2023-01-08-17-01-21.png)
 
-![](2023-01-08-17-01-37.png)
+![](resources/2023-01-08-17-01-37.png)
 
 ## 使用
 
 首先打开两个**redis-cli**客户端
-![](2023-01-08-17-05-22.png)
+![](resources/2023-01-08-17-05-22.png)
 
 subscribe、publish命令
-![](2023-01-08-17-07-47.png)
+![](resources/2023-01-08-17-07-47.png)
 

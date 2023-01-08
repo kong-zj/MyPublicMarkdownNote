@@ -22,7 +22,7 @@ fprintf(fout, "%d %d %.3f\n", min, max, (double)s/n);
 ```
 
 目录结构
-![](2022-07-26-23-16-28.png)
+![](resources/2022-07-26-23-16-28.png)
 
 ### 编译
 
