@@ -1,5 +1,7 @@
 # 负载均衡
 
+## 安装keepalived
+
 ![](resources/2023-01-02-18-33-06.png)
 
 ## 配置keepalived

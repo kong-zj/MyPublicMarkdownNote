@@ -223,11 +223,92 @@ URI可以分为URL,URN或同时具备locators 和names特性的一个东西。UR
 ### 新增nginx的配置文件```sites-available/myconf3```进行负载均衡的配置
 
 myconf3文件的内容为
+![](resources/2023-01-08-21-20-52.png)
+
+#### nginx负载均衡的分配服务器策略
+
+![](resources/2023-01-08-21-39-59.png)
+![](resources/2023-01-08-21-40-21.png)
+![](resources/2023-01-08-21-40-52.png)
+
+### 在```sites-enabled```中创建```sites-available/myconf3```的软连接
+
+![](resources/2023-01-08-21-24-20.png)
+
+### 最终测试
+
+让配置文件生效
+![](resources/2023-01-03-10-09-43.png)
+
+访问```172.21.103.228/edu/a.html```，可能访问到8080的页面，也可能访问到8081的页面
+
+## 配置实例4：动静分离
+
+前面三个配置实例都是动态的（Tomcat处理），所以这里只配置静态的（Nginx处理）
+
+![](resources/2023-01-08-21-43-19.png)
+
+![](resources/2023-01-08-21-46-29.png)
+
+### 准备静态资源
+
+在```/home/kzj/project```目录下新建www文件夹和image文件夹，分别放入一个html文件和一个图片
+![](resources/2023-01-08-22-01-25.png)
+![](resources/2023-01-08-22-23-47.png)
+
+### 新增nginx的配置文件```sites-available/myconf4```
+
+myconf4文件的内容为
+![](resources/2023-01-08-22-22-05.png)
+
+### 在```sites-enabled```中创建```sites-available/myconf4```的软连接
+
+![](resources/2023-01-08-22-11-21.png)
+
+### 最终测试
+
+让配置文件生效
+![](resources/2023-01-03-10-09-43.png)
+
+访问```172.21.103.228/image/01.png```，可以看到图片
+
+![](resources/2023-01-08-22-14-08.png)
+
+因为在配置文件myconf4中写了```autoindex on```，表示列出当前文件夹的内容
+访问```172.21.103.228/image/```，可以看到文件夹的内容
+![](resources/2023-01-08-22-13-49.png)
+
+访问```172.21.103.228/www/a.html```，可以看到网页
+![](resources/2023-01-08-22-19-07.png)
+
+## 配置实例5：高可用集群
+
+目前的问题：如果Nginx宕机，不能有效响应请求
+![](resources/2023-01-08-22-29-30.png)
+
+解决方法：高可用
+![](resources/2023-01-08-22-34-29.png)
+
+![](resources/2023-01-08-22-35-27.png)
+
+### 准备两个虚拟机环境
+
+
+
+在两个虚拟机中都要安装nginx、keepalived
+
+
+
+
+
 
 
 
 --- 
-到P11 6min
+到P15
+
+
+
 
 
 
