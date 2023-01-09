@@ -89,3 +89,8 @@
 强制删除
 ![](resources/2022-12-15-13-48-58.png)
 
+## system
+
+使用```docker system df```命令，查看docker占用的空间
+
+使用```docker system prune```命令，清理docker垃圾
