@@ -12,7 +12,7 @@
 
 ## 容器内添加容器数据卷
 
-### 直接命令添加容器数据卷
+### 直接命令添加容器数据卷（具名挂载）
 
 ![](resources/2023-01-05-22-15-01.png)
 
@@ -79,7 +79,7 @@
 ![](resources/2023-01-05-23-38-38.png)
 注意这里的```Mode```和```RW```的值和上面命令不带权限的不同
 
-### DockerFile添加容器数据卷
+### DockerFile添加容器数据卷（匿名挂载）
 
 #### 新建DockerFile文件
 
@@ -122,7 +122,7 @@ DockerFile文件中设置容器数据卷时，不能设置容器数据卷的宿�
 可以看到宿主机的数据卷的默认目录地址
 ![](resources/2023-01-09-22-06-58.png)
 
-```xml
+```
 "/var/lib/docker/volumes/dd6895dbc2d0656f0148fd6c5dae6d03b2c7cd0f0ac5d2facf646f75196b2a6a/_data"对应"/dataVolumeContainer1",
               
 "/var/lib/docker/volumes/5008d836611ea8bd5ac82fcb9987cb434b896e8f51a5561192f22630a138df2f/_data"对应"/dataVolumeContainer2",
@@ -131,11 +131,25 @@ DockerFile文件中设置容器数据卷时，不能设置容器数据卷的宿�
 ![](resources/2023-01-09-22-18-01.png)
 看到了之前新建的contain01.txt文件
 
+##### 可以使用grep显示符合条件的附近的行
+
+使用命令```docker inspect f51afed2400d | grep -A20 Mounts```查找关键字Mounts，并显示关键字所在行和其之后的20行
+![](resources/2023-01-10-09-32-40.png)
+其中的参数：
+1. A ->After（后）
+2. B ->Before（前）
+3. C ->Context（前后）
+
+##### volume命令
+
+通过```docker volume ls```查看所有数据卷的情况
+![](resources/2023-01-10-09-41-09.png)
+
 # Docker数据卷容器
 
 ## 作用
 
-命名的容器挂载数据卷，其他容器通过挂载这个父容器实现数据共享，挂载数据卷的容器称为数据卷荣容器
+命名的容器挂载数据卷，其他容器通过挂载这个父容器实现数据共享，挂载数据卷的容器称为数据卷容器
 
 > 容器中数据管理主要有两种方式：数据卷和数据卷容器
 > 1. 数据卷（Data Volumes） 容器内数据直接映射到本地宿主机

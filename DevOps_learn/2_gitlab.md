@@ -8,6 +8,7 @@
 依次使用以下命令
 ```sudo apt-get update```
 ```sudo apt-get install -y curl openssh-server ca-certificates tzdata perl```
+其中cURL是一个利用URL语法在命令行下工作的文件传输工具
 ```sudo apt-get install -y postfix```
 ```wget https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/bionic/main/g/gitlab-ce/gitlab-ce_12.9.9-ce.0_amd64.deb```
 ```sudo dpkg -i gitlab-ce_12.9.9-ce.0_amd64.deb```
