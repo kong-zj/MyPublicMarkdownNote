@@ -22,6 +22,7 @@ ENV- 变量属性值，容器内部也会起作用
 ADD- 添加文件，如果是压缩文件也解压
 COPY- 添加文件，以复制的形式
 ENTRYPOINT- 容器进入时执行的命令
+ONBUILD- 为镜像添加触发器
 
 [Dockerfile菜鸟教程](https://www.runoob.com/docker/docker-dockerfile.html)
 
@@ -79,7 +80,7 @@ Dockerfile1的内容为
 ![](resources/2023-01-11-22-39-12.png)
 每经过Dockerfile文件中的一步，就产生一个新的镜像，像千层饼
 
-## 案例2：CMD-ENTRYPOINT指令
+## 案例2：CMD-ENTRYPOINT指令（追加和覆盖的区别）
 
 ### Dockerfile中可以有多个CMD指令，但只有最后一个生效，CMD会被```docker run```之后的参数替换
 
@@ -101,23 +102,79 @@ CMD ls -l
 
 ### ```docker run```之后的参数会被当做参数传递给ENTRYPOINT，之后形成新的命令组合
 
-![](resources/2023-01-11-23-06-20.png)
+![](resources/2023-01-14-21-18-50.png)
+
+```ipinfo.io```可以查询IP信息的网站
 
 ```curl```是一个下载命令
-![](resources/2023-01-11-23-07-56.png)
-
 ![](resources/2023-01-11-23-14-44.png)
+![](resources/2023-01-14-21-12-00.png)
 
-[IP地址查询网站](https://ip.cn/)
+#### CMD版本的Dockerfile
 
 Dockerfile2的内容为
+![](resources/2023-01-14-21-04-39.png)
 
+使用命令```docker build -f ./DockerFile2 -t myip:1.0 .```构建镜像
+![](resources/2023-01-14-21-15-03.png)
 
-这个网址现在不能和视频里返回一样的东西
+在```docker run```命令后面加参数```-i```，报错，因为新增加的```-i```变成```CMD -i```**覆盖**Dockerfile文件的最后一行```CMD ["curl", "-s", "ipinfo.io"]```
+![](resources/2023-01-14-21-20-38.png)
 
+#### ENTRYPOINT版本的Dockerfile
 
+Dockerfile3的内容为
+![](resources/2023-01-14-21-26-56.png)
 
+使用命令```docker build -f ./DockerFile3 -t myip:2.0 .```构建镜像
+![](resources/2023-01-14-21-28-41.png)
 
----
+在```docker run```命令后面加参数```-i```，正确执行，因为新增加的```-i```作为参数**追加**在```ENTRYPOINT ["curl", "-s", "ipinfo.io"]```中，变成```ENTRYPOINT ["curl", "-s", "ipinfo.io", "-i"]```
+![](resources/2023-01-14-21-30-21.png)
 
-到 P26 尚硅谷
+## 案例3：ONBUILD指令
+
+ONBUILD指令可以为镜像添加触发器。其参数是任意一个Dockerfile指令。
+
+当我们在一个Dockerfile文件中加上ONBUILD指令，该指令对利用该Dockerfile构建镜像（比如为A镜像）不会产生实质性影响。
+
+但是当我们编写一个新的Dockerfile文件来基于A镜像构建一个镜像（比如为B镜像）时，这时构造A镜像的Dockerfile文件中的ONBUILD指令就生效了，在构建B镜像的过程中，首先会执行ONBUILD指令指定的指令，然后才会执行其它指令。
+
+需要注意的是，如果是再利用B镜像构造新的镜像时，那个ONBUILD指令就无效了，也就是说只能再构建子镜像中执行，对孙子镜像构建无效。其实想想是合理的，因为在构建子镜像中已经执行了，如果孙子镜像构建还要执行，相当于重复执行，这就有问题了。
+
+利用ONBUILD指令,实际上就是相当于创建一个模板镜像，后续可以根据该模板镜像创建特定的子镜像，需要在子镜像构建过程中执行的一些通用操作就可以在模板镜像对应的dockerfile文件中用ONBUILD指令指定。 从而减少dockerfile文件的重复内容编写。
+
+给Dockerfile3增加最后一行，内容为
+![](resources/2023-01-14-21-45-49.png)
+
+使用命令```docker build -f ./DockerFile3 -t myip_father .```构建子镜像```myip_father```
+![](resources/2023-01-14-21-53-14.png)
+
+新增Dockerfile4，内容为
+![](resources/2023-01-14-21-50-24.png)
+
+使用命令```docker build -f ./DockerFile4 -t myip_son .```构建子镜像```myip_son```，**父镜像的Dockerfile文件中的ONBUILD中的Dockerfile指令被执行**
+![](resources/2023-01-14-21-54-07.png)
+
+## 案例4：部署jar包运行
+
+提前运行好mysql容器
+![](resources/2023-01-14-22-52-39.png)
+
+可以通过以下方式访问容器中的mysql
+![](resources/2023-01-14-23-12-01.png)
+
+Dockerfile的内容为
+![](resources/2023-01-14-22-20-29.png)
+
+使用命令```docker build -t mysystem .```构建镜像，这里可以不用```-f```参数，是因为执行命令时默认使用当前目录中名为Dockerfile的文件
+![](resources/2023-01-14-22-21-39.png)
+
+![](resources/2023-01-14-22-27-53.png)
+
+使用命令```docker run -p 8080:8080 -p 465:465 --name mysystem --link mysql-test:mysql-test -d mysystem```运行mysystem镜像
+![](resources/2023-01-14-23-24-36.png)
+
+![](resources/2023-01-14-23-03-25.png)
+
+详见Docker部署Springboot项目
