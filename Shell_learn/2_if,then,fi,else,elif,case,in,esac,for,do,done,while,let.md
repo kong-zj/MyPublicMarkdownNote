@@ -102,13 +102,95 @@ esac
 
 ## for循环
 
+![](resources/2023-01-16-21-10-43.png)
 
+shell脚本文件内容为
+```shell
+#!/bin/bash
+for (( i=1; i <= $1; i++ ))
+do
+	sum=$[ $sum + $i ]
+done
+echo $sum
+ ```
+![](resources/2023-01-16-21-15-51.png)
 
+```<```与```>```有输入输出重定向的作用，不能乱用
+为什么这里可以用```<=```，而不用```-le```
+因为这里使用了**双小括号**，里面可以放**数学运算式**
 
+### foreach
 
+![](resources/2023-01-16-21-23-49.png)
 
+![](resources/2023-01-16-21-28-02.png)
+```{1..100}```表示一个1到100的生成序列
 
+### 用for循环体会```$*```和```$@```的区别
 
----
+shell脚本文件内容为
+ ```shell
+#!/bin/bash
+echo '=====$*====='
+for para in $*
+do
+	echo $para
+done
+echo '=====$@====='
+for para in $@
+do
+	echo $para
+done
+```
+![](resources/2023-01-16-21-32-57.png)
 
-到P77
+shell脚本文件内容修改为
+```shell
+#!/bin/bash
+echo '=====$*====='
+for para in "$*"
+do
+	echo $para
+done
+echo '=====$@====='
+for para in "$@"
+do
+	echo $para
+done
+```
+![](resources/2023-01-16-21-34-35.png)
+
+## while循环
+
+![](resources/2023-01-16-21-36-50.png)
+
+shell脚本文件内容为
+```shell
+#!/bin/bash
+a=1
+while [ $a -le $1 ]
+do
+	sum=$[ $sum + $a ]
+	a=$[ $a + 1 ]
+done
+echo $sum
+```
+![](resources/2023-01-16-21-40-56.png)
+
+这样的语法感觉比较别扭，现在的很多shell版本里支持```let```，只要加入```let```，就可以写我们熟悉的语法
+
+shell脚本文件内容修改为
+```shell
+#!/bin/bash
+a=1
+while [ $a -le $1 ]
+do
+	#sum=$[ $sum + $a ]
+	#a=$[ $a + 1 ]
+	let sum+=a
+	let a++
+done
+echo $sum
+```
+效果相同
+
