@@ -81,6 +81,8 @@ awk、sed、grep更适合的方向：
 
 ![](resources/2023-01-19-23-24-18.png)
 
+### 实践：得到IP地址
+
 用```ifconfig eth0 | grep "inet " | cut -d " " -f 10```命令得到当前的IP地址
 ```grep```相当于提取选定的**行**，```cut```相当于提取选定的**列**
 ![](resources/2023-01-19-23-28-44.png)
@@ -98,6 +100,40 @@ awk、sed、grep更适合的方向：
 2. ```whereis```可以用来查找二进制（命令）、源文件、man文件。与which不同的是这条命令可以是**通过文件索引数据库而非PATH来查找的**，所以查找的面比which要广
 
 ![](resources/2023-01-19-23-39-20.png)
+一个```pattern```（正则表达式，用于匹配文本）对应一个```action```（对于找到的文本，执行的命令）
+
+### 实践：代替```grep```和```cut```
+
+![](resources/2023-01-20-11-52-20.png)
+
+![](resources/2023-01-20-11-40-21.png)
+```cat /etc/passwd | grep "^root" | cut -d ":" -f 7```
+之前使用了```grep```（行的提取）和```cut```（列的提取）两个工具
+```cat /etc/passwd | awk -F ":" '/^root/ {print $7}'```
+现在用```awk```就不用那么麻烦了，一个工具直接把行和列的操作全部搞定
+
+可以使用字符串拼接
+![](resources/2023-01-20-11-43-42.png)
+
+![](resources/2023-01-20-11-47-19.png)
+```cat /etc/passwd | awk -F ":" 'BEGIN{print "user, shell"} {print $1", "$7} END{print "dahaige, /bin/zuishuai"}'```
+
+![](resources/2023-01-20-11-54-56.png)
+查看每一行的第三列：
+```cat /etc/passwd | awk -F ":" '{print $3}'```
+输出每一行的第三列+1：
+```cat /etc/passwd | awk -F ":" '{print $3+1}'```
+这里的+1在```action```代码块中写死了，下次想+2怎么办，如果```action```代码块复杂，修改比较麻烦
+解决方法：
+使用```-v```参数，把```+n```中的```n```定义成**变量**，传递进```action```代码块，不管```action```代码块有多复杂，```n```只要修改一次
+更有甚者，可以把```action```代码块包装成一个脚本文件，可以使用```-f```参数指定执行的脚本文件
+```cat /etc/passwd | awk -v i=1 -F ":" '{print $3+i}'```
+
+![](resources/2023-01-20-12-11-28.png)
+
+# 综合应用案例：发送消息
+
+![](resources/2023-01-20-12-18-52.png)
 
 
 
@@ -106,7 +142,12 @@ awk、sed、grep更适合的方向：
 
 
 
-到P86
+
+---
+
+到P88  2：40min
+
+
 
 
 
