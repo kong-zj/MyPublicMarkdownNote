@@ -13,7 +13,42 @@ Vscode
 
 # windows下的WSL管理命令
 
+## 查看、安装、运行子系统
+
+查看已安装的子系统
+```wsl -l -v```
+
+查看可安装的子系统
+```wsl -l -o```
+![](resources/2023-01-20-15-14-00.png)
+
+安装指定的发行版
+```wsl --install -d <Distribution Name>```
+![](resources/2023-01-20-15-20-28.png)
+
+运行指定的子系统
+```wsl -d <Distribution Name>```
+![](resources/2023-01-20-15-32-30.png)
+
+## 备份、还原子系统
+
+```wsl --export Ubuntu-20.04 D:\Ubuntu-20.04.tar```
 ![](resources/2023-01-19-17-15-03.png)
+
+## 更改子系统文件的位置
+
+看到kali子系统文件默认位置在C盘
+![](resources/2023-01-20-15-52-29.png)
+
+开始迁移，从C盘迁移到D盘以节省空间：
+1. 导出
+2. 注销原来的
+3. 导入
+
+![](resources/2023-01-20-16-07-51.png)
+
+看到kali子系统文件迁移到了D盘
+![](resources/2023-01-20-16-09-23.png)
 
 # zsh
 
@@ -52,6 +87,27 @@ plugins=(
     history-substring-search
 )
  ```
+
+# wsl网络
+
+## wsl和windows之间的网络访问
+
+![](resources/2023-01-21-20-32-48.png)
+
+## 多个子系统共用一个IP地址
+
+![](resources/2023-01-21-21-12-09.png)
+
+![](resources/2023-01-21-21-01-54.png)
+
+WSL 2 不支持将每个 Linux 系统分配独立的 IP 地址
+在 WSL 2 中，所有的 Linux 系统都共享同一个 IP 地址
+
+
+
+
+
+
 
 
 

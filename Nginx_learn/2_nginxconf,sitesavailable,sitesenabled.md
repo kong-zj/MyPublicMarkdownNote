@@ -293,16 +293,26 @@ myconf4文件的内容为
 
 ### 准备两个虚拟机环境
 
-
-
 在两个虚拟机中都要安装nginx、keepalived
 
+> 因为多个WSL子系统共用一个IP地址（详见WSL_learn文件夹），不符合要求
+> 所以下载VMware，在其中安装Ubuntu虚拟机
+
+经测试，Ubuntu虚拟机和WSL子系统中是不同的IP地址，符合要求
+![](resources/2023-01-22-00-13-10.png)
 
 
 
 
+[Ubuntu关闭软件更新器开机提醒弹窗](https://blog.csdn.net/huludan/article/details/118459624)
 
 
+
+用docker也可以负载均衡？
+https://zhuanlan.zhihu.com/p/157183707
+
+教程
+https://cloud.tencent.com/developer/article/1719470
 
 --- 
 到P15

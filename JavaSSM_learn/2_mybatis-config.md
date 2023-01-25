@@ -162,8 +162,114 @@ jdbc.password=1
     </typeAliases>
 ```
 
+## ```<mappers>```标签
 
+在**mybatis-config.xml文件**中
+使用```<mappers>```标签，**引入mybatis的映射文件**
+```xml
+    <!--指定mybatis的mapper映射文件的位置
+        目的是找到其他mapper文件的sql语句
+    -->
+    <mappers>
+        <!--使用mapper的resource属性指定mapper文件的路径(使用 / 分割路径)
+            这个路径是相对于src/main/resources/的
+            一个resource指定一个mapper文件
+        -->
+        <mapper resource="mappers/UserMapper.xml"/>
+    </mappers>
+```
+这样可以用```<mapper>```子标签，一个一个地引入映射文件，比较麻烦
 
-到sgg P17
+### 使用```<package>```标签
 
+前提要求：
+1. mapper映射文件所在的包（相对于```resources/```文件夹），要和mapper接口所在的包（相对于```java/```文件夹）一致
+2. mapper映射文件的名字，要和mapper接口的名字保持一致
+
+![](resources/2023-01-25-00-22-41.png)
+
+为什么mapper映射文件和mapper接口所在的包（不是同一个目录）要保持一致：
+在项目编译后产生的```target/```文件夹中，发现mapper映射文件和mapper接口在同一个目录下面
+![](resources/2023-01-25-00-42-02.png)
+
+使用```<package>```标签，以**包**（所有的映射文件统一放在一个包下）的方式引入映射文件
+在**mybatis-config.xml文件**改成
+```xml
+    <mappers>
+        <package name="com.example.mybatis.mapper" />
+    </mappers>
+```
+
+# 在VSCode中创建文件模板
+
+![](resources/2023-01-25-00-57-30.png)
+VSCode中的模板设置是JSON格式的，不如IDEA好用，这里暂时不在VSCode中设置模板
+
+## 创建MyBatis核心配置文件的模板
+
+mybatis-config.xml
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--
+        MyBatis核心配置文件中的标签必须按照指定的顺序：
+        properties?,settings?,typeAliases?,typeHandlers?,
+        objectFactory?,objectWrapperFactory?,reflectorFactory?,
+        plugins?,environments?,databaseIdProvider?,mappers?
+    -->
+
+    <!-- 引入properties文件，此后就可以在当前文件中使用${key}的方式访问value -->
+    <properties resource="jdbc.properties" />
+
+    <typeAliases>
+        <!-- 
+            此时这个包下面的所有实体类将全部拥有默认的别名（即类名且不区分大小写）
+        -->
+        <package name="替换成实体类所在的包" />
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+ 
+    <mappers>
+        <package name="替换成映射文件所在的包" />
+    </mappers>
+</configuration>
+```
+
+## 创建mapper映射文件的模板
+
+mybatis-mapper.xml
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="替换成接口的全类名">
+    <!--
+        id：Mapper接口中的方法名称
+        resultType：Java对象的全限定名称(告诉MyBatis，执行sql语句，把数据赋值给哪个类型的Java对象)(是从src/main/java/路径开启的)(注意是用.分隔而不是/)
+        resultMap：自定义映射，处理多对一或一对多的映射关系
+        注意：resultType属性和resultMap属性只能二选一设置一个
+        #{studentId}：占位符，表示从Java程序中传入过来的数据
+    -->
+    <!-- <select id="selectStudentById" resultType="com.bjpowernode.entity.Student">
+        select id,name,email,age from student where id=#{studentId}
+    </select>
+     -->
+</mapper>
+```
 

@@ -161,7 +161,26 @@
 
 解决方法：在IDEA中是正常的
 ![](resources/2022-12-21-15-24-24.png)
-暂时不要在Vscode直接点击run，手动命令行代替
+如果在Vscode直接点击run出现上述问题，手动修改后去命令行执行代替
+
+### 因为Java的版本问题而报错
+
+报错内容：
+```bash
+[ERROR] Error executing Maven.
+[ERROR] java.lang.IllegalStateException: Unable to load cache item
+[ERROR] Caused by: Unable to load cache item
+[ERROR] Caused by: Could not initialize class com.google.inject.internal.cglib.core.$MethodWrapper
+```
+
+问题原因：
+之前安装Jenkins时，升级了JDK版本
+
+解决方法：
+使用下面的命令切换JDK版本
+```sudo update-alternatives --config java```
+```sudo update-alternatives --config javac```
+![](resources/2023-01-24-15-20-16.png)
 
 ## 配置Tomcat插件
 

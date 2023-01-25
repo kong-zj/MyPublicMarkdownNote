@@ -105,7 +105,7 @@ mybatis-config.xml的文件内容形式如下
     -->
     <mappers>
         <!--使用mapper的resource属性指定mapper文件的路径(使用 / 分割路径)
-            这个路径是相对于src/main/java/的
+            这个路径是相对于src/main/resources/的
             一个resource指定一个mapper文件
         -->
         <mapper resource="{mybatis的mapper映射文件}"/>

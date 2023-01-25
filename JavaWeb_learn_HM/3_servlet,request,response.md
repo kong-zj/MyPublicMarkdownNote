@@ -532,13 +532,109 @@ public class ResponseDemo2 extends HttpServlet{
 
 #### Response 响应字符数据
 
-到P108
+![](resources/2023-01-24-23-18-47.png)
+
+文件ResponseDemo3.java的内容如下
+```java
+package com.kongzj.web;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/resp3")
+public class ResponseDemo3 extends HttpServlet{
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("resp3...");
+
+        // 1. 获取字符输出流
+        PrintWriter writer = resp.getWriter(); 
+        resp.setHeader("content-type", "text/html");
+        writer.write("aaa");
+        writer.write("<h1>aaa</h1>");
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    }
+}
+```
+注意这里的输出流不需要关闭
+
+响应在网页中显示为
+![](resources/2023-01-24-15-29-42.png)
+
+##### 解决响应的中文乱码问题
+
+问题：
+```java
+writer.write("你好");
+```
+在网页中为```??```
+
+解决方法：
+只需要在获取字符输出流之前加上一行
+```java
+resp.setContentType("text/html;charset=utf-8");
+```
+即可
 
 #### Response 响应字节数据
 
+![](resources/2023-01-24-23-48-20.png)
 
+文件ResponseDemo4.java的内容如下
 
+```java
+package com.kongzj.web;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
+@WebServlet("/resp4")
+public class ResponseDemo4 extends HttpServlet{
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("resp4...");
 
+        // 1. 读取文件
+        FileInputStream fis = new FileInputStream("servletdemo/src/main/resources/111.png");
+
+        // 2. 获取字节输出流
+        ServletOutputStream os = resp.getOutputStream();
+
+        // 3. 完成流的copy
+        // byte[] buff = new byte[1024];
+        // int len = 0;
+        // while ((len = fis.read(buff)) != -1){
+        //     os.write(buff, 0, len);
+        // }
+        // 上面这样写太麻烦了，我们用工具类commons-io
+        IOUtils.copy(fis, os);
+
+        fis.close();
+
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    }
+}
+```
+
+使用maven管理工具，在```pom.xml```文件中添加依赖```commons-io```
+![](resources/2023-01-24-23-42-18.png)
+这样就可以用```IOUtils.copy(fis, os);```
+
+网页中会显示我们指定的图片
 
 
