@@ -448,10 +448,36 @@ mybatis仍然会自动把参数放到map集合里面，但此时按```@Param注�
     </select>
 ```
 
+## 添加功能获取自增的主键
+
+```java
+    //添加用户信息并获取主键
+    void insertUser(User user);
+```
+
+```xml
+    <!--void insertUser(User user);-->
+    <!--不能把主键值作为返回值是因为增删改的返回值固定为影响行数
+        所以把获取的主键放到传入对象User的指定属性keyProperty中
+
+        useGeneratedKeys: 表示添加功能使用了自增的主键
+        keyProperty：将添加的数据的自增主键为实体类类型的参数的属性赋值
+        -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user values(null,#{username},#{password},#{age},#{gender},#{email})
+    </insert>
+```
 
 
 
 
 
+
+
+
+---
+到p35
+大佬笔记
+https://blog.csdn.net/gdxdekx/article/details/125950227
 
 
