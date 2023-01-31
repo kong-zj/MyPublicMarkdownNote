@@ -1019,10 +1019,270 @@ public class DataSourceTest {
 
 看来它只认```applicationContext.xml```文件中配置的bean
 
+经检查发现，是获取IOC容器时，加载配置文件弄错了，改成
+```java
+        ApplicationContext ioc = new ClassPathXmlApplicationContext("spring-datasource.xml");
+```
+运行成功
+
+### bean的作用域
+
+![](resources/2023-01-31-22-07-51.png)
+
+```xml
+<!--
+    scope默认是单例，可以选择prototype多例
+    scope="singleton|prototype"
+    singleton:单例，表示获取该bean所对应的对象都是同一个
+    prototype:多例，表示获取该bean所对应的对象都不是同一个
+-->
+<bean id="student" class="com.kzj.spring.pojo.Student" scope="prototype">
+    <property name="sid" value="1001"/>
+    <property name="sname" value="张三"/>
+</bean>
+```
+
+### bean的生命周期
+
+> 1. bean对象创建，调用无参构造器
+> 2. 实例注入，调用set方法
+> 3. bean对象初始化之前的操作（由bean的后置处理器负责）
+> 4. bean对象初始化，需要通过bean的```init-method```属性指定初始化方法
+> 5. bean对象初始化之后的操作（由bean的后置处理器负责）
+> 6. bean对象就绪，可以使用
+> 7. bean对象销毁，需要通过bean的```destroy-method```属性指定销毁方法
+> 8. IOC容器关闭
+
+简单的例子：
+创建User.java（在```java/com/kzj/spring/pojo/```目录下）如下
+```java
+package com.kzj.spring.pojo;
+
+public class User {
+    private Integer id;
+    private String username;
+    private String password;
+    private Integer age;
+
+    public User() {
+        System.out.println("生命周期：1、创建对象");
+    }
+
+    public User(Integer id, String username, String password, Integer age) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.age = age;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        System.out.println("生命周期：2、依赖注入");
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public void initMethod() {
+        System.out.println("生命周期：3、初始化");
+    }
+
+    public void destroyMethod() {
+        System.out.println("生命周期：4、销毁");
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+```
+
+创建配置文件spring-lifecycle.xml（在```resources/```目录下）如下
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/util 
+       https://www.springframework.org/schema/util/spring-util-3.1.xsd">
+
+    <bean id="user" class="com.kzj.spring.pojo.User" init-method="initMethod" destroy-method="destroyMethod">
+        <property name="id" value="1"></property>
+        <property name="username" value="admin"></property>
+        <property name="password" value="123"></property>
+        <property name="age" value="25"></property>
+    </bean>
+</beans>
+```
+
+创建测试类LifeCycleTest.java（在```test/java/com/kzj/spring/test/```目录下）如下
+```java
+package com.kzj.spring.test;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import com.kzj.spring.pojo.User;
+
+public class LifeCycleTest {
+    @Test
+    public void test(){
+        // ConfigurableApplicationContext 是 ApplicationContext 的子接口，其中扩展了刷新和关闭容器的方法
+        ConfigurableApplicationContext ioc = new ClassPathXmlApplicationContext("spring-lifecycle.xml");
+        User user = ioc.getBean(User.class);
+        System.out.println(user);
+        ioc.close();
+    }
+}
+```
+
+运行后，控制台输出结果为
+![](resources/2023-01-31-22-43-49.png)
+
+#### 饿汉式
+
+经测试，上述代码运行到
+```java
+        ConfigurableApplicationContext ioc = new ClassPathXmlApplicationContext("spring-lifecycle.xml");
+```
+就会输出
+![](resources/2023-01-31-22-47-06.png)
+
+前三个步骤是在**获取IOC容器的时候**就执行了，不是在**获取bean的时候**执行的
+因为IOC容器中配置的bean是**单例模式**的，获取的bean永远是唯一的对象，直接在获取IOC容器的时候，把bean对象创建好，以后直接用，这是**饿汉式**
+
+#### 懒汉式
+
+配置文件spring-lifecycle.xml中在```<beans></beans>```标签内部的内容修改如下
+```xml
+    <bean id="user" scope="prototype" class="com.kzj.spring.pojo.User" init-method="initMethod" destroy-method="destroyMethod">
+        <property name="id" value="1"></property>
+        <property name="username" value="admin"></property>
+        <property name="password" value="123"></property>
+        <property name="age" value="25"></property>
+    </bean>
+```
+
+测试代码执行到
+```java
+        User user = ioc.getBean(User.class);
+```
+才会输出
+![](resources/2023-01-31-23-00-35.png)
+
+前三个步骤是在**获取bean的时候**执行的
+因为IOC容器中配置的bean是**多例模式**的，每一次通过bean获取的对象都是新的对象，所以没必要提前创建，这是**懒汉式**
+
+另外，测试代码执行到容器关闭时
+```java
+        ioc.close();
+```
+销毁的方法没有执行
+当我们把bean的作用域设置为多例模式时，销毁方法不由IOC容器来管理
+
+#### bean的后置处理器
+
+![](resources/2023-01-31-23-09-40.png)
+
+创建MyBeanPostProcessor.java实现BeanPostProcessor接口（在```java/com/kzj/spring/process/```目录下）如下
+```java
+package com.kzj.spring.process;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+
+public class MyBeanPostProcessor implements BeanPostProcessor{
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        // 此方法在bean的生命周期：初始化之前执行
+        System.out.println("MyBeanPostProcessor-->后置处理器postProcessBeforeInitialization");
+		return bean;
+	}
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        // 此方法在bean的生命周期：初始化之后执行
+        System.out.println("MyBeanPostProcessor-->后置处理器postProcessAfterInitialization");
+		return bean;
+	}
+}
+```
+
+还要把类MyBeanPostProcessor配置到IOC容器中
+配置文件spring-lifecycle.xml中在```<beans></beans>```标签内部添加内容如下
+```xml
+    <bean id="myBeanPostProcessor" class="com.kzj.spring.process.MyBeanPostProcessor"></bean>
+```
+
+同时，把id为user的bean改成单例模式
+
+运行测试方法，控制台输出结果为
+![](resources/2023-01-31-23-23-46.png)
+
+### FactoryBean
+
+[BeanFactory和FactoryBean的区别](https://www.cnblogs.com/aspirant/p/9082858.html)
+
+![](resources/2023-01-31-23-29-06.png)
 
 
 
-到P79  8min
+
+
+
+
+到P83
+
+
+
+
+### 自动装配
+
+
+
+
 
 
 
