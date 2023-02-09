@@ -43,12 +43,16 @@ class DataTest extends Controller
 {
     public function index()
     {
-        return 'index';
+        return phpinfo();
+        // return 'index';
     }
 
     public function getNoModelData()
     {
-        $data = Db::table("tp_user")->select();
+        // 用table的话，需要加前缀
+        // $data = Db::table("tp_user")->select();
+        // 用name的话，默认帮你加前缀
+        $data = Db::name("user")->select();
         return json($data);
     }
 }
@@ -80,6 +84,76 @@ class DataTest extends Controller
 再次访问```localhost:90/helloworld/public/index.php/data_test/getNoModelData```，成功
 ![](resources/2023-02-08-23-55-59.png)
 
+以上是不结合module来处理的，以下结合module
+
+## 模型定义
+
+![](resources/2023-02-09-22-04-05.png)
+User.php文件的内容如下
+```php
+<?php
+namespace app\model;
+use think\Model;
+
+class User extends Model
+{
+    
+}
+```
+
+创建完User模型后，控制器端DataTest.php文件可以这样写：
+```php
+<?php
+namespace app\controller;
+use app\model\User;
+use think\Controller;
+use think\Db;
+
+class DataTest extends Controller
+{
+    public function index()
+    {
+        return phpinfo();
+        // return 'index';
+    }
+
+    public function getNoModelData()
+    {
+        // 用table的话，需要加前缀
+        // $data = Db::table("tp_user")->select();
+        // 用name的话，默认帮你加前缀
+        $data = Db::name("user")->select();
+        return json($data);
+    }
+
+    public function getModelData()
+    {
+        $data = User::select();
+        return json($data);
+    }
+}
+```
+
+访问```localhost:90/helloworld/public/index.php/data_test/getModelData```，成功
+
+其中```User::select()```执行的sql语句是什么？
+![](resources/2023-02-09-22-15-44.png)
+![](resources/2023-02-09-22-14-03.png)
+
+## 查询数据
+
+### 基本查询
+
+![](resources/2023-02-09-22-23-27.png)
+![](resources/2023-02-09-22-26-25.png)
+
+![](resources/2023-02-09-22-28-30.png)
+
+### 链式查询
+
+
+
+
 
 
 
@@ -94,7 +168,7 @@ class DataTest extends Controller
 ---
 Laravel
 
-到P5
+到P8
 
 
 
