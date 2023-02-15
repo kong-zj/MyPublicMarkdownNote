@@ -2,7 +2,7 @@
 
 ## 创建一个maven工程（jar）
 
-![](resources/2023-02-11-23-17-36.png)
+![](resources/2023-02-12-20-58-03.png)
 
 ## 导入springboot依赖
 
@@ -42,7 +42,7 @@ public class HelloWorldMainApplication {
 
 创建文件```src/main/java/com/kzj/ccontroller/HelloController.java```内容如下
 ```java
-package com.kzj.ccontroller;
+package com.kzj.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -59,11 +59,11 @@ public class HelloController {
 
 ## 运行主程序的main方法
 
-![](resources/2023-02-12-00-04-11.png)
+![](resources/2023-02-12-22-54-15.png)
 
-![](resources/2023-02-12-00-05-15.png)
+![](resources/2023-02-12-22-55-29.png)
 
-![](resources/2023-02-12-00-05-39.png)
+![](resources/2023-02-12-22-56-13.png)
 
 ![](resources/2023-02-12-00-06-11.png)
 
@@ -87,13 +87,13 @@ public class HelloController {
 
 ### 使用插件打包
 
-![](resources/2023-02-12-00-12-47.png)
+![](resources/2023-02-12-22-58-57.png)
 
-![](resources/2023-02-12-00-17-30.png)
+![](resources/2023-02-12-23-01-00.png)
 
 ### 运行jar包
 
-![](resources/2023-02-12-00-20-45.png)
+![](resources/2023-02-12-23-09-01.png)
 
 经测试，成功
 ![](resources/2023-02-12-00-06-11.png)
@@ -108,12 +108,71 @@ public class HelloController {
 
 ![](resources/2023-02-12-00-35-50.png)
 
+## 自动配置
+
+![](resources/2023-02-12-11-55-25.png)
+
+学完整个课程再看P7
+
+# 使用Spring Initializer快速创建Spring Boot项目
+
+![](resources/2023-02-12-23-16-03.png)
+
+![](resources/2023-02-12-23-16-32.png)
+
+![](resources/2023-02-12-23-22-50.png)
+使用默认的用户设置文件和本地仓库位置，把settings.xml文件复制到对应的文件夹中
+![](resources/2023-02-12-23-22-21.png)
+
+![](resources/2023-02-12-23-37-08.png)
+
+创建文件```src/main/java/com/kzj/springboot02helloworld/controller/HelloController.java```内容如下
+
+```java
+package com.kzj.springboot02helloworld.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+//@ResponseBody
+//@Controller
+public class HelloController {
+    @RequestMapping("/hello")
+    public String hello(){
+        return "hello world!";
+    }
+}
+```
+
+在文件```src/main/resources/application.properties```中添加内容如下
+```xml
+server.port=8081
+```
+
+运行后，成功访问
+![](resources/2023-02-12-23-41-38.png)
+
+
+
+
+
+
+
+
+
 
 
 
 
 ---
-到P7
+到P9
+
+最后再看复习P7
+之后看 ： Spring注解版 （谷粒学院）
+
 
 
 

@@ -20,7 +20,11 @@
 
 ## 环境准备
 
+在windows下开发
 ![](resources/2023-02-11-22-53-50.png)
+![](resources/2023-02-12-20-40-29.png)
+![](resources/2023-02-12-21-01-27.png)
+![](resources/2023-02-12-21-02-09.png)
 
 ### maven设置
 
@@ -40,9 +44,22 @@
     </profile>
 ```
 
+给maven的```settings.xml```配置文件的```mirrors```标签添加
+```xml
+    <mirror>
+        <id>alimaven</id>
+        <mirrorOf>central</mirrorOf>
+        <name>aliyun maven</name>
+        <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
+    </mirror>
+```
+
 ### IDEA设置
 
 配置成自己的maven
-![](resources/2023-02-11-23-47-52.png)
+![](resources/2023-02-12-20-53-18.png)
+
+配置成自己的JDK
+![](resources/2023-02-12-21-05-11.png)
 
 

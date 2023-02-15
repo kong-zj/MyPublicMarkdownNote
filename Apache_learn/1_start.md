@@ -44,7 +44,6 @@ apache和nginx中部署的网页文件都放在同一个目录```/var/www/html``
 使用命令```sudo a2enmod php7.4```启动php
 ![](resources/2023-01-03-17-11-17.png)
 
-
 ## 测试php处理
 
 ![](resources/2023-01-03-17-03-46.png)
