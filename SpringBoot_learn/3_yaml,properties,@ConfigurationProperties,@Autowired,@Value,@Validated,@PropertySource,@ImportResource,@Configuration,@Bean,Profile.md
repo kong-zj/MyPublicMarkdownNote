@@ -286,7 +286,7 @@ public class Person {
 }
  ```
 
-运行测试类，成功获取配置文件```person.properties```中的值
+运行测试方法，成功获取配置文件```person.properties```中的值
 ![](resources/2023-02-16-22-07-53.png)
 
 ### 使用```@ImportResource```注解，导入Spring的配置文件，让其中的内容生效
@@ -366,7 +366,7 @@ public class SpringBoot02HelloworldApplication {
 运行上面的测试方法，结果为
 ![](resources/2023-02-16-22-52-22.png)
 
-#### 使用```@ImportResource```注解，以全注解的方式给容器添加组件
+#### 使用```@Configuration```注解，以全注解的方式给容器添加组件
 
 > 注意：SpringBoot不推荐上面的使用xml的方式给容器添加组件
 
@@ -406,24 +406,136 @@ public class MyAppConfig {
 
 # 配置文件占位符
 
+![](resources/2023-02-18-12-00-14.png)
 
+```application.properties```的内容修改为
+```properties
+person.last-name=kzj${random.uuid}
+person.age=${random.int}
+person.boss=false
+person.birth=1998/1/1
+person.maps.k1=v1
+person.maps.k2=v2
+person.lists=lisi,wangwu
+person.dog.name=${person.last-name}'s dog
+person.dog.age=2
+ ```
 
+运行结果为
+![](resources/2023-02-18-12-08-01.png)
 
+# Profile
 
+![](resources/2023-02-18-12-13-36.png)
 
+## properties文件（多profile文件形式）
 
+新建文件```src/main/resources/application-dev.properties```
+```properties
+server.port=8082
+```
 
+新建文件```src/main/resources/application-prod.properties```
+```properties
+server.port=80
+```
 
+原先的配置文件```src/main/resources/application.properties```中为
+```properties
+server.port=8081
+```
 
+默认使用```application.properties```文件中的配置
 
+在配置文件```src/main/resources/application.properties```中添加
+```properties
+spring.profiles.active=dev
+```
 
+则会激活使用```application-dev.properties```文件中的配置
 
+## yaml文件（多profile文档块模式）
 
+在配置文件```src/main/resources/application.yaml```中添加
 
-
+```yaml
+server:
+  port: 8081
+spring:
+  profiles:
+    active: dev
 ---
-到P15
+server:
+  port: 80
+spring:
+  config:
+    activate:
+      on-profile: prod
+---
+server:
+  port: 8082
+spring:
+  config:
+    activate:
+      on-profile: dev
+```
 
-最后再看复习P7
-之后看 ： Spring注解版 （谷粒学院）
+则会激活使用8082端口
+
+## 激活指定的profile
+
+### 1. 在配置文件中指定
+
+如上```spring.profiles.active=dev```
+
+### 2. 传入命令行参数
+
+先把项目打成jar包
+使用命令```sudo java -jar spring-boot-02-helloworld-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod```
+![](resources/2023-02-18-12-57-18.png)
+如果使用多个参数，可以用空格分开```--配置项=值```
+
+### 3. 传入JVM参数
+
+![](resources/2023-02-18-13-05-18.png)
+![](resources/2023-02-18-13-05-47.png)
+![](resources/2023-02-18-13-07-32.png)
+使用虚拟机参数```-Dspring.profiles.active=prod```
+![](resources/2023-02-18-13-08-42.png)
+
+# 配置文件加载位置
+
+## 内部配置文件
+
+![](resources/2023-02-18-13-13-09.png)
+
+- classpath 指的是```src.main.java```和```src.main.resources```路径以及第三方jar包的根路径
+- file 指的是```项目根目录```
+
+这些配置文件或命令行参数会形成**互补配置**：
+1. 低优先级配置文件，配置全部内容
+2. 高优先级配置文件，覆盖部分内容
+3. 命令行参数，覆盖配置文件的内容
+
+## 外部配置文件
+
+![](resources/2023-02-18-13-27-38.png)
+
+官方文档
+![](resources/2023-02-18-14-05-37.png)
+
+### 引入jar包外的配置文件
+
+如果已经打好了jar包，但是要改的配置特别多，用传入命令行参数```--配置项=值```的方式比较繁琐，这时可引入**jar包外的配置文件**，放在jar包的同目录下
+
+![](resources/2023-02-18-13-54-38.png)
+
+访问成功
+![](resources/2023-02-18-13-56-02.png)
+
+# 自动配置原理
+
+学完整个课程再看P19 P20
+
+
 
