@@ -56,9 +56,19 @@ class SpringBoot06DataJdbcApplicationTests {
 
 ### 自动配置原理
 
-数据源的相关配置都在```DataSourceProperties.class```里面
+数据源的相关配置在```DataSourceConfiguration.class```里面
+用```@Bean```向容器中添加各种```dataSource```组件，这个类主要是给容器添加各种**数据源**，也可以使用```spring.datasource.type```指定自定义的数据源类型，继续到```DataSourceBuilder.class```里面的```build()```方法，使用```BeanUtils```工具进行反射，创建相应type的数据源，并且绑定相关属性
+
+数据源自动配置在```DataSourceAutoConfiguration.class```
 
 到P61 7min
+剩P62
+
+
+
+
+
+
 
 
 
@@ -70,8 +80,12 @@ class SpringBoot06DataJdbcApplicationTests {
 
 ## MyBatis
 
+新建项目
+![](resources/2023-02-21-23-36-08.png)
+![](resources/2023-02-21-23-37-37.png)
 
-待学习
+![](resources/2023-02-21-23-40-47.png)
+
 
 
 
@@ -173,8 +187,44 @@ spring:
 
 #### 增删改查
 
+新增```src/main/java/com/kzj/springboot06datajpa/controller/UserController.java```
+```java
+package com.kzj.springboot06datajpa.controller;
+import com.kzj.springboot06datajpa.entity.User;
+import com.kzj.springboot06datajpa.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+public class UserController {
+    @Autowired
+    UserRepository userRepository;
 
+    @GetMapping("/user/{id}")
+    public User getUser(@PathVariable("id") Integer id){
+        User user = userRepository.findById(id).get();
+        return user;
+    }
+
+    @GetMapping("/user")
+    public User insertUser(User user){
+        // 返回的user中带有自增主键
+        User save = userRepository.save(user);
+        return save;
+    }
+}
+```
+
+启动项目
+访问```localhost:8080/user/1```来查看数据
+![](resources/2023-02-21-22-58-32.png)
+现在数据库表中还没有数据，所以报错
+![](resources/2023-02-21-22-58-56.png)
+
+访问```localhost:8080/user?lastName=zhangsan&email=aa@qq.com```来新增数据
+![](resources/2023-02-21-23-01-53.png)
 
 
 
@@ -186,7 +236,7 @@ spring:
 
 ---
 
-到P67  12：30min
+到P68
 
 
 
