@@ -106,8 +106,24 @@ plugins=(
 WSL 2 不支持将每个 Linux 系统分配独立的 IP 地址
 在 WSL 2 中，所有的 Linux 系统都共享同一个 IP 地址
 
+# 释放wsl占用空间
 
+[教程](https://juejin.cn/post/7148427154194169892)
 
+先在wsl子系统中清理
+清理完后，还需主动压缩wsl空间。diskpart操作有风险，注意备份ext4.vhdx
+
+```shell
+wsl --shutdown
+diskpart
+select vdisk file="自己的目录\ext4.vhdx"
+attach vdisk readonly
+compact vdisk
+detach vdisk
+exit
+ ```
+
+![](resources/2023-02-22-16-37-08.png)
 
 
 
