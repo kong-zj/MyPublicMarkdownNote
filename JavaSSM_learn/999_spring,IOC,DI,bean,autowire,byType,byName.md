@@ -559,7 +559,7 @@ ref引用IOC容器中的某个bean的id
 运行后，控制台输出结果为
 ![](resources/2023-01-26-12-07-15.png)
 
-#### 数组类型的属性赋值
+#### array数组类型的属性赋值
 
 ##### 1. 字符串类型的数组
 
@@ -804,7 +804,7 @@ public class Teacher {
 
 ##### 1. 在属性中使用```<map>```标签
 
-在属性中使用```<map>```标签，标签中map的键值对中的值的引用写在```<entry>```中
+在属性中使用```<map>```标签，标签中map的键值对写在```<entry>```中
 
 配置文件applicationContext.xml中在```<beans></beans>```标签内部的内容如下
 ```xml
@@ -1267,43 +1267,264 @@ public class MyBeanPostProcessor implements BeanPostProcessor{
 
 ![](resources/2023-01-31-23-29-06.png)
 
+FactoryBean接口中的三个方法：
+- getObject():返回一个对象给IOC容器
+- getObjectType():设置所提供对象的类型
+- isSingleton():所提供的对象是否为单例
 
+创建MyBeanPostProcessor.java实现FactoryBean接口（在```java/com/kzj/spring/factory```目录下）如下
+```java
+package com.kzj.spring.factory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
+import com.kzj.spring.pojo.User;
 
+public class UserFactoryBean implements FactoryBean<User>{
+    @Override
+    @Nullable
+    public User getObject() throws Exception {
+        return new User();
+    }
+    @Override
+    @Nullable
+    public Class<?> getObjectType() {
+        return User.class;
+    }
+}
+```
 
+创建spring-factory.xml文件（在```resources/```目录下）如下
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/util 
+       https://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
+    <bean class="com.kzj.spring.factory.UserFactoryBean"></bean>
+</beans>
+```
 
+实际是把```UserFactoryBean```中的```getObject()```方法所返回的```User```对象，交给IOC容器进行管理
 
-到P83
+创建FactoryBeanTest.java文件（在```test/java/com/kzj/spring/test/```目录下）如下
+```java
+package com.kzj.spring.test;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import com.kzj.spring.pojo.User;
 
+public class FactoryBeanTest {
+    @Test
+    public void testFactoryBean(){
+        ApplicationContext ioc = new ClassPathXmlApplicationContext("spring-factory.xml");
+        User user = ioc.getBean(User.class);
+        System.out.println(user);
+    }
+}
+```
 
+运行测试方法，控制台输出结果为
+![](resources/2023-02-26-18-42-21.png)
 
+- 在配置文件中只需要配置FactoryBean即可
+- 当把FactoryBean的实现类配置为bean时，真正交给IOC容器管理的对象，是FactoryBean工厂中getObject方法返回的对象
+- 也就是说，省略了传统的工厂模式从工厂实例中获取产品的步骤，而是直接把工厂的产品交给了ioc容器管理
+- 另外，还可以设置是否为单例
 
 ### 自动装配
 
+根据指定的策略，在IOC容器中匹配某个bean，自动为bean中的**类类型的属性**或者**接口类型的属性**赋值
 
+#### 场景模拟
 
+场景模拟，先创建**三层架构**（**controller**调用**service**处理业务逻辑，service调用**dao**实现持久化操作）
+- controller：接收并解析请求
+- service：真正处理业务逻辑
+- dao：操作数据库
+![](resources/2023-02-26-18-56-38.png)
 
+其中，文件夹```dao```和```service```下面直接放着**接口**，下面的```impl```文件夹下放着**实现类**。接口只有一个，实现类可以是多种，配置到IOC容器中，可以随时更换不同的实现类
 
+**UserController.java**文件如下
+```java
+package com.kzj.spring.controller;
+import com.kzj.spring.service.UserService;
 
+public class UserController {
+    private UserService userService;
+    
+    public UserService getUserService() {
+        return userService;
+    }
 
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
+    // 模拟场景
+    public void saveUser() {
+        userService.saveUser();
+    }
+}
+```
+把UserController类交给IOC容器管理之后，其中的userService属性就会被动接受IOC容器的注入
 
-## 基于注解管理bean
+**UserService.java**文件如下
+```java
+package com.kzj.spring.service;
 
+public interface UserService {
+    // 抽象方法
+    void saveUser();
+}
+```
 
+**UserServiceImpl.java**文件如下
+```java
+package com.kzj.spring.service.impl;
+import com.kzj.spring.dao.UserDao;
+import com.kzj.spring.service.UserService;
 
+public class UserServiceImpl implements UserService{
+    private UserDao userDao;
 
+    public UserDao getUserDao() {
+        return userDao;
+    }
 
+    public void setUserDao(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
----
+    // 具体方法
+    @Override
+    public void saveUser() {
+        userDao.saveUser();
+    }
+}
+```
 
----
-到P70
+**UserDao.java**文件如下
+```java
+package com.kzj.spring.dao;
 
----
+public interface UserDao {
+    void saveUser();
+}
+```
 
-学神笔记
-https://blog.csdn.net/gdxdekx/article/details/126173888
-https://blog.csdn.net/gdxdekx/article/details/126173479
+**UserDaoImpl.java**文件如下
+```java
+package com.kzj.spring.dao.impl;
+import com.kzj.spring.dao.UserDao;
 
-尚硅谷2022新版javaweb 手写 IOC（张益桃），去看看
+public class UserDaoImpl implements UserDao{
+    @Override
+    public void saveUser() {
+        System.out.println("保存成功");
+    } 
+}
+```
+
+用xml文件配置，而不是把实现类写死在代码中，如果换一个实现类只需要改配置文件就能用了，不用再次编码打包部署
+
+创建spring-autowire-xml.xml配置文件（在```resources/```目录下）如下
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/util 
+       https://www.springframework.org/schema/util/spring-util-3.1.xsd">
+
+    <bean class="com.kzj.spring.controller.UserController">
+        <property name="userService" ref="userService"></property>
+    </bean>
+    <!-- class属性中不能写接口，要写具体的类型 -->
+    <bean id="userService" class="com.kzj.spring.service.impl.UserServiceImpl">
+        <property name="userDao" ref="userDao"></property>
+    </bean>
+    <bean id="userDao" class="com.kzj.spring.dao.impl.UserDaoImpl"></bean>
+</beans>
+```
+以上是**未使用自动装配**的代码
+
+创建AutowireByXMLTest.java文件（在```test/java/com/kzj/spring/test/```目录下）如下
+```java
+package com.kzj.spring.test;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import com.kzj.spring.controller.UserController;
+
+public class AutowireByXMLTest {
+    @Test
+    public void testAutowire() {
+        ApplicationContext ioc = new ClassPathXmlApplicationContext("spring-autowire-xml.xml");
+        UserController userController = ioc.getBean(UserController.class);
+        userController.saveUser();
+    }
+}
+```
+
+运行测试类的这个方法，成功
+![](resources/2023-02-27-22-28-38.png)
+
+#### 自动装配的策略
+
+可以通过```<bean>```标签的```autowire```属性设置自动装配的策略
+
+自动装配的策略：
+1. ```no```，```default```：表示不装配，即bean中的属性不会自动匹配某个bean为某个属性赋值
+2. ```byType```：根据赋值的属性的**类型**，在IOC容器中匹配某个bean为属性赋值
+    > 异常情况：
+    > 1. IOC中一个类型都匹配不上：属性就不会装配，使用默认值
+    > 2. 有多个类型匹配的bean：此时会抛出异常
+    > 总结：当使用**byType**实现自动装配时，IOC容器中**有且仅有一个类型匹配的bean**能够为属性赋值
+3. ```byName```：将要赋值的属性的**属性名**作为bean的id在IOC容器中匹配某个bean，为属性赋值
+
+> 总结：一般使用byType。
+> 特殊情况下：当类型匹配的bean有多个时，此时可以使用byName实现自动装配
+
+配置文件spring-autowire-xml.xml中在```<beans></beans>```标签内部内容修改如下
+```xml
+    <bean class="com.kzj.spring.controller.UserController" autowire="byType">
+        <!-- <property name="userService" ref="userService"></property> -->
+    </bean>
+    <bean id="userService" class="com.kzj.spring.service.impl.UserServiceImpl" autowire="byType">
+        <!-- <property name="userDao" ref="userDao"></property> -->
+    </bean>
+    <bean id="userDao" class="com.kzj.spring.dao.impl.UserDaoImpl"></bean>
+ ```
+
+运行效果同上
+
