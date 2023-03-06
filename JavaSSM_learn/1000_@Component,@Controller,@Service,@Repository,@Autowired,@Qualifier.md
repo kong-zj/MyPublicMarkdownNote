@@ -18,12 +18,15 @@
 - dao：操作数据库
 ![](resources/2023-02-26-18-56-38.png)
 
-#### 使用注解注册bean组件
+#### 使用```@Component```，```@Controller```，```@Service```，```@Repository```注解注册bean组件
 
-@Component：将类标识为普通组件
-@Controller：将类标识为控制层组件
-@Service：将类标识为业务层组件
-@Repository：将类标识为持久层组件
+```@Component```：将类标识为普通组件
+
+```@Controller```：将类标识为控制层组件
+
+```@Service```：将类标识为业务层组件
+
+```@Repository```：将类标识为持久层组件
 
 ![](resources/2023-03-04-23-34-20.png)
 
@@ -107,7 +110,6 @@ public class IOCByAnnotationTest {
 
 ##### 扫描组件的配置文件详解
 
-
 配置文件```resources/spring_ioc_annotation.xml```中在```<beans></beans>```标签内部内容修改如下
 ```xml
     <!--开启组件扫描-->
@@ -167,29 +169,82 @@ public class UserController {
 
 ### 自动装配
 
+#### 使用```@Autowired```注解代替getter和setter方法
 
+场景模拟如下：
+```java
+@Controller
+public class UserController {
+    @Autowired
+    private UserService userService;
+    
+    public void saveUser() {
+        userService.saveUser();
+    }
+}
+```
 
+```java
+public interface UserService {
+    void saveUser();
+}
+```
 
+```java
+@Service
+public class UserServiceImpl implements UserService{
+    @Autowired
+    private UserDao userDao;
 
+    @Override
+    public void saveUser() {
+        userDao.saveUser(); 
+    }
+}
+```
 
+```java
+public interface UserDao {
+    void saveUser();
+}
+```
 
+```java
+@Repository
+public class UserDaoImpl implements UserDao{
 
+    @Override
+    public void saveUser() {
+        System.out.println("保存成功"); 
+    }
+}
+```
+注意这里与之前不同的是：使用```@Autowired```注解，而不是getter和setter方法
 
+测试类```IOCByAnnotationTest.java```的部分内容修改如下
+```java
+public class IOCByAnnotationTest {
+    @Test
+    public void test(){
+        ApplicationContext ioc = new ClassPathXmlApplicationContext("spring_ioc_annotation.xml");
+            UserController userController = ioc.getBean("userController", UserController.class);
+            userController.saveUser();
+    }
+}
+```
+运行结果为
+![](resources/2023-03-06-21-28-02.png)
 
+#### ```@Autowired```能够标识的位置
 
+1. 成员变量上，此时不需要设置成员变量的set方法
+2. set方法上
+3. 为当前成员变量赋值的有参构造器上
 
+#### ```@Autowired```的注入方式
 
+1. ```@Autowired```默认通过**byType**方式自动注入，在IOC容器中通过类型匹配某个bean为属性赋值
+2. 若有多个类型匹配的bean，此时会自动转化为**byName**的方式来实现自动装配的效果，即将要赋值的属性的属性名作为bean的id匹配某个bean为属性赋值
+3. 若byType和byName的方式都无法实现自动装配，即IOC容器中有多个类型匹配的bean，且这些bean的id和要赋值的属性的属性名都不一致，此时抛异常```NoSuchBeanDefinitionException```，此时可以在要赋值的属性上，添加一个注解```@Qualifier("value")```通过该注解的value属性值指定某个bean的id，然后用这个bean为属性赋值
+4. 若IOC容器中没有任何一个类型匹配bean，此时抛出异常```NoSuchBeanDefinitionException```，在```@Autowired```注解中有个```required```属性，默认值为true，要求必须完成自动装配，可以将```required```设置为false，此时能装配则装配，无法装配则使用属性的默认值
 
-
----
-
----
-到P91
-
----
-
-学神笔记
-https://blog.csdn.net/gdxdekx/article/details/126173888
-https://blog.csdn.net/gdxdekx/article/details/126173479
-
-尚硅谷2022新版javaweb 手写 IOC（张益桃），去看看
