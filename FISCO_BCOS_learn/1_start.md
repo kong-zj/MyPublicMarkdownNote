@@ -36,6 +36,12 @@ curl -#LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.9.1/buil
 
 ![](resources/2023-03-12-21-29-08.png)
 
+### 检查端口
+
+```netstat -anp | grep -v grep | grep fisco-bcos```
+
+![](resources/2023-04-17-23-15-47.png)
+
 ### 检查日志输出
 
 查看节点node0链接的节点数
