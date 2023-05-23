@@ -224,3 +224,60 @@ contract Asset {
 
 ```.sol```的智能合约需要编译成ABI和BIN文件才能部署至区块链网络上。有了这两个文件即可凭借Java SDK进行合约部署和调用。但这种调用方式相对繁琐，需要用户根据合约ABI来传参和解析结果。为此，控制台提供的编译工具不仅可以编译出ABI和BIN文件，还可以**自动生成一个与编译的智能合约同名的合约Java类**。这个Java类是根据ABI生成的，帮助用户解析好了参数，提供同名的方法。当应用需要部署和调用合约时，可以调用该合约类的对应方法，传入指定参数即可。使用这个合约Java类来开发应用，可以极大简化用户的代码。
 
+```cd ~/project/fisco/console/```
+```bash sol2java.sh -p org.fisco.bcos.asset.contract```
+
+运行成功之后，将会在```console/contracts/sdk```目录生成java、abi和bin目录，如下所示：
+```shell
+# 其它无关文件省略
+|-- abi # 生成的abi目录，存放solidity合约编译生成的abi文件
+|   |-- Asset.abi
+|   |-- Table.abi
+|-- bin # 生成的bin目录，存放solidity合约编译生成的bin文件
+|   |-- Asset.bin
+|   |-- Table.bin
+|-- contracts # 存放solidity合约源码文件，将需要编译的合约拷贝到该目录下
+|   |-- Asset.sol # 拷贝进来的Asset.sol合约，依赖Table.sol
+|   |-- Table.sol # 实现系统CRUD操作的合约接口文件
+|-- java  # 存放编译的包路径及Java合约文件
+|   |-- org
+|        |--fisco
+|             |--bcos
+|                  |--asset
+|                       |--contract
+|                             |--Asset.java  # Asset.sol合约生成的Java文件
+|                             |--Table.java  # Table.sol合约生成的Java文件
+|-- sol2java.sh
+```
+
+其中```Asset.java```是Java应用调用```Asset.sol```合约需要的文件
+Asset.java的主要接口：
+```java
+package org.fisco.bcos.asset.contract;
+
+public class Asset extends Contract {
+    // Asset.sol合约 transfer接口生成
+    public TransactionReceipt transfer(String from_account, String to_account, BigInteger amount);
+    // Asset.sol合约 register接口生成
+    public TransactionReceipt register(String account, BigInteger asset_value);
+    // Asset.sol合约 select接口生成
+    public Tuple2<BigInteger, BigInteger> select(String account) throws ContractException;
+    // 加载Asset合约地址，生成Asset对象
+    public static Asset load(String contractAddress, Client client, CryptoKeyPair credential);
+    // 部署Assert.sol合约，生成Asset对象
+    public static Asset deploy(Client client, CryptoKeyPair credential) throws ContractException;
+}
+```
+其中load与deploy函数用于构造Asset对象，其他接口分别用来调用对应的solidity合约的接口
+
+## 创建区块链应用项目
+
+### 环境
+
+
+
+---
+待完成
+
+
+

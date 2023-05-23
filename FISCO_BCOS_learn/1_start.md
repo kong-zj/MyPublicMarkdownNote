@@ -119,7 +119,7 @@ contract HelloWorld {
 为了方便用户快速体验，HelloWorld合约已经内置于控制台中，位于控制台目录下```contracts/solidity/HelloWorld.sol```，在控制台输入以下指令，部署成功则返回合约地址
 ```shell
 deploy HelloWorld
-```
+ ```
 
 ![](resources/2023-03-12-22-01-01.png)
 
