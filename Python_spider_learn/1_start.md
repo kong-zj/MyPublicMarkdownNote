@@ -126,4 +126,98 @@ or：如果or前面的的结果为True，则后面的不再执行
 
 ### 文件的打开和关闭
 
+```py
+fp = open('test.txt', 'w')
+fp.close()
+```
+
 ### 文件的读写
+
+```py
+fp = open('test.txt', 'a')
+fp.write('hello world\n' *5)
+fp.close()
+```
+
+```py
+fp = open('test.txt', 'r')
+content = fp.read()
+print(content)
+fp.close()
+```
+
+![](resources/2023-05-23-22-33-10.png)
+
+### 序列化和反序列化
+
+![](resources/2023-05-23-22-35-51.png)
+
+#### 用JSON模块进行序列化
+
+![](resources/2023-05-23-22-37-26.png)
+
+##### dumps:
+
+```py
+import json
+fp = open('test.txt', 'w')
+name_list = ['kzj','ll']
+name_json = json.dumps(name_list)
+fp.write(name_json)
+fp.close()
+```
+
+##### dump:
+
+相当于操作合并
+```py
+import json
+fp = open('test.txt', 'w')
+name_list = ['kzj','ll']
+json.dump(name_list, fp)
+fp.close()
+```
+
+#### 用JSON模块进行反序列化
+
+##### loads:
+ 
+```py
+import json
+fp = open('test.txt', 'r')
+name_json = fp.read()
+print(type(name_json))
+name_list = json.loads(name_json)
+print(type(name_list))
+fp.close()
+```
+
+##### load:
+
+相当于操作合并
+```py
+import json
+fp = open('test.txt', 'r')
+name_list = json.load(fp)
+print(type(name_list))
+fp.close()
+```
+
+## 异常
+
+```py
+try:
+    fh = open("testfile", "w")
+    fh.write("这是一个测试文件，用于测试异常!!")
+except IOError:
+    print "Error: 没有找到文件或读取文件失败"
+else:
+    print "内容写入文件成功"
+    fh.close()
+```
+
+# 反爬手段
+
+![](resources/2023-05-23-23-14-36.png)
+
+
