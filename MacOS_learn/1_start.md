@@ -31,6 +31,7 @@ macOS 版本 11.7.7 (Big Sur)
 | 打开新窗口           | <kbd>command</kbd>+<kbd>N</kbd>                                     |
 | 添加书签             | <kbd>command</kbd>+<kbd>D</kbd>                                     |
 | 缩小程序             | <kbd>command</kbd>+<kbd>M</kbd>                                     |
+| 全屏显示             | <kbd>control</kbd>+<kbd>command</kbd>+<kbd>F</kbd>                  |
 | 输入法切换           | <kbd>CapsLock</kbd>                                                 |
 | 偏好设置             | <kbd>command</kbd>+<kbd>,</kbd>                                     |
 | 切换应用             | <kbd>command</kbd>+<kbd>Tab</kbd>                                   |
@@ -41,7 +42,7 @@ macOS 版本 11.7.7 (Big Sur)
 | 访达搜索             | <kbd>option</kbd>+<kbd>command</kbd>+<kbd>空格</kbd>                |
 | 全屏截图为文件       | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>3</kbd>                    |
 | 全屏截图到剪贴板     | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>3</kbd>+<kbd>control</kbd> |
-| 区域截图为文件       | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>4</kbd>                   |
+| 区域截图为文件       | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>4</kbd>                    |
 | 区域截图到剪贴板     | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>4</kbd>+<kbd>control</kbd> |
 
 # 效率工具
@@ -72,6 +73,12 @@ macOS 版本 11.7.7 (Big Sur)
 ```
 sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 ```
+
+## 腾讯柠檬清理
+
+## iStat Menus for Mac 6.70.1217
+
+[下载网址](https://www.imacso.com/istat-menus.html/comment-page-1#comments)
 
 # 软件
 
@@ -118,11 +125,25 @@ git配置好config和ssh密钥就可以用了
 
 ### 常用命令
 
-```brew search 软件名```
-```brew install 软件名```
-```brew uninstall 软件名```
-```brew list```
-```which 软件名```
+```
+brew search 软件名
+brew install 软件名
+brew uninstall 软件名
+brew list
+which 软件名
+ ```
+
+## postman
+
+## charles
+
+## Navicat_Premium_16.1.10
+
+[下载地址](https://www.imacso.com/navicat-premium.html)
+
+## Sourcetree
+
+[官网](https://www.sourcetreeapp.com/)
 
 # JetBrains全家桶
 
@@ -149,7 +170,7 @@ git配置好config和ssh密钥就可以用了
 
 ## CLion 2022.2.5
 
-## AppCode 202.2.6
+## AppCode 2022.2.6
 
 激活方法同上
 
