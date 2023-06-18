@@ -57,6 +57,7 @@ macOS 版本 11.7.7 (Big Sur)
 | -------------- | ------------------ |
 | 加速滚动键     | <kbd>control</kbd> |
 | 竖直转为水平键 | <kbd>option</kbd>  |
+| 禁止平滑滚动   | <kbd>command</kbd> |
 
 ## Maccy粘贴板
 
@@ -89,10 +90,11 @@ Safari浏览器的禁用硬件加速选项没有找到，导致有时候会花�
 
 ## VSCode
 
-| 功能       | 快捷键                                           |
-| ---------- | ------------------------------------------------ |
-| 格式化代码 | <kbd>option</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>  |
-| 命令面板   | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> |
+| 功能                    | 快捷键                                            |
+| ----------------------- | ------------------------------------------------- |
+| 格式化代码              | <kbd>option</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>   |
+| 命令面板                | <kbd>command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>  |
+| Paste Image插件粘贴图片 | <kbd>option</kbd>+<kbd>command</kbd>+<kbd>V</kbd> |
 
 ### 终端中使用```code .```命令
 
