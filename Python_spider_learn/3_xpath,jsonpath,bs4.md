@@ -19,6 +19,14 @@
 
 修改了快捷键为<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>
 
+#### mac上的chrome安装xpath_helper插件
+
+[教程](https://blog.csdn.net/weixin_41582372/article/details/124583414)
+
+呼出插件的快捷键为<kbd>Shift</kbd>+<kbd>command</kbd>+<kbd>X</kbd>
+
+定位元素：按住快捷键<kbd>Shift</kbd>+<kbd>command</kbd>，移动鼠标放在要选择的元素上，在QUERY输入框里就会展示要定位的元素的路径
+
 ### 安装lxml库
 
 ![](resources/2023-06-15-22-13-34.png)
@@ -104,16 +112,14 @@ print(len(li_list))
 # 注意：节点的或关系用 | 表示
 ```
 
-### 解析服务器相应的数据
+### 解析服务器响应的数据
 
 解析出[百度官网](https://www.baidu.com/)的搜索按钮上的文字（百度一下）
 
 ![](resources/2023-06-16-00-07-05.png)
 
 用快捷键打开浏览器的xpath_helper插件，用来验证xpath语句是否正确
-
 ![](resources/2023-06-16-00-05-32.png)
-
 经验证，可以用```//input[@id="su"]/@value```解析出百度一下
 
 ```py
@@ -375,14 +381,148 @@ city_list = jsonpath.jsonpath(obj, '$..regionName')
 print(city_list)
 ```
 
-# bs4(BeautifulSoup)
+# bs4 库 (BeautifulSoup)
 
+## 基本使用
 
+![](resources/2023-06-19-16-23-01.png)
+![](resources/2023-06-19-17-02-54.png)
+![](resources/2023-06-19-16-58-04.png)
+![](resources/2023-06-19-17-43-21.png)
 
+### 安装bs4库
 
+![](resources/2023-06-19-16-26-17.png)
 
+### 解析本地文件
 
+现在有文件```html_demo.html```，内容如下
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Title</title>
+    </head>
+    <body>
+        <div>
+            <ul>
+                <li id="l1">张三</li>
+                <li id="l2">李四</li>
+                <li>王五</li>
+                <a href="" id="" class="a1">尚硅谷</a>
+                <span>嘿嘿嘿</span>
+            </ul>
+        </div>
+        <a href="" title="a2">百度</a>
+        <div id="d1">
+            <span>
+                哈哈哈
+            </span>
+        </div>
+    </body>
+</html>
+```
 
+![](resources/2023-06-19-17-02-54.png)
+![](resources/2023-06-19-16-58-04.png)
+![](resources/2023-06-19-17-43-21.png)
 
----
-到p75
+bs4基础语法的代码示例：
+```py
+from bs4 import BeautifulSoup
+# 解析本地文件
+soup = BeautifulSoup(open('html_demo.html', encoding='utf-8'), 'lxml')
+# 根据标签的名字查找节点
+# 找到的是第一个符合条件的数据
+print(soup.a)
+# 获取标签的属性和属性值
+print(soup.a.attrs)
+# bs4的三个函数
+# (1) find
+# 找到的是第一个符合条件的数据
+print(soup.find('a'))
+# 根据title的值来找标签对象
+print(soup.find('a', title='a2'))
+# 根据class的值来找标签对象，注意的是class要添加下划线，写成class_
+print(soup.find('a', class_='a1'))
+# (2) find_all
+# 返回的是一个列表，返回所有的<a>标签
+print(soup.find_all('a'))
+# 如果想获取多个标签的数据，那么需要在find_all的参数中传入列表
+print(soup.find_all(['a', 'span']))
+# 用limit参数控制查找前几个数据
+print(soup.find_all('li', limit=2))
+# (3) select
+# select方法返回的是一个列表，里面可以包含多个数据
+# 通过标签名查找（标签选择器）
+print(soup.select('a'))
+# 通过.代表class（类选择器）
+print(soup.select('.a1'))
+# 通过#代表id（id选择器）
+print(soup.select('#l1'))
+# 属性选择器
+# 查找出<li>标签，并且这个标签中有id属性
+print(soup.select('li[id]'))
+# 查找出<li>标签，并且这个标签中有id属性值为l2
+print(soup.select('li[id="l2"]'))
+# 层级选择器
+# 后代选择器
+# 找到<div>里的<li>
+print(soup.select('div li'))
+# 子代选择器（第一级子标签）
+print(soup.select('div>ul>li'))
+# 查找出所有的<a>标签和<li>标签，注意与find_all()中传入参数的区别
+print(soup.select('a,li'))
+# 节点信息
+# 获取节点内容
+obj = soup.select('#d1')[0]
+# 如果标签对象中，只有内容，那么.string和.get_text()都可以使用
+# 如果标签对象中，除了内容还有标签，那么.string就获取不到数据，而.get_text()可以获取数据
+# 一般情况下推荐使用.get_text()
+print(obj.string)
+print(obj.get_text())
+# 获取节点的属性
+obj = soup.select('#d1')[0]
+# .name是标签的名字
+print(obj.name)
+# .attrs将属性值作为一个字典返回
+print(obj.attrs)
+# 获取节点属性的三种写法
+print(obj.attrs.get('id'))
+print(obj.get('id'))
+print(obj['id'])
+```
+
+## 解析服务器响应的数据
+
+### 解析出星巴克菜单中的所有商品
+
+[要爬取的网址](https://www.starbucks.com.cn/menu/)
+
+[要爬取的接口](https://www.starbucks.com.cn/menu/)
+
+![](resources/2023-06-19-22-15-23.png)
+
+使用xpath_helper浏览器插件
+![](resources/2023-06-19-22-43-03.png)
+经验证，可以用```//ul[@class="grid padded-3 product"]//strong/text()```解析出全部商品名
+要自己转化为bs4下的语法
+
+```py
+import urllib.request
+url = 'https://www.starbucks.com.cn/menu/'
+response = urllib.request.urlopen(url)
+content = response.read().decode('utf-8')
+# print(content)
+
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(content, 'lxml')
+# xpath下的解析式为
+# //ul[@class="grid padded-3 product"]//strong/text()
+# 要自己转化为bs4下的语法
+name_list = soup.select('ul[class="grid padded-3 product"] strong')
+for name in name_list:
+    print(name.get_text())
+```
+

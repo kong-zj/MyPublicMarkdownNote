@@ -81,6 +81,8 @@ sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/ins
 
 [下载网址](https://www.imacso.com/istat-menus.html/comment-page-1#comments)
 
+## 向日葵远程控制
+
 # 软件
 
 ## chrome浏览器
