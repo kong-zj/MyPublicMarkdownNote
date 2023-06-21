@@ -33,6 +33,7 @@ macOS 版本 11.7.7 (Big Sur)
 | 缩小程序             | <kbd>command</kbd>+<kbd>M</kbd>                                     |
 | 全屏显示             | <kbd>control</kbd>+<kbd>command</kbd>+<kbd>F</kbd>                  |
 | 输入法切换           | <kbd>CapsLock</kbd>                                                 |
+| 大小写切换           | 长按<kbd>CapsLock</kbd>                                             |
 | 偏好设置             | <kbd>command</kbd>+<kbd>,</kbd>                                     |
 | 切换应用             | <kbd>command</kbd>+<kbd>Tab</kbd>                                   |
 | 打开应用菜单         | <kbd>option</kbd>+<kbd>空格</kbd>                                   |
@@ -136,6 +137,27 @@ brew uninstall 软件名
 brew list
 which 软件名
  ```
+
+## mySQL
+
+[安装教程](https://blog.csdn.net/sfh2018/article/details/124822621)
+
+```
+brew install mysql
+```
+![](resources/2023-06-20-16-38-25.png)
+这里我安装的是 mysql  Ver 8.0.33 for macos11.7 on x86_64 (Homebrew) 版本
+密码：kzj1998,.
+
+开启mySQL服务
+```
+brew services start mysql
+```
+
+关闭mySQL服务
+```
+brew services stop mysql
+```
 
 ## postman
 
