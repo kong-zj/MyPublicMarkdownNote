@@ -17,7 +17,7 @@ print(content)
 
 ![](resources/2023-05-23-23-15-54.png)
 
-#### HTTPResponse
+#### HTTPResponse 类型
 
 ```py
 import urllib
