@@ -7,6 +7,8 @@
 
 ### 下载谷歌浏览器驱动
 
+这里用的是mac
+
 [驱动下载地址](https://chromedriver.storage.googleapis.com/index.html)
 
 ![](resources/2023-06-21-18-39-04.png)
@@ -15,6 +17,53 @@
 解压后的chromedriver文件，移动到main.py的同级目录下
 
 ![](resources/2023-06-21-18-45-39.png)
+
+#### WSL2环境下的配置
+
+如果不用mac，使用win11和内置的WSL2子系统
+
+[ChromeDriver in WSL2教程](https://www.gregbrisebois.com/posts/chromedriver-in-wsl2/)
+
+[中文教程](https://blog.csdn.net/weixin_42555153/article/details/119118054)
+
+##### 安装chrome浏览器
+
+需要先在WSL2子系统中安装chrome浏览器（和win11系统中的chrome浏览器无关）
+```shell
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb
+# 检测是否安装好
+google-chrome --version
+```
+
+如果中文显示不出来，那就安装中文字体
+```shell
+# 安装中文字体
+sudo apt install fonts-wqy-microhei
+# 查看已安装的中文字体
+fc-list :lang=zh-cn
+```
+
+##### 安装驱动程序
+
+[下载地址](https://chromedriver.storage.googleapis.com/)
+
+安装chromedriver
+```shell
+# 按照自己的chrome浏览器的版本号下载
+wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+unzip chromedriver_linux64.zip
+sudo mv chromedriver /usr/bin/chromedriver
+sudo chown root:root /usr/bin/chromedriver
+sudo chmod +x /usr/bin/chromedriver
+# 检测是否安装好
+chromedriver --version
+```
+
+##### 运行python代码，不显示chrome的解决方法
+
+可能是之前运行的chromedriver没有关闭，手动关闭即可
+![](resources/2023-06-22-20-07-33.png)
 
 ### 安装selenium库
 
@@ -167,14 +216,95 @@ js_bottom = 'document.documentElement.scrollTop=100000'
 browser.execute_script(js_bottom)
 time.sleep(1)
 
+# 获取下一页的按钮
+next_button = browser.find_element('xpath', '//a[@class="n"]')
+# 点击下一页
+next_button.click()
+time.sleep(1)
+
+# 后退操作
+browser.back()
+time.sleep(1)
+
+# 前进操作
+browser.forward()
+time.sleep(1)
+
+# 退出
+browser.quit()
+
 # 用来暂停，不然浏览器窗口会一闪而过
 input()
 ```
 
+# 无界面浏览器（提高代码效率）
 
+之前的执行都要打开浏览器，打开网页页面做一通操作，有点慢
 
+## Phantomjs
 
+![](resources/2023-06-22-23-31-47.png)
 
----
-到P79
+### 安装
+
+WSL2子系统
+
+```shell
+apt install phantomjs
+# 检测是否安装好
+phantomjs -v
+```
+
+### 使用
+
+如果出现找不到Phantomjs，尝试用pip降低selenium的版本
+
+![](resources/2023-06-22-23-49-03.png)
+![](resources/2023-06-22-23-52-30.png)
+
+和前面使用selenium的代码相比，除了引入的文件不一样，其他的完全一致
+但是与handless相比，更推荐使用Chrome handless
+
+## Chrome headless
+
+![](resources/2023-06-23-00-18-23.png)
+
+为了与前面的代码统一，把selenium又用回4.10.0版本
+
+### 简单使用
+
+```py
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--disable_gpu')
+
+browser = webdriver.Chrome(chrome_options=chrome_options)
+url = 'https://www.baidu.com'
+browser.get(url)
+# 保存网页快照
+browser.save_screenshot('baidu.png')
+```
+
+### 封装使用
+
+```py
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+# 封装
+def share_browser():
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable_gpu')
+    browser = webdriver.Chrome(chrome_options=chrome_options)
+    return browser
+
+# 调用
+browser = share_browser()
+url = 'https://www.baidu.com'
+browser.get(url)
+```
 
