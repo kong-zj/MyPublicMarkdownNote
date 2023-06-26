@@ -398,6 +398,8 @@ except urllib.error.URLError:
 
 ### 微博
 
+[微博用户登录页面](https://passport.weibo.cn/signin/login)
+
 用户自己的详细资料，需要登录才能查看
 1. **cookie**中携带着你的登录信息，如果有登录之后的cookie，那么我们就可以携带着cookie访问页面
 2. **referer**用来判断当前路径是不是由上一个路径进来的，一般情况下，是做图片或视频的防盗链
