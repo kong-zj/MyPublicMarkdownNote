@@ -353,7 +353,7 @@ class ScrapyDangdangPipeline:
 
 ##### 步骤1：定义管道类
 
-在pipelines.py文件中新增加一个类，pipelines.py文件的内容修改为
+在pipelines.py文件中新增加一个类ScrapyDangdangPipeline2，pipelines.py文件的内容修改为
 ```py
 from itemadapter import ItemAdapter
 import urllib.request
@@ -375,7 +375,7 @@ class ScrapyDangdangPipeline:
 class ScrapyDangdangPipeline2:
     def process_item(self, item, spider):
         url = item.get('src')
-        # 注意这里的当前目录指的是dangdang.py文件所在的目录
+        # 注意这里的当前目录.指的是执行 scrapy crawl dangdang 命令的目录
         filename = './bookImg/' + item.get('name') + '.png'
         # 下载图片
         urllib.request.urlretrieve(url=url, filename=filename)
@@ -400,9 +400,293 @@ ITEM_PIPELINES = {
 
 上面的代码只能下载第一页的数据，现在想下载前一百页的数据
 
+每一页的url为
+```url
+http://category.dangdang.com/pg1-cp01.01.02.00.00.00.html(或http://category.dangdang.com/cp01.01.02.00.00.00.html)
+http://category.dangdang.com/pg2-cp01.01.02.00.00.00.html
+...
+http://category.dangdang.com/pg100-cp01.01.02.00.00.00.html
+```
 
+每一页的爬取逻辑相同，在parse()函数中递归调用自身，实现多页爬取，dangdang.py文件的内容修改为
+```py
+import scrapy
+# 导入items
+from scrapy_dangdang.items import ScrapyDangdangItem
+
+class DangdangSpider(scrapy.Spider):
+    name = "dangdang"
+    # 如果爬取多页的话，一般情况下allowed_domains只写域名
+    allowed_domains = ["category.dangdang.com"]
+    start_urls = ["http://category.dangdang.com/cp01.01.02.00.00.00.html"]
+    # 用于拼接url
+    prefix_url = 'http://category.dangdang.com/pg'
+    page = 1
+    suffix_url = '-cp01.01.02.00.00.00.html'
+
+    def parse(self, response):
+        print('当当网爬虫启动成功')
+        li_list = response.xpath('//ul[@id="component_59"]/li')
+        for li in li_list:
+            src = li.xpath('.//img/@data-original').extract_first()
+            if (None == src):
+                src = li.xpath('.//img/@src').extract_first()
+            name = li.xpath('.//img/@alt').extract_first()
+            price = li.xpath('.//p[@class="price"]/span[1]/text()').extract_first()
+            # 把零散的信息组装成对象
+            book = ScrapyDangdangItem(src=src, name=name, price=price)
+            # 获取一个book对象，就用yield交给管道pipelines
+            yield book
+        # 每一页的业务逻辑都一样，所以只需要再次调用对下一页的parse()方法
+        if (self.page < 100):
+            self.page += 1
+            url = self.prefix_url + str(self.page) + self.suffix_url
+            # 调用parse()方法
+            # scrapy.Request就是scrapy的get请求
+            # 传入的url是请求地址，callback是要执行的那个函数，注意self.parse不需要加()
+            yield scrapy.Request(url=url, callback=self.parse)
+```
 
 ### 电影天堂
+
+[电影天堂国内电影列表](https://www.ygdy8.net/html/gndy/china/index.html)
+
+父级页面，电影列表
+![](resources/2023-06-28-14-42-07.png)
+
+子级页面，一部电影的详细信息
+![](resources/2023-06-28-14-43-29.png)
+
+items.py文件的内容为
+```py
+import scrapy
+
+class ScrapyMovieItem(scrapy.Item):
+    # 电影名
+    name = scrapy.Field()
+    # 电影海报链接
+    img_src = scrapy.Field()
+```
+
+#### 爬取多级页面
+
+在movie.py文件的MovieSpider类中新增加一个方法parse_child()，movie.py文件的内容为
+```py
+import scrapy
+from scrapy_movie.items import ScrapyMovieItem
+
+class MovieSpider(scrapy.Spider):
+    name = "movie"
+    allowed_domains = ["www.ygdy8.net"]
+    start_urls = ["https://www.ygdy8.net/html/gndy/china/index.html"]
+    # 电影详细页的前缀
+    prefix_url = 'https://www.ygdy8.net/'
+
+    def parse(self, response):
+        print('电影天堂爬虫启动成功')
+        a_list = response.xpath('//table[@class="tbspan"]//a[@class="ulink"][2]')
+        for a in a_list:
+            # 获取当前页的电影列表中的电影名和电影详细页链接
+            name = a.xpath('./text()').extract_first()
+            href = a.xpath('./@href').extract_first()
+            url = self.prefix_url + href
+            # 对详细页发起访问
+            # 使用 meta 参数传递数据
+            yield scrapy.Request(url=url, callback=self.parse_child, meta={'name':name})
+    
+    def parse_child(self, response):
+        img_src = response.xpath('//div[@id="Zoom"]//img/@src').extract_first()
+        # 接收到请求的 meta 参数的值
+        name = response.meta['name']
+        # 组装成对象，用于下载
+        movie = ScrapyMovieItem(name=name, img_src=img_src)
+        # 把 movie 返回给管道pipelines
+        yield movie
+```
+
+注意：
+1. parse()方法用于爬取父级页面
+2. parse_child()方法用于爬取子级页面
+3. 使用meta参数，从parse()方法向parse_child()方法传递数据
+
+接下来完成下载功能的代码
+
+在settings中开启管道，settings.py文件中对应位置修改如下
+```py
+ITEM_PIPELINES = {
+   "scrapy_movie.pipelines.ScrapyMoviePipeline": 300,
+   "scrapy_movie.pipelines.ScrapyMoviePipelineImg": 301
+}
+```
+
+pipelines.py文件的内容为
+```py
+from itemadapter import ItemAdapter
+import urllib.request
+
+class ScrapyMoviePipeline:
+    def open_spider(self, spider):
+        self.fp = open('movie.json', 'w', encoding='utf-8')
+    
+    def process_item(self, item, spider):
+        self.fp.write(str(item))
+        return item
+
+    def close_spider(self, spider):
+        self.fp.close()
+
+class ScrapyMoviePipelineImg:    
+    def process_item(self, item, spider):
+        img_src = item.get('img_src')
+        img_name = './movieImg/' + item.get('name') + '.png'
+        urllib.request.urlretrieve(url=img_src, filename=img_name)
+        return item
+```
+
+经测试，爬取成功
+
+## CrawlSpider
+
+链接提取器
+![](resources/2023-06-28-15-44-35.png)
+![](resources/2023-06-28-15-55-40.png)
+
+### 读书网
+
+[读书网的当代小说列表](https://www.dushu.com/book/1188.html)
+
+之前爬当当网的时候，能看到列表总共只有100页
+而读书网的列表，看不出有多少页
+
+![](resources/2023-06-28-15-50-14.png)
+![](resources/2023-06-28-15-51-23.png)
+
+#### 简单使用 CrawlSpider
+
+定义一个规则，拿到网页中的符合规则链接，进行解析
+
+这里使用 scrapy shell 进行演示
+```shell
+scrapy shell https://www.dushu.com/book/1188.html
+In [1]: from scrapy.linkextractors import LinkExtractor
+In [2]: link = LinkExtractor(allow=r'/book/1188_\d+\.html')
+In [3]: link.extract_links(response)
+Out[3]:
+[Link(url='https://www.dushu.com/book/1188_2.html', text='2', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_3.html', text='3', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_4.html', text='4', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_5.html', text='5', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_6.html', text='6', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_7.html', text='7', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_8.html', text='8', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_9.html', text='9', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_10.html', text='10', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_11.html', text='11', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_12.html', text='12', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_13.html', text='13', fragment='', nofollow=False)]
+In [4]: link = LinkExtractor(restrict_xpaths=r'//div[@class="pages"]/a')
+In [5]: link.extract_links(response)
+Out[5]:
+[Link(url='https://www.dushu.com/book/1188_2.html', text='2', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_3.html', text='3', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_4.html', text='4', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_5.html', text='5', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_6.html', text='6', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_7.html', text='7', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_8.html', text='8', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_9.html', text='9', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_10.html', text='10', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_11.html', text='11', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_12.html', text='12', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_13.html', text='13', fragment='', nofollow=False),
+ Link(url='https://www.dushu.com/book/1188_2.html', text='下一页»', fragment='', nofollow=False)]
+```
+
+注意：
+r'...'中r的意思是，后面语句中出现的斜杠和反斜杠不进行转义，表示自己本身
+
+#### 在项目中使用 CrawlSpider
+
+![](resources/2023-06-28-16-49-40.png)
+
+使用命令创建爬虫项目
+```shell
+scrapy startproject scrapy_readbook
+cd scrapy_readbook
+scrapy genspider -t crawl readbook https://www.dushu.com/book/1188.html
+```
+
+注意：
+这里执行 scrapy genspider 命令时，多了 -t crawl 参数
+生成的readbook.py文件中相比之前多了
+```py
+rules = (Rule(LinkExtractor(allow=r"Items/"), callback="parse_item", follow=True),)
+```
+
+readbook.py文件的内容为
+```py
+import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy_readbook.items import ScrapyReadbookItem
+
+class ReadbookSpider(CrawlSpider):
+    name = "readbook"
+    allowed_domains = ["www.dushu.com"]
+    start_urls = ["https://www.dushu.com/book/1188.html"]
+
+    # rules = (Rule(LinkExtractor(allow=r"Items/"), callback="parse_item", follow=True),)
+    rules = (Rule(LinkExtractor(allow=r'/book/1188_\d+\.html'), callback="parse_item", follow=False),)
+
+    def parse_item(self, response):
+        print('读书网爬虫启动成功')
+        img_list = response.xpath('//div[@class="bookslist"]//a/img')
+        for img in img_list:
+            name = img.xpath('./@alt').extract_first()
+            src = img.xpath('./@data-original').extract_first()
+            book = ScrapyReadbookItem(name=name, src=src)
+            yield book
+```
+
+items.py文件的内容为
+```py
+import scrapy
+
+class ScrapyReadbookItem(scrapy.Item):
+    name = scrapy.Field()
+    src = scrapy.Field()
+```
+
+别忘了在settings.py文件中开启管道
+```py
+ITEM_PIPELINES = {
+   "scrapy_readbook.pipelines.ScrapyReadbookPipeline": 300,
+}
+```
+
+pipelines.py文件的内容为
+```py
+from itemadapter import ItemAdapter
+
+class ScrapyReadbookPipeline:
+    def open_spider(self, spider):
+        self.fp = open('book.json', 'w', encoding='utf-8')
+        
+    def process_item(self, item, spider):
+        self.fp.write(str(item))
+        return item
+
+    def close_spider(self, spider):
+        self.fp.close()
+```
+
+使用命令运行爬虫
+```shell
+scrapy crawl readbook
+```
+
+得到的book.json文件中有480本书的信息
+![](resources/2023-06-28-19-40-18.png)
 
 
 
@@ -417,5 +701,5 @@ ITEM_PIPELINES = {
 
 
 ---
-到P97
+到P101
 

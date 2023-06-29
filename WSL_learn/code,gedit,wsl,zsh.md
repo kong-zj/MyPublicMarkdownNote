@@ -1,3 +1,7 @@
+# 安装教程
+
+[b站视频](https://www.bilibili.com/video/BV1aA411s7PJ/)
+
 # 在windows中打开GUI界面
 
 ## code .
@@ -19,23 +23,33 @@ Vscode
 ## 查看、安装、运行子系统
 
 查看已安装的子系统
-```wsl -l -v```
+```
+wsl -l -v
+```
 
 查看可安装的子系统
-```wsl -l -o```
+```
+wsl -l -o
+```
 ![](resources/2023-01-20-15-14-00.png)
 
 安装指定的发行版
-```wsl --install -d <Distribution Name>```
+```
+wsl --install -d <Distribution Name>
+```
 ![](resources/2023-01-20-15-20-28.png)
 
 运行指定的子系统
-```wsl -d <Distribution Name>```
+```
+wsl -d <Distribution Name>
+```
 ![](resources/2023-01-20-15-32-30.png)
 
 ## 备份、还原子系统
 
-```wsl --export Ubuntu-20.04 D:\Ubuntu-20.04.tar```
+```
+wsl --export Ubuntu-20.04 D:\Ubuntu-20.04.tar
+```
 ![](resources/2023-01-19-17-15-03.png)
 
 ## 更改子系统文件的位置
@@ -55,7 +69,9 @@ Vscode
 
 # zsh
 
-```sudo apt install zsh```
+```
+sudo apt install zsh
+```
 
 ## 安装 oh-my-zsh
 
@@ -89,7 +105,7 @@ plugins=(
     colored-man-pages
     history-substring-search
 )
- ```
+```
 
 # wsl网络
 
