@@ -136,12 +136,3 @@ apt list | grep kali-linux-large
 ```shell
 sudo apt install kali-linux-large
 ```
-
-
-
-
-
-
-
-
-
