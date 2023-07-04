@@ -125,7 +125,18 @@ XDG_VIDEOS_DIR="$HOME/videos"
 mkdir desktop documents downloads music pictures public templates videos
 ```
 
+#### 虚拟机和宿主机的共享文件夹
+
+![](resources/2023-07-04-02-01-28.png)
+
+在windows中的目录为
+```
+C:\Users\k\Documents\kali_virtualbox_share_documents
+```
+
 ## kali 工具包
+
+这里我的在安装系统时已安装
 
 使用下面命令查看工具包是否安装
 ```shell
