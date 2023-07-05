@@ -199,6 +199,12 @@ brew services stop mysql
 
 [官网](https://www.sourcetreeapp.com/)
 
+## SwitchHosts
+
+方便地修改系统的hosts文件
+
+[SwitchHosts的GitHub地址](https://github.com/oldj/SwitchHosts)
+
 # JetBrains全家桶
 
 ## IDEA 2022.2.5
