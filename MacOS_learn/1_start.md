@@ -21,6 +21,10 @@ macOS 版本 11.7.7 (Big Sur)
 
 我这里是修改了hosts文件
 
+## 禁止进入睡眠
+
+在设置下的节能设置中，把时间改成永不
+
 ## 系统快捷键
 | 功能                 | 快捷键                                                              |
 | -------------------- | ------------------------------------------------------------------- |
@@ -72,7 +76,7 @@ macOS 版本 11.7.7 (Big Sur)
 [官网](https://ohmyz.sh/#install)
 
 安装命令为
-```
+```shell
 sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 ```
 
@@ -80,9 +84,33 @@ sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/ins
 
 ## iStat Menus for Mac 6.70.1217
 
+硬件状态监控
+
 [下载网址](https://www.imacso.com/istat-menus.html/comment-page-1#comments)
 
 ## 向日葵远程控制
+
+## amd power gadget
+
+硬件状态监控
+
+[安装教程](https://formulae.brew.sh/cask/amd-power-gadget)
+
+安装命令为
+```shell
+brew install --cask amd-power-gadget
+```
+
+启动时提示缺少 AMDRyzenCPUPowerManagement
+![](resources/2023-07-05-12-35-23.png)
+
+[AMDRyzenCPUPowerManagement 下载网址](https://github.com/trulyspinach/SMCAMDProcessor/releases)
+
+[AMDRyzenCPUPowerManagement.kext 和 SMCAMDProcessor.kext 的安装教程](https://heipg.cn/drivers/smcamdprocessor-0-7.html)
+
+用Hackintool软件的磁盘功能，打开EFI，发现/EFI/OC/Kexts/目录中，已经有了 AMDRyzenCPUPowerManagement.kext 和 SMCAMDProcessor.kext，然后发现是config.plist文件里没有启用 AMDRyzenCPUPowerManagement.kext，那就修改为启用（0改成1），然后重启后生效
+
+![](resources/2023-07-05-13-50-58.png)
 
 # 软件
 
@@ -124,13 +152,13 @@ git配置好config和ssh密钥就可以用了
 因为官网里的下载地址被墙了，使用这个[教程](https://blog.csdn.net/MrWangisgoodboy/article/details/127609389)
 
 安装命令为
-```
+```shell
 /bin/bash -c "$(curl -fsSL https://gitee.com/ineo6/homebrew-install/raw/master/install.sh)"
  ```
 
 ### 常用命令
 
-```
+```shell
 brew search 软件名
 brew install 软件名
 brew uninstall 软件名
@@ -142,7 +170,7 @@ which 软件名
 
 [安装教程](https://blog.csdn.net/sfh2018/article/details/124822621)
 
-```
+```shell
 brew install mysql
 ```
 ![](resources/2023-06-20-16-38-25.png)
@@ -150,12 +178,12 @@ brew install mysql
 密码：kzj1998,.
 
 开启mySQL服务
-```
+```shell
 brew services start mysql
 ```
 
 关闭mySQL服务
-```
+```shell
 brew services stop mysql
 ```
 
