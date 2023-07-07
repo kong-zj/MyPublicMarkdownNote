@@ -129,6 +129,11 @@ mkdir desktop documents downloads music pictures public templates videos
 
 ![](resources/2023-07-04-02-01-28.png)
 
+在kali中的目录为
+```
+/media/sf_kali_virtualbox_share_documents
+```
+
 在windows中的目录为
 ```
 C:\Users\k\Documents\kali_virtualbox_share_documents
