@@ -147,7 +147,7 @@ aireplay-ng -0 10 -a 94:0C:6D:46:51:52 -c 8A:07:74:A1:D2:D9 wlan0
 [利用kali生成字典的三种方式](https://blog.csdn.net/qq_44204058/article/details/115562895)
 
 kali自带字典的目录为
-```
+```shell
 /usr/share/wordlists/
 ```
 
@@ -258,11 +258,198 @@ EWSA-173-HC1UW-L3EGT-FFJ3O-SOQB3
 
 破解成功
 
+## WiFiphisher 工具
+
+Wifiphisher是一个安全工具,具有安装快速、自动化搭建的优点，利用它搭建起来的网络钓鱼攻击WiFi可以轻松获得密码和其他凭证。与其它（网络钓鱼）不同，这是社会工程攻击，不包含任何的暴力破解，它能轻松获得门户网站和第三方登陆页面的证书或WPA/WPA2的密钥。
+
+[WiFiphisher的GitHub](https://github.com/wifiphisher/wifiphisher)
+
+### 原理
+
+1. 它会先创建一个伪造的无线访问接入点（AP）并把自己伪装成一个合法的WiFi AP，然后向合法无线访问接入点（AP）发动DoS攻击，或者在其周围创建一个射频干扰。 Wifiphisher通过伪造“去认证”或“分离”数据包来破坏现有的关联，从而不断地在范围内阻塞所有目标接入点的wifi设备。
+2. 受攻击者登录假冒AP。Wifiphisher会嗅探附近无线区域并拷贝目标AP的设置，然后创建一个假冒AP，并设置NAT/DHCP服务器转发对应端口数据。那些被解除认证的客户端会尝试连接假冒AP。
+3. 无论受害者访问什么页面，WiFiPhisher都会向受害者提供一个很逼真的路由器配置更改界面，并称由于路由器固件更新需修改路由器密码，Wifiphisher使用一个最小的web服务器来响应HTTP和HTTPS请求。一旦受害者请求互联网的页面，wifiphisher会用一个真实的假页面来回应，要求提供凭证或服务恶意软件。这个页面将专门为受害者制作。例如，一个路由器配置文件的页面将包含受害者的供应商的品牌。该工具支持针对不同钓鱼场景的社区构建模板。
+
+### 网上教程
+
+[英文教程](https://null-byte.wonderhowto.com/how-to/hack-wi-fi-get-anyones-wi-fi-password-without-cracking-using-wifiphisher-0165154/)
+[中文教程](https://zhuanlan.zhihu.com/p/149945656)
+
+### 前置条件
+
+
+
+#### 安装
+
+```shell
+apt install wifiphisher
+```
+
 ## Fluxion 工具
 
 钓鱼wifi的框架工具
 就是做伪AP，很经典的欺骗方式
 
+![](resources/2023-07-07-15-18-19.png)
+
+[Fluxion的GitHub](https://github.com/FluxionNetwork/fluxion)
+
+### 原理
+
+1. 扫描能够接收到的wifi信号
+2. 抓取握手包，可以选择跑包，但是fluxion更为直接的是利用握手包来验证后边用户输入的密码
+3. 启用Web接口
+4. 生成一个和之前选择的AP名称相同的假的AP，模拟原来的接入点
+5. 生成一个MDK3进程，如果用户已经连接到这个WIFI（真实），也会输入密码
+6. 启动一个模拟的DNS服务器，并且抓取所有的DNS请求，并且将所有的请求重定向到一个含有恶意脚本的HOST地址
+7. 在用户的终端会弹出一个窗口来让用户输入密码
+8. 程序会将用户输入的密码和之前抓到的握手包来进行比较，比对密码是否正确，如果用户密码输入的不正确，那么窗口会提示密码输入不正确，直至用户密码输入正确为止。
+9. 用户输入正确的密码之后，假的AP停止，fluxion会返回正确的密码给操作者，并且将用户输入的所有密码记录在文档中
+
+### 网上教程
+
+[教程链接](https://www.freebuf.com/articles/wireless/283395.html)
+教程链接2
+
+### 前置条件
+
+#### 安装
+
+```shell
+git clone git@github.com:FluxionNetwork/fluxion.git
+cd fluxion
+./fluxion.sh
+```
+
+安装位置：/root/software_download/fluxion/
+
+### 捕获目标握手包
+
+攻击方式选择2
+![](resources/2023-07-07-16-16-18.png)
+
+对WiFi进行扫描
+![](resources/2023-07-07-16-37-33.png)
+
+选择要攻击的WiFi
+![](resources/2023-07-07-16-38-04.png)
+
+选择跳过
+![](resources/2023-07-07-16-35-59.png)
+
+选择2
+![](resources/2023-07-07-16-41-10.png)
+
+选择推荐的
+![](resources/2023-07-07-16-42-03.png)
+![](resources/2023-07-07-16-42-45.png)
+![](resources/2023-07-07-16-43-31.png)
+
+之后会自动进行攻击，握手包抓取成功后如下图，选择1
+![](resources/2023-07-07-16-46-54.png)
+
+#### 如果扫描不到WiFi
+
+退出fluxion并执行
+```shell
+iwconfig wlan0 mode monitor
+ifconfig wlan0 up
+airmon-ng start wlan0
+```
+然后再进入fluxion再次扫描WiFi
+
+### 攻击真实ap，伪造钓鱼ap，获取密码
+
+攻击方式选择1
+![](resources/2023-07-07-16-49-54.png)
+
+选择Y
+![](resources/2023-07-07-16-53-37.png)
+
+选择跳过
+![](resources/2023-07-07-16-54-22.png)
+
+选择2
+![](resources/2023-07-07-16-54-55.png)
+
+选择2
+![](resources/2023-07-07-16-55-30.png)
+
+选择1
+![](resources/2023-07-07-16-55-58.png)
+
+选择1
+![](resources/2023-07-07-16-56-42.png)
+
+选择1，使用刚刚抓取到的hash文件
+![](resources/2023-07-07-16-57-18.png)
+
+选择推荐的
+![](resources/2023-07-07-16-57-56.png)
+
+选择1
+![](resources/2023-07-07-17-02-23.png)
+
+选择推荐的
+![](resources/2023-07-07-17-03-02.png)
+
+选择钓鱼模板，这里我选择3
+![](resources/2023-07-07-17-04-26.png)
+
+选择完钓鱼模板后，会自动开启钓鱼服务，正常应该弹出下图的六个窗口
+分别代表 钓鱼ap的服务信息，dns信息，认证密码保存信息，服务器的访问记录以及攻击真实ap的记录（下图是在网上找的一张运行正常的截图）
+![](resources/2023-07-07-17-50-44.png)
+
+#### 如果DHCP服务启动失败
+
+但是我到这一步时，fluxion启动DHCP服务失败，只弹出了五个窗口
+![](resources/2023-07-07-17-54-10.png)
+
+被钓鱼端提示无法加入这个WiFi网络
+![](resources/2023-07-07-18-26-19.png)
+
+[fluxion 无法连接虚假AP热点，DHCP服务启动失败解决方案](https://www.codenong.com/cs109240619/)
+
+定位到attack.sh文件的第1468行
+![](resources/2023-07-07-18-22-10.png)
+![](resources/2023-07-07-18-23-35.png)
+
+其中 $FLUXIONWorkspacePath 的值为 /tmp/fluxspace
+
+其中文中中的命令
+```shell
+dhcpd -d -f -lf \"$FLUXIONWorkspacePath/dhcpd.leases
+```
+等效于在 /tmp/fluxspace 目录下执行命令
+```shell
+dhcpd -d -f -lf ./dhcpd.leases
+```
+
+执行报错了
+![](resources/2023-07-07-18-33-45.png)
+
+前加 sudo
+```shell
+sudo dhcpd -d -f -lf ./dhcpd.leases
+```
+
+用root权限执行也报错
+![](resources/2023-07-07-18-34-58.png)
+
+查看文件的权限设置
+![](resources/2023-07-07-18-44-12.png)
+
+```shell
+chmod 777 dhcpd.leases 
+```
+修改权限后，对报错没有影响
+
+退出攻击后，可见 /tmp/fluxspace 文件夹里的文件少了许多
+![](resources/2023-07-07-18-57-59.png)
+这个思路不通，换个角度试试
+
+在反复恢复攻击时，发现下图的报错
+![](resources/2023-07-07-19-36-37.png)
 
 
 
@@ -278,6 +465,29 @@ EWSA-173-HC1UW-L3EGT-FFJ3O-SOQB3
 
 
 
+
+---
+
+出现右上角的窗口代表钓鱼成功，密码保存的位置会显示
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
 ---
 
 
