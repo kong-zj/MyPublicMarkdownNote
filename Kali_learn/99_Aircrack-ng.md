@@ -319,6 +319,8 @@ apt install wifiphisher
 git clone git@github.com:FluxionNetwork/fluxion.git
 cd fluxion
 ./fluxion.sh
+# 安装必要的依赖
+./fluxion.sh -i
 ```
 
 安装位置：/root/software_download/fluxion/
@@ -491,7 +493,6 @@ chmod 777 dhcpd.leases
 ---
 
 
-虚拟机安装kali，里面有各种破解软件，相关教程也可以到网上找到，比如Aircrack-ng，使用单独网卡可以搞定；如果是使用Fluxion 等社会工程方式破解，则需要两种不同的网卡，即RT3070和螃蟹卡8187各买一张。
 
 
 网卡找字典，做好长跑还未必跑的出来的准备。一般来说，字典越大，破解的几率越大，但耗时也越长。速度比较快的破解方式是hash码表，8位密码秒破，但现在的密码很少有8位的，并且生成hash码表比较耗时，更让人**的是一个essid只对应一个hash码表，也就是每个wifi信号都需要重新生成一次……。如果你运气比较好，对方有开放pin那最好了，最多半小时搞定。
