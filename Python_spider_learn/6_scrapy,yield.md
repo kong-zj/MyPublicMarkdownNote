@@ -603,7 +603,7 @@ Out[5]:
 ```
 
 注意：
-r'...'中r的意思是，后面语句中出现的斜杠和反斜杠不进行转义，表示自己本身
+r'...' 中 r 的意思是，后面语句中出现的斜杠和反斜杠不进行转义，表示自己本身
 
 #### 在项目中使用 CrawlSpider
 
@@ -688,6 +688,136 @@ scrapy crawl readbook
 得到的book.json文件中有480本书的信息
 ![](resources/2023-06-28-19-40-18.png)
 
+##### 解决问题1：爬取不到当前页
+
+已知一页有40本书，那么爬下来共12页（第2页到第13页）的内容，没有爬第1页的内容
+
+想要也爬第1页的内容，需要将readbook.py文件中对应位置修改如下
+```py
+# 因为地址 https://www.dushu.com/book/1188.html 不符合 r'/book/1188_\d+\.html' 这个规则，所以没有爬第1页
+# start_urls = ["https://www.dushu.com/book/1188.html"]
+# 修改成符合规则的地址
+start_urls = ["https://www.dushu.com/book/1188_1.html"]
+rules = (Rule(LinkExtractor(allow=r'/book/1188_\d+\.html'), callback="parse_item", follow=False),)
+```
+
+现在能爬到520本书
+
+##### 解决问题2：链接跟进
+
+上面只能爬第1页到第13页的内容，没有链接跟进
+
+想要链接跟进，自动爬取更后面的页面，需要将readbook.py文件中对应位置修改如下
+```py
+# rules = (Rule(LinkExtractor(allow=r'/book/1188_\d+\.html'), callback="parse_item", follow=False),)
+rules = (Rule(LinkExtractor(allow=r'/book/1188_\d+\.html'), callback="parse_item", follow=True),)
+```
+把 follow 属性从 False 改成 True 即可
+
+现在能爬到共100页中的4000本书
+
+为了后面演示的方便，后面的代码不使用链接跟进，只爬前13页
+
+## 数据存入数据库
+
+创建库和表
+```sql
+mysql> create database my_spider_db charset=utf8;
+mysql> use my_spider_db;
+mysql> create table book(
+    -> id int primary key auto_increment,
+    -> name varchar(128),
+    -> src varchar(128));
+```
+
+### PyMySQL 库
+
+[PyMySQL 驱动教程](https://www.runoob.com/python3/python3-mysql.html)
+
+![](resources/2023-07-10-15-26-26.png)
+
+### 读书网
+
+继续上面的项目
+
+#### 配置数据库连接参数
+
+settings.py文件中添加
+```py
+DB_HOST = '127.0.0.1'
+DB_PORT = 3306
+DB_USER = 'root'
+DB_PASSWORD = '1'
+DB_NAME = 'my_spider_db'
+DB_CHARSET = 'utf8'
+```
+
+#### 添加一条管道
+
+pipelines.py文件中增加一个管道类
+```py
+# 加载settings.py文件
+from scrapy.utils.project import get_project_settings
+import pymysql
+     
+class MysqlPipeline:
+    def open_spider(self, spider):
+        settings = get_project_settings()
+        self.host = settings['DB_HOST']
+        self.port = settings['DB_PORT']
+        self.user = settings['DB_USER']
+        self.password = settings['DB_PASSWORD']
+        self.name = settings['DB_NAME']
+        self.charset = settings['DB_CHARSET']
+        self.connect()
+        
+    def connect(self):
+        self.conn = pymysql.connect(
+            host=self.host,
+            port=self.port,
+            user=self.user,
+            password=self.password,
+            db=self.name,
+            charset=self.charset
+        )
+        self.cursor = self.conn.cursor()
+    
+    def process_item(self, item, spider):
+        sql = 'insert into book(name,src) values("{}","{}")'.format(item['name'], item['src'])
+        self.cursor.execute(sql)
+        self.conn.commit()
+    
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.connect.close()
+```
+
+settings.py文件中对应位置修改如下
+```py
+ITEM_PIPELINES = {
+   "scrapy_readbook.pipelines.ScrapyReadbookPipeline": 300,
+   "scrapy_readbook.pipelines.MysqlPipeline": 301
+}
+```
+
+运行爬虫，数据存入数据库正常
+![](resources/2023-07-10-15-40-25.png)
+
+## 日志
+
+![](resources/2023-07-10-15-55-49.png)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -701,5 +831,5 @@ scrapy crawl readbook
 
 
 ---
-到P101
+到P103
 
