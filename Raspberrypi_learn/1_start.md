@@ -90,13 +90,6 @@ sudo apt install gedit
 sudo dpkg -i code_1.80.0-1688477950_armhf.deb
 ```
 
-### 试一试先
-
-airo 可以
-fluxion 
-wifiphisher
-
-
 ## Raspberry Pi OS 系统
 
 ### 事先准备

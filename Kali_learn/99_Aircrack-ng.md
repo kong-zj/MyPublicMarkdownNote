@@ -13,12 +13,14 @@ Aircrack-ng是一个与802.11标准的无线网络分析有关的安全软件，
 
 我按网上的教程，在扫描WiFi时，扫描不到，经多次尝试，按我下面的步骤可以成功
 
-### 前置条件
+### 用kali虚拟机（不推荐）
+
+#### 前置条件
 
 一个kali支持的无线网卡，芯片3070/8187/5370都可以
 注意，因为kali是安装在虚拟机里的，不能直接调用宿主机自带的ax200无线网卡，但是可以调用USB无线网卡，这里我使用的是RT3070L芯片的网卡
 
-### step0：关掉干扰进程
+#### step0：关掉干扰进程
 
 ```shell
 su root
@@ -26,7 +28,7 @@ su root
 airmon-ng check kill
 ```
 
-### step1：启用网卡的监听模式
+#### step1：启用网卡的监听模式
 
 在usb2.0接口插上RT3070L无线网卡
 在虚拟机中启用这个USB设备
@@ -66,7 +68,7 @@ dmesg -T
 
 ![](resources/2023-07-02-19-58-03.png)
 
-### step2：扫描WiFi
+#### step2：扫描WiFi
 
 在root目录下创建wifi_crack文件夹（用于保存抓到的握手包），并进入
 ![](resources/2023-07-02-20-30-20.png)
@@ -94,7 +96,7 @@ airodump-ng wlan0mon
 - STATION：客户端的 Mac 地址，包括连上的和想要连的客户端。如果客户端没有连上 AP，ESSID 列显示成 (not associated)
 - Probe：被客户端查探的 ESSID，如果客户端正在试图连接一个 AP，但是没有连接上，将会显示在这里
 
-### step3：攻击并抓取握手包
+#### step3：攻击并抓取握手包
 
 通过抓去这个指定bssid我已经看到有一个用户连接，STATION可以看到
 接下来进行握手包抓取了
@@ -138,9 +140,9 @@ aireplay-ng -0 10 -a 94:0C:6D:46:51:52 -c 8A:07:74:A1:D2:D9 wlan0
 
 ![](resources/2023-07-03-17-30-57.png)
 
-### step4：破解密码
+#### step4：破解密码
 
-#### 使用aircrack-ng
+##### 使用aircrack-ng
 
 现在需要字典
 
@@ -165,9 +167,9 @@ aircrack-ng -w ./pass_test.txt ./-18.cap
 这里为了测试，我把已知正确的密码加到了字典文件中
 破解成功
 
-#### 使用Hashcat
+##### 使用Hashcat
 
-##### 生成字典
+###### 生成字典
 
 用中国大陆手机号字典
 
@@ -187,7 +189,7 @@ crunch 9 9 -t %%%%%%%%% -o mobilephone_tail.txt
 
 ![](resources/2023-07-03-19-20-20.png)
 
-##### 握手包格式转换（cap to hc22000）
+###### 握手包格式转换（cap to hc22000）
 
 现在很多关于hashcat的博客关于转换的描述都说是cap转换为hccap格式，但是这种格式其实已经不适用于现在的hashcat版本了，在hashcat6.0版本之后，-m 2500 和 -m 16800 已经被更改为 -m 22000 了
 
@@ -195,7 +197,7 @@ crunch 9 9 -t %%%%%%%%% -o mobilephone_tail.txt
 
 [在线转换网站](https://hashcat.net/cap2hashcat/)
 
-##### 破解
+###### 破解
 
 [Hashcat详解](https://www.sqlsec.com/2019/10/hashcat.html)
 [Hashcat使用](https://blog.csdn.net/m0_50177728/article/details/124003791)
@@ -219,7 +221,7 @@ hashcat -a 1 -m 22000 ./1880_1688381391.hc22000 -o wifi_passwd_result.txt mobile
 
 这里在kali虚拟机中的破解速度很慢，那就用windows宿主机破解（EWSA软件）
 
-#### EWSA跑包
+##### EWSA跑包
 
 在windows系统中安装EWSA（Elcomsoft Wireless Security Auditor）
 
@@ -275,15 +277,21 @@ Wifiphisher是一个安全工具,具有安装快速、自动化搭建的优点�
 [英文教程](https://null-byte.wonderhowto.com/how-to/hack-wi-fi-get-anyones-wi-fi-password-without-cracking-using-wifiphisher-0165154/)
 [中文教程](https://zhuanlan.zhihu.com/p/149945656)
 
-### 前置条件
+### 用kali虚拟机（不推荐）
 
+#### 前置条件
 
-
-#### 安装
+##### 安装
 
 ```shell
 apt install wifiphisher
 ```
+
+#### 扫描WiFi
+
+在虚拟机中就是扫不到，像上面那样手动把网卡切换到监听模式也不行，不玩了，换树莓派
+
+### 用树莓派（推荐）
 
 ## Fluxion 工具
 
@@ -311,9 +319,11 @@ apt install wifiphisher
 [教程链接](https://www.freebuf.com/articles/wireless/283395.html)
 教程链接2
 
-### 前置条件
+### 用kali虚拟机（不推荐）
 
-#### 安装
+#### 前置条件
+
+##### 安装
 
 ```shell
 git clone git@github.com:FluxionNetwork/fluxion.git
@@ -325,7 +335,7 @@ cd fluxion
 
 安装位置：/root/software_download/fluxion/
 
-### 捕获目标握手包
+#### 捕获目标握手包
 
 攻击方式选择2
 ![](resources/2023-07-07-16-16-18.png)
@@ -350,7 +360,7 @@ cd fluxion
 之后会自动进行攻击，握手包抓取成功后如下图，选择1
 ![](resources/2023-07-07-16-46-54.png)
 
-#### 如果扫描不到WiFi
+##### 如果扫描不到WiFi
 
 退出fluxion并执行
 ```shell
@@ -360,7 +370,7 @@ airmon-ng start wlan0
 ```
 然后再进入fluxion再次扫描WiFi
 
-### 攻击真实ap，伪造钓鱼ap，获取密码
+#### 攻击真实ap，伪造钓鱼ap，获取密码
 
 攻击方式选择1
 ![](resources/2023-07-07-16-49-54.png)
@@ -402,7 +412,7 @@ airmon-ng start wlan0
 分别代表 钓鱼ap的服务信息，dns信息，认证密码保存信息，服务器的访问记录以及攻击真实ap的记录（下图是在网上找的一张运行正常的截图）
 ![](resources/2023-07-07-17-50-44.png)
 
-#### 如果DHCP服务启动失败
+##### 如果DHCP服务启动失败
 
 但是我到这一步时，fluxion启动DHCP服务失败，只弹出了五个窗口
 ![](resources/2023-07-07-17-54-10.png)
@@ -444,7 +454,7 @@ sudo dhcpd -d -f -lf ./dhcpd.leases
 ```shell
 chmod 777 dhcpd.leases 
 ```
-修改权限后，对报错没有影响
+修改权限后，还是一样报错
 
 退出攻击后，可见 /tmp/fluxspace 文件夹里的文件少了许多
 ![](resources/2023-07-07-18-57-59.png)
@@ -453,9 +463,9 @@ chmod 777 dhcpd.leases
 在反复恢复攻击时，发现下图的报错
 ![](resources/2023-07-07-19-36-37.png)
 
+搞不好，不用虚拟机了，换树莓派
 
-
-
+### 用树莓派（推荐）
 
 
 
