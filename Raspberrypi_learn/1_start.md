@@ -42,23 +42,53 @@ root用户密码设置为 1
 
 ### 调整分辨率
 
-未完成
+在 /boot/config.txt 文件中增加
+```
+# 不留边缘
+disable_overscan=1
+overscan_left=0
+overscan_right=0
+overscan_top=0
+overscan_bottom=0
+# 开启4K模式
+hdmi_enable_4kp60=1
+```
 
-准备换4B，等我的mirco hdmi线到
+重启即可
+
+然后在设置中开启 Kali HiDPI Mode
 
 ### 换源
 
+速度可以，暂时不换
+
 ### 中文输入法
+
+```shell
+sudo apt install fcitx
+sudo apt-get install fcitx-rime
+```
+重启即可使用
+
+默认是繁体字，按 F4 键，切换成简体字
 
 ### 安装软件
 
 #### gedit
 
+```shell
+sudo apt install gedit
+```
+
 #### vscode
 
+[vscode官方下载地址](https://code.visualstudio.com/#alt-downloads)
 
+下载 .deb arm32 的版本
 
-
+```shell
+sudo dpkg -i code_1.80.0-1688477950_armhf.deb
+```
 
 ### 试一试先
 
