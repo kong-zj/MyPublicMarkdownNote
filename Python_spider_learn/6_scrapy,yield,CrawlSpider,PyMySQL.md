@@ -807,29 +807,41 @@ ITEM_PIPELINES = {
 
 ![](resources/2023-07-10-15-55-49.png)
 
+## post 请求
 
+上面用的都是 get 请求
 
+[使用Scrapy框架发送POST请求教程](https://blog.csdn.net/weixin_38819889/article/details/109106942)
 
+### 百度翻译
 
+为了方便和前面做对比，还是用之前的百度翻译案例
 
+重写start_requests()方法
 
+baiduTrans.py文件的内容为
+```py
+import scrapy
+import json
 
+class BaidutransSpider(scrapy.Spider):
+    name = "baiduTrans"
+    allowed_domains = ["fanyi.baidu.com"]
+    start_urls = ["https://fanyi.baidu.com/sug"]
 
+    def start_requests(self):
+        data={
+            'kw':"final"
+        }
+        yield scrapy.FormRequest(url=self.start_urls[0], formdata=data, callback=self.parse)
 
+    def parse(self, response):
+        content = response.text
+        # 解决编码问题
+        obj = json.loads(content, encoding='utf-8')
+        print(obj)
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-到P103
+运行爬虫的结果为
+![](resources/2023-07-11-12-32-19.png)
 

@@ -46,6 +46,19 @@ root用户密码设置为 1
 
 准备换4B，等我的mirco hdmi线到
 
+### 换源
+
+### 中文输入法
+
+### 安装软件
+
+#### gedit
+
+#### vscode
+
+
+
+
 
 ### 试一试先
 
@@ -88,6 +101,11 @@ root用户密码设置为 1
 关机命令
 ```shell
 sudo halt
+```
+
+重启命令
+```shell
+sudo reboot
 ```
 
 
