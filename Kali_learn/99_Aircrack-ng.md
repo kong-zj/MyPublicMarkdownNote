@@ -627,38 +627,89 @@ MDK3 是一款无线DOS 攻击测试工具，能够发起Beacon Flood（无线SS
 
 
 
-## WiFi 安全接入方法 - WEP, WPA, WPS
+
+
+## Wifite 工具
+
+### 网上教程
+
+[Wifite官网](https://www.kali.org/tools/wifite/)
+
+### 用树莓派（推荐）
+
+
+
+
+
+
+
+# WiFi 安全接入方法
+
+[WIFI基础入门--802.11--TKIP/CCMP/RSN--8](https://blog.csdn.net/qq_20677327/article/details/104663116)
 
 有几种不同的协议用于保护 WiFi 网络安全
 
-### WEP（wired equivalent privacy）- 优先等效保密协议
+## WEP（wired equivalent privacy）- 优先等效保密协议
 
 已过时，不用
 
-### WPA（WiFi protected access）- WiFi网络安全接入
+## WPA（WiFi protected access）- WiFi网络安全接入
 
 为解决 WEP 的问题而开发的
-使用一种叫 TKIP（Temporal key integrity protocol，临时密钥完整性协议）的更强大的加密方法
+WPA是对WEP的升级，所以在设计的时候，考虑到对WEP的兼容，于是有了TKIP的加密规则，WEP采用的是 40bits 或 104bits 的RC4算法，而TKIP是也使用了RC4算法对密钥进行加密
+
+### TKIP（Temporal KeyIntegrity Protocol）- 临时密钥完整性协议
+
 TKIP 在使用时会动态地更改其密钥，这就确保了数据的完整性
 然而，WPA 使用的 TKIP 仍然有一些漏洞，这就引出了 WPA2
 
-### WPA2
+## WPA2
 
 WPA2 使用 AES（Advanced Encryption Standard，高级加密标准）加密
+
+### AES（Advanced Encryption Standard）- 高级加密标准
+
 AES 使用对称加密算法，但它强大到足以抵抗暴力破解
+AES 是根据 CBC-MAC 算法导出密钥
 
-### WPA2/WPA
+### CCMP（Counter Mode with Cipher-Block Chaining Message Authentication Code Protocol）- 链消息认证码协议
 
-一个混合安全选项
-这个选项同时启动 WPA（TKIP） 和 WPA2（AES）
+CCMP 则是 AES 的升级，以 AES 为核心，配合 CTR 和 CBC-MAC 模式分别实现加密和认证功能
+
+## PSK（pre-shared key）- 预共用密钥模式
+
+是设计给负担不起 802.1X 验证服务器的成本和复杂度的家庭和小型公司网络用的，每一个使用者必须输入来取用网络，而密语可以是8 到 63 个 ASCII 字符、或是 64 个数字（256位元）
+
+## WPA/WPA2
+
+一个混合安全选项，这个选项同时启动 WPA（TKIP） 和 WPA2（AES）
 这是出于兼容性的考虑，因为 2006 年前的设备可能与 WPA2 使用的 AES 加密不兼容
 
-### WPA3
+### WPA-PSK/WPA2-PSK
 
-[WI-Fi官方网站](https://www.wi-fi.org)称，WPA3 于 2018 年推出。
+WPA-PSK/WPA2-PSK 是WPA/WPA2的简化版，采用了 Pre-shared key 预共享密钥认证方式，而不是通过认证服务器进行认证。
 
+## WPA3
 
+[WI-Fi官方网站](https://www.wi-fi.org)称，WPA3 于 2018 年推出
 
+## WPS（WI-Fi protedted setup）- WI-Fi保护设置
+
+主要致力于简化无线网络的安全加密设置。具备这一功能的无线产品往往在机身上设计有一个功能键，称为WPS按钮，用户只需轻轻按下该按钮或输入PIN码，再经过两三步简单操作即可完成无线加密设置，同时在客户端和路由器之间建立起一个安全的连接
+
+### PIN码
+
+在无线网卡的配套管理软件（如TP-LINK的QSS软件）里输入无线路由器设备上的那8位数字字符串就可以成功登录该已被加密的无线路由器
+
+#### 破解
+
+PIN码分前4和后4，而后4中最后一个是CHECKSUM，所以等于只有三位，先破前4只有最多一万个组合，破后4中的前3只有一千个组合，一共就是一万一千个密码组合。 10的4次方+10的3次方=11000个密码组合
+
+## AC（access control）- 接入控制
+
+在一些路由器上也叫做 MAC过滤器
+每个网络适配器都有一个 MAC 地址（一组16进制数字，用来标识网络上的每一个设备）
+使用接入控制，可以允许或阻止某些设备加入您的网络
 
 
 
