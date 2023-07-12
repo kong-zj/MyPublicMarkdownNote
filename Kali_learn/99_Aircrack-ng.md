@@ -616,32 +616,117 @@ reaver -i wlan0mon -b [路由器的mac地址] -p [PIN码]
 
 ## MDK3 工具
 
-MDK3 是一款无线DOS 攻击测试工具，能够发起Beacon Flood（无线SSID干扰攻击）、Authentication DoS（DHCP地址耗尽攻击）、Deauthentication/Disassociation Amok（指定用户断线攻击） 等模式的攻击，另外它还具有针对隐藏ESSID 的暴力探测模式、802.1X 渗透测试、WIDS干扰等功能
+MDK3 是一款无线DOS 攻击测试工具，能够发起Beacon Flood（无线SSID干扰攻击）、Authentication DoS（DHCP地址耗尽攻击）、Deauthentication/Disassociation Amok（指定用户断线攻击） 等模式的攻击，另外它还具有针对隐藏ESSID 的暴力探测模式、802.1X 渗透测试、WIDS干扰等功能。
+
+各种攻击模式如下图
+![](resources/2023-07-13-01-02-45.png)
 
 ### 网上教程
 
 [MDK3官网](https://www.kali.org/tools/mdk3/)
+[无线大杀器mdk3教程](https://parrotsec-cn.org/t/mdk3/159)
+[无线DOS 攻击测试工具：mdk3](https://cloud.tencent.com/developer/news/16421)
 
 ### 用树莓派（推荐）
 
+#### 前置条件
 
+欲用此利器，必先启动网卡的监听模式
+```shell
+airmon-ng start wlan0
+```
 
+#### Beacon Flood（Beacon泛洪攻击）
 
+攻击原理是攻击者伪造任意的MAC地址在无线网络环境中发送Beacon管理控制帧，造成一定范围的无线覆盖范围内的用户扫描到大量的垃圾SSID
 
+```shell
+# 参数：
+# -n <ssid>  自定义ESSID
+# -f <filename>  读取ESSID列表文件
+# -v <filename>  自定义ESSID和BSSID对应列表文件
+# -d  自定义为Ad-Hoc模式
+# -w  自定义为wep模式
+# -g  54Mbit模式
+# -t  WPA TKIP encryption
+# -a  WPA AES encryption
+# -m  读取数据库的mac地址
+# -c <chan>  自定义信道
+# -s <pps>  发包速率
+mdk3 wlan0mon b 
+```
+
+发射大量的垃圾SSID来干扰其他使用者
+![](resources/2023-07-13-01-04-12.png)
+![](resources/2023-07-13-01-00-41.png)
+
+用crunch工具生成ESSID列表文件
+![](resources/2023-07-13-01-08-45.png)
+使用自定义的ESSID名
+![](resources/2023-07-13-01-10-26.png)
+![](resources/2023-07-13-01-06-11.png)
+
+#### Authentication DoS（身份验证洪水攻击）
+
+自动模拟随机产生的mac向目标AP发起大量验证请求，可以导致AP忙于处理过多的请求而停止对正常连接客户端的响应。这个模式常见的使用是在reaver穷举路由PIN码，当遇到AP被“pin死”时，可以用这个模式来直接让AP停止正常响应，迫使AP主人重启路由
+
+```shell
+# 先找到一个目标WiFi
+airodump-ng wlan0mon
+# 参数：
+# -a <ap_mac>  测试指定BSSID
+# -m  使用有效数据库中的客户端mac地址
+# -c  对应 -a ，不检查是否测试成功
+# -i <ap_mac>  对指定BSSID进行智能攻击
+# -s <pps>  速率，默认50
+mdk3 wlan0mon a -a [目标WiFi的BSSID]
+```
+
+![](resources/2023-07-13-01-13-19.png)
+![](resources/2023-07-13-01-12-23.png)
+
+上面这条命令会循环发送大量验证信息给AP，过不了几分钟，AP就会卡死，如果路由器有防DOS的功能的话，这个不好用
+
+#### Deauthentication/Disassociation Amok（强制解除验证解除连接攻击）
+
+[对WiFi发动取消认证攻击（Deauthentication)](https://www.bilibili.com/read/cv18290136)
+[WIFI接入之Authentication（认证）和Association（关联）流程梳理](https://blog.csdn.net/Atlas12345/article/details/104588090)
+
+软件会向周围所有可见AP发起循环攻击，可以造成一定范围内的无线网络瘫痪（当然有白名单，黑名单模式）
+
+```shell
+# 参数：
+# -w <filename>  白名单mac地址列表文件
+# -b <filename>  黑名单mac地址列表文件
+# -s <pps>  速率，这个模式下默认无限制
+# -c [chan,chan,chan,...]  信道，可以多填，如 2,4,5,1
+mdk3 wlan0mon d -c 1
+```
+
+![](resources/2023-07-13-01-15-11.png)
+![](resources/2023-07-13-01-12-23.png)
+
+此时的无线网络会处于一个时断时续的状态直到攻击停止
 
 ## Wifite 工具
+
+Wifite是一个自动化工具，用于攻击使用 WEP / WPA / WPA2 / WPS 进行加密的多个无线网络。
 
 ### 网上教程
 
 [Wifite官网](https://www.kali.org/tools/wifite/)
+[wifite硬核破解WiFi密码](https://www.cnblogs.com/nanstar/p/12319158.html)
 
 ### 用树莓派（推荐）
 
+```shell
+# 启动命令
+wifite
+```
 
-
-
-
-
+![](resources/2023-07-13-01-16-02.png)
+选择目标WiFi，会自动尝试攻击
+![](resources/2023-07-13-01-16-34.png)
 
 # WiFi 安全接入方法
 
@@ -712,6 +797,74 @@ PIN码分前4和后4，而后4中最后一个是CHECKSUM，所以等于只有三
 使用接入控制，可以允许或阻止某些设备加入您的网络
 
 
+
+# 相关知识
+
+[802.11协议帧格式、Wi-Fi连接交互过程、无线破解入门研究](https://www.cnblogs.com/LittleHann/p/3700357.html)
+
+## 802.11 协议
+
+802.11 协议将所有的数据分为三种：
+- 数据帧
+- 管理帧
+- 控制帧
+
+### 管理帧主要用来STA连接和断开无线网络，总共12个管理帧
+
+Association request (subtype 0x0)
+Association response (subtype 0x1)
+Reassociation request (subtype 0x2)
+Reassociation response (subtype 0x3)
+Probe request (subtype 0x4)
+Probe response (subtype 0x5)
+Beacon (subtype 0x8)
+ATIM (subtype 0x9)
+Disassociation (subtype 0xa)
+Authentication (subtype 0xb)
+Deauthentication (subtype 0xc)
+Action (subtype 0xd)
+
+## WiFi连接交互过程
+
+1. AP广播发送Beacon（信标帧）
+2. STA向AP发送携带有指定SSID的Probe Request（探测请求帧）
+3. AP向STA发送Probe Response（探测回应帧）
+4. STA对AP发送Authentication Request（认证请求帧）
+   1. AP向STA发送Authentiction Response (Challenge)（加密认证）
+   2. STA对AP发送Authentication Response (Encrypted Challenge)（加密认证）
+5. AP向STA发送Authentiction Response（认证应答帧）
+6. STA向AP发送Association Request（关联请求帧）
+7. AP向STA发送Association Response（关联应答帧）
+8. 正常数据传输（浏览网页、看视屏等）
+9. STA向AP发送Disassociation（取消关联帧）
+
+### 根据协议，可以针对这一过程发起攻击
+
+#### Deauthentication攻击
+
+- 如果一个STA想要从AP取消认证，或者一个AP想要从STA取消认证，无论哪一个设备都可以发送取消认证帧。
+
+- 因为认证帧是关联帧的先决条件，所以取消认证帧会自动的导致取消关联发生。取消认证帧不能被任何一方拒绝，除非双方已经协商了管理帧保护协议（定义在 802.11w），并且MIC完整性检查失败。
+
+- 结论：取消认证帧的发送会导致STA断开网络。
+
+#### Disassociation攻击
+
+- 一旦STA连接到AP，任何一方都可以通过发送取消连接帧来中断连接。它和取消认证帧有相同的帧格式。
+
+- 如果手动点击断开连接或者STA想要切换网络（比如漫游），那么STA就会发送取消连接帧。
+
+- 如果STA尝试发送不合法的参数，AP会发送取消连接帧。
+
+- 结论：取消连接帧的发送会导致STA断开网络。 
+
+
+
+
+---
+---
+
+Arpspoof进行ARP欺骗，用Ettercap进行DNS劫持
 
 
 ---
