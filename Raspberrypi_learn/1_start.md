@@ -105,26 +105,130 @@ code .
 我下载的是32位Lite版本（无桌面）系统
 3. [SD卡烧录软件（树莓派官方推荐）](https://www.raspberrypi.com/software/)
 4. SD卡（大于等于16G）
-
-
-
-
-
-可选：
-1. 显示器
-2. 键盘
-3. 鼠标
+5. 一台可以远程连接树莓派的电脑
 
 ### 烧录系统到SD卡
 
+![](resources/2023-07-15-00-29-02.png)
 
+### 开启ssh功能
 
+在根目录bootfs中，直接新建一个文本文档，重命名为ssh，注意不要保留原来的txt后缀
+![](resources/2023-07-14-23-55-40.png)
 
+### 连接路由器
 
-### 第一次开机
+#### 有线连接
 
-设置账号 zk，密码 1
-root用户密码设置为 1
+一根网线分别连接路由器和树莓派
+
+#### 无线连接
+
+在根目录bootfs中，新建文本文档写入以下内容，文件名改为wpa_supplicant.conf
+```txt
+country=CN
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+ssid="WiFi-A"
+psk="12345678"
+key_mgmt=WPA-PSK
+priority=1
+}
+
+network={
+# ssid:网络名称
+ssid="WiFi-B"
+# psk:密码
+psk="12345678"
+# key_mgmt:加密方式
+key_mgmt=WPA-PSK
+# priority:连接优先级，数字越大优先级越高（不可以是负数）
+priority=2
+# scan_ssid:连接隐藏WiFi时需要指定该值为1
+scan_ssid=1
+}
+
+# 如果你的 WiFi 没有密码
+network={
+ssid="你的无线网络名称"
+key_mgmt=NONE
+}
+
+# 如果你的 WiFi 使用WEP加密
+network={
+ssid="你的无线网络名称"
+key_mgmt=NONE
+wep_key0="你的wifi密码"
+}
+
+# 如果你的 WiFi 使用WPA/WPA2加密
+network={
+ssid="你的无线网络名称"
+key_mgmt=WPA-PSK
+psk="你的wifi密码"
+}
+```
+
+此处按自己的WiFi配置填写
+
+#### 确定树莓派的IP地址
+
+![](resources/2023-07-15-00-40-13.png)
+
+### 启用默认账号
+
+默认用户 pi ，默认密码 raspberry
+
+[树莓派raspberry pi 4 SSH默认密码无法登录解决办法](https://blog.csdn.net/u012329294/article/details/123447208)
+
+pi账号在最近的raspberry pi os中因为安全原因已经删除
+那就手动恢复这个账号
+
+在根目录bootfs中，新建文本文档写入以下内容，文件名改为userconf
+```txt
+pi:$6$/4.VdYgDm7RJ0qM1$FwXCeQgDKkqrOU3RIRuDSKpauAbBvP11msq9X58c8Que2l1Dwq3vdJMgiZlQSbEXGaY5esVHGBNbCxKLVNqZW1
+```
+注意：以上其实就是username:hash(password)，这一串hash就是raspberry
+
+### ssh远程连接
+
+电脑和树莓派要在同一局域网里
+
+#### FinalShell
+
+![](resources/2023-07-15-00-59-41.png)
+
+#### putty
+
+![](resources/2023-07-15-01-02-59.png)
+
+#### cmd命令行
+
+[Windows下cmd命令行ssh连接Linux服务器](https://blog.csdn.net/sungencheng/article/details/123070390)
+
+使用命令
+```shell
+ssh [用户名]@[ip地址]
+```
+然后输入该用户的密码即可
+![](resources/2023-07-15-01-06-04.png)
+
+#### termius
+
+[termius官方网站](https://termius.com/)
+
+在iPad上使用
+![](resources/2023-07-15-21-11-50.png)
+![](resources/2023-07-15-21-29-48.png)
+
+### 用户密码修改
+
+pi 用户的密码为 902309
+root 用户的密码为 kzjraspberry
+
+### 命令
 
 关机命令
 ```shell
@@ -136,12 +240,41 @@ sudo halt
 sudo reboot
 ```
 
+### 使用WiFi
+
+#### 启用无线网卡
+
+下面命令用于查看无线网卡的信息和状态
+```shell
+iwconfig
+ifconfig
+```
+
+如果无线网卡没有启动，可用下面命令来启动
+```shell
+ifconfig wlan1 up
+```
+
+通过下面命令查看无线网卡状态，若<>内显示包括UP关键字说明无线网卡已激活
+```shell
+ip link show wlan1
+```
+
+![](resources/2023-07-15-01-21-04.png)
 
 
 
+![](resources/2023-07-15-01-22-05.png)
+
+[Linux环境下通过wpa_supplicant命令连接WIFI](https://blog.csdn.net/weixin_43361652/article/details/128441233)
 
 
 
+[vi命令使用详解](https://blog.csdn.net/anliu1/article/details/128397684)
+
+![](resources/2023-07-15-01-38-55.png)
+
+[linux使用wpa_supplicant和wpa_cli手动配置wifi](https://www.cnblogs.com/libra13179/p/14739113.html)
 
 
 ---
