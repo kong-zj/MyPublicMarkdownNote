@@ -228,7 +228,7 @@ ssh [用户名]@[ip地址]
 pi 用户的密码为 902309
 root 用户的密码为 kzjraspberry
 
-### 命令
+### 关机/重启命令
 
 关机命令
 ```shell
@@ -241,6 +241,10 @@ sudo reboot
 ```
 
 ### 使用WiFi
+
+[wpa_cli与wpa_supplicant的理解](https://blog.csdn.net/weixin_42271802/article/details/109852902)
+
+wpa_supplicant工具包含wpa_supplicant和wpa_cli这两个程序，其中wpa_supplicant程序作为服务端在后台运行，服务wpa_cli客户端的请求，从而实现WiFi的配置连接
 
 #### 启用无线网卡
 
@@ -262,19 +266,122 @@ ip link show wlan1
 
 ![](resources/2023-07-15-01-21-04.png)
 
-
-
-![](resources/2023-07-15-01-22-05.png)
+#### 扫描附近的WiFi
 
 [Linux环境下通过wpa_supplicant命令连接WIFI](https://blog.csdn.net/weixin_43361652/article/details/128441233)
 
+下面命令用于搜索附近的WiFi
+```shell
+iw dev wlan1 scan
+# 搜索附近是否有期望的名为[SSID]的WiFi
+iw dev wlan1 scan | grep [SSID] 
+```
 
+![](resources/2023-07-15-01-22-05.png)
+![](resources/2023-07-15-21-40-01.png)
+
+也可以通过wpa_supplicant的客户端工具wpa_cli来扫描WiFi
+```shell
+# 扫描WiFi
+wpa_cli -i wlan1 scan
+# 打印扫描结果
+wpa_cli -i wlan1 scan_result
+```
+
+![](resources/2023-07-16-15-55-08.png)
+
+#### 连接WiFi
+
+```shell
+# 连接无加密网络
+iw dev wlan1 connect [SSID]
+# 连接WEP加密网络
+iw dev wlan1 connect [SSID] key 0:[WEP密钥]
+# 连接WPA/WPA2加密网络
+# 在wpa_supplicant.conf文件中添加要连接的WiFi信息
+sudo vi /etc/wpa_supplicant/wpa_supplicant.conf
+# 从该配置文件启动wpa_supplicant
+sudo wpa_supplicant -i wlan1 -c /etc/wpa_supplicant/wpa_supplicant.conf &
+```
 
 [vi命令使用详解](https://blog.csdn.net/anliu1/article/details/128397684)
 
 ![](resources/2023-07-15-01-38-55.png)
+上图报错的原因是，系统已经存在打开的多个wpa_supplicant实例，
+执行下面命令杀死所有wpa_supplicant即可
+```shell
+# 断开WiFi
+sudo killall wpa_supplicant
+```
+
+[wpa_supplicant连接Wifi错误分析](https://blog.csdn.net/yk150915/article/details/78728796)
+
+但是我们是ssh连接树莓派的，杀死所有wpa_supplicant之后就会断连
+这里我用重启树莓派系统代替重启wpa_supplicant
+
+可以使用下面命令查看现在连接的网络
+```shell
+iw dev wlan1 link
+```
+
+![](resources/2023-07-16-15-26-01.png)
+
+#### 切换WiFi（用wpa_cli来简化操作）
 
 [linux使用wpa_supplicant和wpa_cli手动配置wifi](https://www.cnblogs.com/libra13179/p/14739113.html)
+[wpa_cli使用之WIFI开启,扫描热点,连接热点,断开热点,WIFI关闭](https://www.cnblogs.com/lifexy/p/10180653.html)
+
+用wpa_cli添加一个网络连接，比在wpa_supplicant.conf文件中添加要连接的WiFi信息麻烦
+所以这里wpa_cli只用来切换已保存的WiFi
+
+```shell
+# 查看已保存的WiFi列表
+wpa_cli -i wlan1 list_network
+# 选择连接指定ID的WiFi
+wpa_cli -i wlan1 select_network [ID]
+# 查看WiFi连接状态
+wpa_cli -i wlan1 status
+```
+
+![](resources/2023-07-16-21-42-58.png)
+
+### 安装软件
+
+#### vim
+
+```shell
+sudo apt install vim
+```
+
+#### zsh
+
+```shell
+sudo apt install zsh
+```
+
+如果出现找不到命令的情况
+~/.zshrc文件中编辑PATH
+![](resources/2023-07-16-18-16-32.png)
+然后使之生效
+![](resources/2023-07-16-18-16-01.png)
+
+#### oh-my-zsh
+
+配置插件和WSL2中的相同
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
