@@ -369,11 +369,45 @@ sudo apt install zsh
 
 配置插件和WSL2中的相同
 
+#### mysql
 
+[在树莓派 4B+ 里安装 MySQL数据库（实际安装的是 mariadb-server）](https://blog.csdn.net/qq_18301257/article/details/112209931)
+[mysql修改初始密码时报错ERROR 1356 (HY000): View ‘mysql.user‘ references invalid table(s) or column(s) or function(s)](https://blog.csdn.net/m0_48096446/article/details/128643379)
 
+root用户的密码设置为 kzjmysql
 
+```shell
+sudo apt-get install mariadb-server
+sudo mysql
+    USE mysql;
+    ALTER USER 'root'@'localhost' IDENTIFIED BY 'kzjmysql';
+    flush privileges;
+    exit
+sudo systemctl restart mariadb
+sudo mysql -u root -p
+```
 
+##### 配置远程连接
 
+取消只允许本机访问数据库
+```shell
+sudo vim /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+
+找到 **bind-address = 127.0.0.1** 并注释掉 → **# bind-address = 127.0.0.1**
+
+创建远程访问用户remoteuser，密码设置为 nhXGwCQqWQe5oNG
+```shell
+sudo mysql -u root -p
+    CREATE user '用户名'@'%' identified by '密码';
+    GRANT ALL PRIVILEGES ON *.* TO 用户名@'%' WITH GRANT OPTION;
+    FLUSH PRIVILEGES;
+    exit
+sudo systemctl restart mariadb
+```
+
+![](resources/2023-07-16-22-49-25.png)
+使用Navicat远程连接成功
 
 
 

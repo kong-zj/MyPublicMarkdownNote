@@ -61,7 +61,7 @@
 
 执行```sudo service mysql restart```重启 MySQL 服务
 
-当你的帐号不允许从远程登陆，只能在localhost连接时。这个时候只要在mysql服务器上，更改 mysql 数据库里的 user 表里的 host 项，从localhost"改成%即可实现用户远程登录
+当你的帐号不允许从远程登陆，只能在localhost连接时。这个时候只要在mysql服务器上，更改 mysql 数据库里的 user 表里的 host 项，从 localhost 改成 % 即可实现用户远程登录
 
 在安装mysql的机器上运行：
 
