@@ -449,6 +449,8 @@ scrapy crawl portrait
 其中下载的图片为
 ![](resources/2023-07-18-16-46-33.png)
 
+然而发现问题
+
 ## 解决图片反爬
 
 因为爬取速度过快，部分图片在下载时触发了反爬，触发了cc攻击的防御机制
@@ -507,5 +509,186 @@ DOWNLOAD_DELAY = 3
 
 清除之前爬虫保存的文件，再次运行爬虫
 
+一共爬取1972张图片
+![](resources/2023-07-19-22-44-29.png)
+
+[Linux、Mac统计文件夹下的文件数目](https://www.cnblogs.com/chloneda/p/linux-count-file.html)
+
+但是显示本地只有1961个图片文件（已确定下载的所有图片都是jpg格式的）
+![](resources/2023-07-19-23-05-42.png)
+
+## 验证下载的图片数量的完整性
+
+[Python判断文件是否存在的三种方法(os.path.exsist, os.path.isfile, try-catch)](https://blog.csdn.net/NeverLate_gogogo/article/details/109333970)
+[python对json对象或json数组操作以及读写各类txt,csv,html,xls文件的工具类](https://blog.csdn.net/ITBigGod/article/details/103131516)
+[python读取和保存json文件](https://blog.csdn.net/leviopku/article/details/103773219)
+
+前面在保存json字符串到 img_info.json 文件时比较随意，各个json字符串前后紧挨着，不方便识别
+这里手动做些如下小改动，方便后面的读取
+
+img_info.json（仅截取一小部分示意）改动前：
+```json
+{'img_name': 'Ayaka Otani - 大谷彩夏.jpg',
+ 'img_src': 'http://binjix.top/data/attachment/forum/202301/17/221206tp69f0kt8gww2w81.jpg',
+ 'person_name': 'A - 大谷彩夏',
+ 'title': '日本萝莉写真图'}{'img_name': 'Miho Kaneko - 金子美穂.jpg',
+ 'img_src': 'http://binjix.top/data/attachment/forum/202302/02/224359ylfkk4v4vmvllzvk.jpg',
+ 'person_name': 'Miho Kaneko 金子美穂',
+ 'title': '日本萝莉写真图'}{'img_name': 'bs2_kaneko_m03_017.jpg',
+ 'img_src': 'http://binjix.top/data/attachment/forum/202302/02/224745m0lg11darf05d71d.jpg',
+ 'person_name': 'Miho Kaneko 金子美穂',
+ 'title': '日本萝莉写真图'}
+```
+
+img_info.json（仅截取一小部分示意）改动后：
+```json
+{
+    "img_list": [
+        {"img_name": "Ayaka Otani - 大谷彩夏.jpg",
+ "img_src": "http://binjix.top/data/attachment/forum/202301/17/221206tp69f0kt8gww2w81.jpg",
+ "person_name": "A - 大谷彩夏",
+ "title": "日本萝莉写真图"},
+        {"img_name": "Miho Kaneko - 金子美穂.jpg",
+ "img_src": "http://binjix.top/data/attachment/forum/202302/02/224359ylfkk4v4vmvllzvk.jpg",
+ "person_name": "Miho Kaneko 金子美穂",
+ "title": "日本萝莉写真图"},
+        {"img_name": "bs2_kaneko_m03_017.jpg",
+ "img_src": "http://binjix.top/data/attachment/forum/202302/02/224745m0lg11darf05d71d.jpg",
+ "person_name": "Miho Kaneko 金子美穂",
+ "title": "日本萝莉写真图"}
+            ]
+}
+```
+
+把各个独立的json字符串，组成一个json字符串数组
+
+另外注意：
+使用 json.loads() 函数时，引号必须为双引号，不能是单引号，不然会有如下报错
+[json报错：Expecting property name enclosed in double quotes: line 1 column 2 (char 1)](https://blog.csdn.net/qq_41375609/article/details/100118545)
+
+新建scrapy_portrait/scrapy_portrait/spiders/checking.py文件的内容为
+```py
+import json
+import os
+
+# 读取json文件
+f = open('img_info.json', 'r')
+content = f.read()
+# json.loads()将读取内容转化为python字典
+content_dict = json.loads(content)
+# 得到list
+img_list = content_dict.get('img_list')
+# 初始化统计值
+index = 0
+miss_count = 0
+hit_count = 0
+# 遍历list
+for each_img in img_list:
+    # each_img是字典
+    path_name = each_img.get('title') + '/' + each_img.get('person_name') + '/' + each_img.get('img_name')
+    # 判断这个图片是否存在
+    res = os.path.exists(path_name)
+    if(res):
+        hit_count += 1
+    else:
+        miss_count += 1
+        print('index: ' + index + ', miss: ' + each_img)
+    index += 1
+f.close()
+print('hit_count: ' + str(hit_count) + ', miss_count: ' + str(miss_count))
+```
+
+运行结果为
+![](resources/2023-07-20-01-10-53.png)
+
+发现json文件中的图片信息，在本地全都有实体图片文件对应
+
+那是多条图片信息对应到了一个实体图片文件？
+
+接下来进行验证
+思路是维护一个字典，记录每一个实体图片文件被检索的次数
+
+[Python 字典(Dictionary)教程](https://www.runoob.com/python/python-dictionary.html)
+
+checking.py文件的内容修改为
+```py
+import json
+import os
+
+# 读取json文件
+f = open('img_info.json', 'r')
+content = f.read()
+# json.loads()将读取内容转化为python字典
+content_dict = json.loads(content)
+# 得到list
+img_list = content_dict.get('img_list')
+# 初始化统计值
+index = 0
+miss_count = 0
+hit_count = 0
+# 实体图片文件检索次数字典
+hit_dict = {}
+# 遍历list
+for each_img in img_list:
+    # each_img是字典
+    path_name = each_img.get('title') + '/' + each_img.get('person_name') + '/' + each_img.get('img_name')
+    # 判断这个图片是否存在
+    res = os.path.exists(path_name)
+    # 图片存在
+    if(res):
+        hit_count += 1
+        # 这个图片文件第一次被检索
+        if(path_name not in hit_dict):
+            hit_dict[path_name] = 1
+        # 这个图片已经被检索过
+        else:
+            hit_dict[path_name] += 1
+            print('hit again: ' + path_name + ', count: ' + str(hit_dict[path_name]))
+    # 图片不存在    
+    else:
+        miss_count += 1
+        print('index: ' + index + ', miss: ' + each_img)
+    index += 1
+f.close()
+print('hit_count: ' + str(hit_count) + ', miss_count: ' + str(miss_count))
+```
+
+运行结果为
+![](resources/2023-07-20-01-29-37.png)
+
+发现确实是这样
+![](resources/2023-07-20-01-32-20.png)
+![](resources/2023-07-20-01-32-37.png)
+不同的下载链接被我指向了完全一致的保存位置
+
+接下来解决这个问题
+
+## 避免保存图片时的同名覆盖问题
 
 
+
+### 思路1：在碰撞的文件名后添加字符
+
+[Python 创建新文件时避免覆盖已有的同名文件的解决方法](https://www.yisu.com/zixun/172560.html)
+
+如果要保存的位置已经有同名文件，就在文件名后面加字符 1，再次判断是否有重名，如果还是重名，就继续添加，直到不重名为止
+
+
+
+### 思路2：维护一个字典，记录每一个文件名被保存的次数
+
+思路1的升级版，不再需要迭代判断，但是维护字典需要一定开销
+
+
+### 思路3：截取下载链接的部分字段作为文件名
+
+只要截取的部分恰当，一定不会重名
+
+## 优化json文件的结构化保存
+
+前面在checking.py中，为了方便地读取img_info.json文件中各个json对象，还需要手动调整img_info.json
+现在将需要手动调节的逻辑，用代码完成
+pipelines.py文件的内容修改为
+```py
+
+```
