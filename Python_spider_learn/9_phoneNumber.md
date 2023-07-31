@@ -1,4 +1,4 @@
-# 爬取苏州手机号的7位号段
+# 爬取苏州市手机号的7位号段
 
 [号麦网苏州号段](https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/suzhou.html)
 
@@ -170,3 +170,59 @@ class ScrapyPhonenumberPipeline:
 
 经测试，爬取成功
 ![](resources/2023-07-23-22-16-46.png)
+
+# 爬取江苏省手机号的7位号段
+
+对上面代码的复用
+
+phoneNumber.py文件的内容修改为
+```py
+import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy_phoneNumber.items import ScrapyPhonenumberItem
+
+class PhonenumberSpider(CrawlSpider):
+    name = "phoneNumber"
+    allowed_domains = ["www.haomais.com"]
+    start_urls = ["https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/suzhou.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/nanjing.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/wuxi.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/xuzhou.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/changzhou.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/nantong.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/lyg.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/huaian.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/yancheng.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/yangzhou.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/zhenjiang.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/tz.html",
+                  "https://www.haomais.com/haoma/chaxun/haomais/haoduan/139/suqian.html"
+                  ]
+
+    rules = (Rule(LinkExtractor(allow=r'\d+/suzhou.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/nanjing.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/wuxi.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/xuzhou.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/changzhou.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/nantong.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/lyg.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/huaian.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/yancheng.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/yangzhou.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/zhenjiang..html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/tz.html'), callback="parse_item", follow=True),
+             Rule(LinkExtractor(allow=r'\d+/suqian.html'), callback="parse_item", follow=True),)
+
+    def parse_item(self, response):
+        print('号麦网爬虫启动成功')
+        phoneNumberPrefix_list = response.xpath('//ul[@class="hd-city"]/li[@class="hd-city01"]/a/text()')
+        for phoneNumberPrefix in phoneNumberPrefix_list:
+            yield ScrapyPhonenumberItem(phoneNumberPrefix=phoneNumberPrefix.extract())
+```
+
+其他的代码不变
+
+运行结果为
+![](resources/2023-07-31-12-33-10.png)
+
