@@ -70,6 +70,8 @@ sudo apt-get install fcitx-rime
 ```
 重启即可使用
 
+用快捷键 Ctrl + 空格 切换中英文输入法
+
 默认是繁体字，按 F4 键，切换成简体字
 
 ### 安装软件
