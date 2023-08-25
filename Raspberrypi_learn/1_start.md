@@ -97,6 +97,17 @@ sudo dpkg -i code_1.80.0-1688477950_armhf.deb
 code .
 ```
 
+#### mysql
+
+系统自带mysql，不用自己下载，但是要先初始化才能用
+```shell
+service mysql start
+mysql_secure_installation
+mysql -u root -p
+```
+
+我设置 root 用户的密码为 kzjkali
+
 ## Raspberry Pi OS 系统
 
 ### 事先准备
