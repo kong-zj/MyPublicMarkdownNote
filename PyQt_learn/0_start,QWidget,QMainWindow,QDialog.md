@@ -225,12 +225,62 @@ if __name__ == '__main__':
 
 ### 窗口居中
 
-https://maicss.gitbook.io/pyqt-chinese-tutoral/pyqt5/hello_world
+实现窗口的居中显示
+```py
+import sys
+from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication
+
+class Example(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):               
+        self.resize(250, 150)
+        # 调用我们下面写的，实现对话框居中的方法
+        self.center()
+        self.setWindowTitle('Center')    
+        self.show()
+
+    def center(self):
+        # 获得主窗口所在的框架
+        qr = self.frameGeometry()
+        # 获取显示器的分辨率，然后得到屏幕中间点的位置
+        cp = QDesktopWidget().availableGeometry().center()
+        # 然后把主窗口框架的中心点放置到屏幕的中心位置
+        qr.moveCenter(cp)
+        # 通过move函数把主窗口的左上角移动到其框架的左上角，这样就把窗口居中了
+        self.move(qr.topLeft())
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Example()
+    sys.exit(app.exec_())
+```
+
+效果如下
+
+## QWidget、QMainWindow、QDialog
+
+QMainWindow、QWidget、QDialog是Qt中常用的窗口，我们在新建Qt Widgets项目进行类信息选择时会碰到它们，那么他们之间到底有什么区别和联系呢？
+
+QWidget继承于QObject和QPaintDevice，QDialog和QMainWindow则继承于QWidget，QDialog、QMainWindow两者之间没有直接关系
+
+![](resources/2023-09-26-23-54-06.png)
+
+## QWidget（基础构建块）
+
+QWidget 是 Qt 中所有用户界面元素的基类。从按钮到文本框，甚至包括窗口和对话框，所有这些都是 QWidget 的子类。QWidget 可以是可视化元素，也可以作为其他可视化元素的容器
+
+## QMainWindow（构建复杂应用程序的框架）
 
 
 
 
 
+
+## QDialog
 
 
 
