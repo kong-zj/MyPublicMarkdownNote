@@ -18,6 +18,7 @@ class Example(QMainWindow):
 
     def initUI(self):               
         textEdit = QTextEdit()
+        # 中心部件
         self.setCentralWidget(textEdit)
 
         # QAction 动作
@@ -106,7 +107,7 @@ if __name__ == '__main__':
 效果如下
 ![](resources/2023-09-26-22-37-01.png)
 
-# QAction 动作
+# QAction 动作（行为）
 
 PyQt提供QAction类来封装用户需要执行的动作，这样不管是菜单栏，抑或是工具条栏，还是快捷键，都可以独立地和和这个动作相关联，这样就很好地做到了界面操作方式和具体行为动作的分离，代码之间的耦合性减少，可维护性良好。一句话，QAction是一个用于菜单栏、工具栏或自定义快捷键的抽象动作行为
 
@@ -405,7 +406,7 @@ if __name__ == '__main__':
 
 QToolBar工具栏是一个可移动面板，在其中常包含文本按钮，图标或者其他控件。通常情况下它位于菜单条下方，但可以移动它，在窗口上下左右不同的位置停靠。QToolBar通常和QMenuBar结合使用，用不同的交互动作完成相同的工作（因为它们可指向相同的QAction）
 
-可以有多个QToolBar工具栏对象，通过QMainWindow.addToolBar()可以获取一个QMenuBar对象
+可以有多个QToolBar工具栏对象，通过QMainWindow.addToolBar()可以添加一个QMenuBar对象
 
 ## 常用方法
 
@@ -473,8 +474,100 @@ if __name__ == '__main__':
 效果如下
 ![](resources/2023-09-26-23-33-47.png)
 
-# 多个锚接部件(dock widgets)
+# QDockWidget 锚接部件（浮动窗口）
 
+QDockWidget是一个可以停靠在QMainWindow内的窗口控件，它可以保持在浮动状态或者在指定位置作为子窗口附加到主窗口中，QMainWindow类的主窗口对象保留有一个用于停靠窗口的区域，这个区域在控件的中央周围
 
+可以有多个QDockWidget浮动窗口对象，通过QMainWindow.addDockWidget()可以添加一个QDockWidget对象
 
-# 一个中心部件(central widget)
+## 常用方法
+
+- setWidget()：在Dock窗口区域设置QWidget
+- setFloating()：设置Dock窗口是否可以浮动，如果设置为True，则表示可以浮动
+- setAlllowedAreas()：设置窗口可以停靠的区域
+- setFearures()：设置停靠窗口的功能属性
+
+## 示例
+
+```py
+import sys
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+class DockDemo(QMainWindow):
+    
+    def __init__(self, parent=None):
+        super(DockDemo, self).__init__(parent)
+        # 设置水平布局
+        layout = QHBoxLayout()
+
+        # 创建QDockWidget窗口（标题，自身窗口）
+        self.items = QDockWidget('Dockable', self)
+
+        # 实例化列表窗口，添加几个条目
+        self.listWidget = QListWidget()
+        self.listWidget.addItem('Item1')
+        self.listWidget.addItem('Item2')
+        self.listWidget.addItem('Item3')
+        self.listWidget.addItem('Item4')
+
+        # 在窗口区域设置QWidget，添加列表控件
+        self.items.setWidget(self.listWidget)
+
+        # 设置dock窗口是否可以浮动，True，运行浮动在外面，自动与主界面脱离，False，默认浮动主窗口内，可以手动脱离
+        self.items.setFloating(False)
+
+        # 设置QTextEdit为中央小控件
+        self.setCentralWidget(QTextEdit())
+        # 将窗口放置在中央小控件的右侧
+        self.addDockWidget(Qt.RightDockWidgetArea, self.items)
+
+        self.setLayout(layout)
+        self.setWindowTitle('Dock 例子')
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    demo = DockDemo()
+    demo.show()
+    sys.exit(app.exec_())
+```
+
+效果如下
+![](resources/2023-09-30-23-58-58.png)
+
+# CentralWidget 核心部件（中心部件）
+
+中心显示的部件都可以作为核心部件，例如一个记事本文件，可以利用QTextEdit做核心部件
+
+一般会有一个对象作为中心部件，通过QMainWindow.setCentralWidget()可以指定某个对象作为中心部件
+
+## 示例
+
+```py
+import sys
+from PyQt5.QtWidgets import QMainWindow, QTextEdit, QAction, QApplication
+from PyQt5.QtGui import QIcon
+
+class Example(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):               
+        # 指定QTextEdit对象作为中心部件
+        self.setCentralWidget(QTextEdit())
+
+        self.setGeometry(300, 300, 350, 250)
+        self.setWindowTitle('Main window')    
+        self.show()
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Example()
+    sys.exit(app.exec_())
+```
+
+效果如下
+![](resources/2023-10-01-00-10-18.png)
