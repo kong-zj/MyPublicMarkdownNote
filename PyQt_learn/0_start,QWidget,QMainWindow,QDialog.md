@@ -64,6 +64,7 @@ if __name__ == '__main__':
 ```
 
 效果如下
+![](resources/2023-09-30-15-59-23.png)
 
 ### 带窗口图标
 
@@ -102,7 +103,7 @@ if __name__ == '__main__':
 ```
 
 效果如下
-
+![](resources/2023-09-30-16-00-21.png)
 
 ### 提示框
 
@@ -143,11 +144,11 @@ if __name__ == '__main__':
 ```
 
 效果如下
-
+![](resources/2023-09-30-16-02-00.png)
 
 ### 关闭窗口
 
-创建了一个点击之后就退出窗口的按钮。这里我们将接触到一点signal（信号）和slots（槽）的知识
+创建了一个点击之后就退出窗口的按钮。这里我们将接触到一点 signals（信号）和 slots（槽）的知识
 ```py
 import sys
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication
@@ -178,8 +179,7 @@ if __name__ == '__main__':
 ```
 
 效果如下
-
-
+![](resources/2023-09-30-16-03-35.png)
 
 ### 消息盒子
 
@@ -219,9 +219,7 @@ if __name__ == '__main__':
 ```
 
 效果如下
-
-
-
+![](resources/2023-09-30-16-05-51.png)
 
 ### 窗口居中
 
@@ -259,37 +257,48 @@ if __name__ == '__main__':
     sys.exit(app.exec_())
 ```
 
-效果如下
+效果就是窗口在屏幕的中心
 
-## QWidget、QMainWindow、QDialog
+## QWidget、QMainWindow、QDialog 的联系和区别
 
-QMainWindow、QWidget、QDialog是Qt中常用的窗口，我们在新建Qt Widgets项目进行类信息选择时会碰到它们，那么他们之间到底有什么区别和联系呢？
+QMainWindow、QWidget、QDialog 是Qt中常用的窗口，我们在新建Qt Widgets项目进行类信息选择时会碰到它们，那么他们之间到底有什么区别和联系呢？
 
 QWidget继承于QObject和QPaintDevice，QDialog和QMainWindow则继承于QWidget，QDialog、QMainWindow两者之间没有直接关系
 
 ![](resources/2023-09-26-23-54-06.png)
 
-## QWidget（基础构建块）
+对比
+
+- 通用性: QWidget 是最通用的，可以作为创建其他控件或容器的基础；QMainWindow 特定于主窗口，具有菜单和工具栏；而 QDialog 主要用于创建对话框
+- 复杂性: QMainWindow 通常比 QWidget 和 QDialog 更复杂，因为它包含更多的组件（如菜单栏、工具栏、状态栏和 dock widgets）
+- 用途: QDialog 主要用于获取用户输入或显示信息；QMainWindow 通常用作应用程序的主界面；而 QWidget 可以用于这两者，并且是所有控件的基础
+
+### QWidget（基础构建块）
 
 QWidget 是 Qt 中所有用户界面元素的基类。从按钮到文本框，甚至包括窗口和对话框，所有这些都是 QWidget 的子类。QWidget 可以是可视化元素，也可以作为其他可视化元素的容器
 
-## QMainWindow（构建复杂应用程序的框架）
+#### 主要特性
 
+- 灵活性: 可以是单独的控件，如按钮，也可以是容纳其他控件的容器
+- 可定制: 可以设置 QWidget 的大小、样式、背景颜色等
+- 事件处理: 支持对各种事件（如鼠标点击和键盘输入）进行处理
 
+### QMainWindow（构建复杂应用程序的框架）
 
+QMainWindow 是专为需要菜单栏、工具栏、状态栏和中央窗口小控件的标准应用程序而设计的。它通常用作应用程序的主窗口
 
+#### 主要特性
 
+- 组织结构: 提供一个中央窗口，该窗口通常包含应用程序的主要内容，以及周围的菜单栏、工具栏和状态栏
+- Dock Widgets: 允许用户自定义窗口布局，通过可拖动的窗口小部件来组织内容
 
-## QDialog
+### QDialog（交互式对话框）
 
+QDialog 是用于创建对话框的类。对话框是一种特殊类型的窗口，通常用于短暂的任务和简短的通信。用户可以通过对话框输入或选择信息
 
+#### 主要特性
 
----
-
-https://www.bilibili.com/video/BV1LT4y1e72X/?spm_id_from=333.337.search-card.all.click
-
-http://www.pyqt5.cn/video/
-
-
-[pyqt6](https://maicss.gitbook.io/pyqt-chinese-tutoral/pyqt6)
+- 模态和非模态: 对话框可以是模态的（阻止用户与父窗口交互）或非模态的
+- default buttons：默认按钮用来告知用户已接受dialog的设置，并且希望关闭dialog
+- 返回值：提供一个返回值
 
