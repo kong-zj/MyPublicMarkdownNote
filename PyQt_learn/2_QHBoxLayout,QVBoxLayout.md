@@ -1,14 +1,20 @@
 # 布局管理
 
-在一个GUI程序里，布局是一个很重要的方面。布局就是如何管理应用中的元素和窗口。有两种方式可以搞定：绝对定位和PyQt5的layout类
+在一个GUI程序里，布局是一个很重要的方面。布局就是如何管理应用中的元素和窗口。有两种方式可以搞定：
+1. 绝对定位
+2. PyQt5的QLayout类
 
 ## 绝对定位
 
-每个程序都是以像素为单位区分元素的位置，衡量元素的大小。所以我们完全可以使用绝对定位搞定每个元素和窗口的位置。但是这也有局限性：
+每个程序都是以像素为单位区分元素的位置，衡量元素的大小。所以我们完全可以使用绝对定位搞定每个元素和窗口的位置。
+
+当我们需要在窗口的某个位置放置一个布局时，总是在创建部件之后，调用QWidget中的相关方法，如move(),resize(),setGeometry()来指定部件的位置和大小。用这种方式来对窗口中的部件进行部件，存在很多缺陷，比如：
 - 如果我们调整窗口大小，元素的大小和位置不会改变
 - 不能适用于不同的平台和不同分辨率的显示器
 - 更改应用字体大小会破坏布局
 - 如果我们决定改变我们的布局，我们必须彻底重做布局，这很浪费时间
+
+### 示例
 
 本例中，我们将小部件置于绝对坐标中
 ```py
@@ -43,11 +49,27 @@ if __name__ == '__main__':
 ```
 
 效果如下
+![](resources/2023-10-01-00-21-58.png)
 
+## QLayout类
 
-## 盒布局（箱布局）
+为了克服绝对定位的缺陷，在PyQt中，可以使用**QLayout的四个子类**（分别是QHBoxLayout、QVBoxLayout、QFrameLayout、QGridLayout）来实现自动布局
+
+QLayout常用方法：
+- addLayout()： 在布局中添加一个布局，即布局可以嵌套
+- addWidget()： 在布局中添加一个控件
+- addSpacing()： 添加指定像素的空白控件
+- addStretch()： 添加伸缩控制，类似弹簧，当窗口变化时，把部件推向某方向
+- setSpacing()： 设置布局内部控件的间距
+- setContentsMargins()： 设置布局边沿的空白间距
+- removeWidget()： 删除指定的部件
+- removeItem()： 删除指定的QLayoutItemm
+
+### QHBoxLayout QVBoxLayout 盒布局（箱布局）
 
 使用盒布局能让程序具有更强的适应性。这个才是布局一个应用的更合适的方式。QHBoxLayout 和 QVBoxLayout 是基本的布局类，分别是水平布局和垂直布局
+
+#### 示例
 
 本例中，我们需要把两个按钮放在程序的右下角，创建这样的布局，我们只需要一个水平布局加一个垂直布局的盒子就可以了。再用弹性布局增加一点间隙。当改变窗口大小的时候，它们能依然保持在相对的位置。我们同时使用了 QHBoxLayout 和 QVBoxLayout
 ```py
@@ -93,9 +115,9 @@ if __name__ == '__main__':
 ```
 
 效果如下
+![](resources/2023-10-01-00-34-48.png)
 
-
-### addStretch()函数
+#### addStretch()函数
 
 [PyQt5的addStretch()函数介绍](https://zhuanlan.zhihu.com/p/36193945)
 
@@ -103,7 +125,7 @@ if __name__ == '__main__':
 
 https://zhuanlan.zhihu.com/p/28559136
 
-## 栅格布局（网格布局）
+### QGridLayout 栅格布局（网格布局）
 
 栅格布局将位于其中的窗口部件放入一个网状的栅格之中。QGridLayout需要将提供给它的空间划分成的行和列，并把每个窗口部件插入并管理到正确的单元格。
 
@@ -169,7 +191,7 @@ if __name__ == '__main__':
 效果如下
 
 
-## 表单布局
+### QFormLayout 表单布局
 
 QFormLayout管理输入型控件和关联的标签组成的那些Form表单。
 
@@ -297,3 +319,10 @@ http://www.pyqt5.cn/video/
 
 
 [pyqt6](https://maicss.gitbook.io/pyqt-chinese-tutoral/pyqt6)
+
+
+
+好教程
+https://zhuanlan.zhihu.com/p/75673557
+
+https://blog.csdn.net/La_vie_est_belle/article/details/82316745
