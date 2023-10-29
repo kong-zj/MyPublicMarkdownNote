@@ -111,7 +111,7 @@ polls/
         __init__.py
 ```
 
-## 编写第一个视图
+## 编写第一个视图，并将一个 URL 映射到它（urlpatterns）
 
 polls/views.py文件内容修改为
 ```py

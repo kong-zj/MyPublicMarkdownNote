@@ -8,6 +8,10 @@
 
 [DockerHub](https://hub.docker.com/)（类似GitHub）
 
+# 安装
+
+[安装教程](https://linux.cn/article-14871-1.html)
+
 # 基础认识
 
 ![](resources/2022-12-14-17-35-25.png)
