@@ -1,8 +1,10 @@
-# Django 官方文档
+# Django 官方文档和教程
 
-[新手引导](https://docs.djangoproject.com/zh-hans/4.2/intro/)
+[官方新手引导](https://docs.djangoproject.com/zh-hans/4.2/intro/)
 
-[详细文档](https://docs.djangoproject.com/zh-hans/4.2/topics/)
+[官方详细文档](https://docs.djangoproject.com/zh-hans/4.2/topics/)
+
+[菜鸟教程](https://www.runoob.com/django/django-tutorial.html)
 
 # 安装
 
@@ -146,7 +148,7 @@ urlpatterns = [
 ```
 函数 include() 允许引用其它 URLconfs。每当 Django 遇到 include() 时，它会截断与此项匹配的 URL 的部分，并将剩余的字符串发送到 URLconf 以供进一步处理
 
-用浏览器访问 http://localhost:8000/polls/，应该能够看见 "Hello, world. You're at the polls index."，这是在 index 视图中定义的
+用浏览器访问 http://localhost:8000/polls/ 应该能够看见 "Hello, world. You're at the polls index."，这是在 index 视图中定义的
 ![](resources/2023-10-23-14-28-21.png)
 
 ### 何时使用 include()

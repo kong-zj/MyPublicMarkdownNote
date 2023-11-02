@@ -54,20 +54,18 @@ Django如果开启了Time Zone功能，则所有的存储和内部处理，甚�
 2. 在函数之间传递时间参数时，确保时间已经转换成 UTC 时间
 
 
----
-待完成
-
 比如，通常获取当前时间用的是：
-
+```py
 import datetime
 now = datetime.datetime.now()
+```
 
 启用 USE_TZ = True 后，需要写成：
-
+```py
 import datetime 
 from django.utils.timezone import utc
 utcnow = datetime.datetime.utcnow().replace(tzinfo=utc)
-
+```
 
 ### settings.py文件头部的 INSTALLED_APPS 设置项
 
