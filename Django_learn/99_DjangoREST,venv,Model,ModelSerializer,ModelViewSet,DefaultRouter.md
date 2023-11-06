@@ -22,6 +22,8 @@
 
 #  Rest Api
 
+[RESTful 架构详解](https://www.runoob.com/w3cnote/restful-architecture.html)
+
 ## API 简介
 
 API 即 应用程序接口（英文：Application Programming Interface，简称API）。那么它是一个怎样的接口呢，现在我们常将它看成一个HTTP接口即 HTTP API。也就是说这个接口得通过HTTP的方式来调用，做过前后端开发的小伙伴可能知道，后端开发又叫做面向接口开发，我们往往会提供一个接口供前端调用，或者供其他服务调用。举个例子，我们程序中往往会涉及到调用第三方接口，比如调用支付宝或者微信的支付接口来实现我们程序中的支付功能、调用带三方的短信接口来向用户发送验证码短信等等
@@ -114,12 +116,6 @@ Accept:application/json
 	}]
 }
 ```
-
-## 待完成例子
-
-https://zhuanlan.zhihu.com/p/536437382
-
----
 
 # Django REST 框架入门
 
@@ -366,6 +362,26 @@ python3 manage.py runserver
 ![](resources/2023-11-06-15-12-41.png)
 
 #### 使用Postman测试
+
+![](resources/2023-11-06-15-26-00.png)
+
+![](resources/2023-11-06-15-26-48.png)
+
+![](resources/2023-11-06-15-28-40.png)
+
+![](resources/2023-11-06-15-29-39.png)
+
+![](resources/2023-11-06-15-43-52.png)
+
+![](resources/2023-11-06-15-44-36.png)
+
+
+
+
+
+
+
+
 
 
 
