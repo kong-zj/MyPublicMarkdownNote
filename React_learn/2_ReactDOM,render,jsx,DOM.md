@@ -205,14 +205,14 @@ jsx 创建虚拟DOM的写法：
 ## jsx 语法
 
 1. 定义虚拟dom时，不要写引号
-2. 标签中混入js表达式时要用{}
+2. 标签中混入js**表达式**时要用{}
 表达式与js语句的区别：
     1. 表达式：会产生一个值，可以放在任何需要值的地方
         ① a    //一个变量
         ② a+b   //一个算数表达式
         ③ demo(1)   //函数调用得到确认的值
-        ④ arr.map()  //map函数获得一个新数组
-        ⑤ json对象
+        ④ arr.map()   //map函数获得一个新数组
+        ⑤ function test() {}   //函数
     2. 语句：
         ① if(){}
         ② else{}
@@ -223,8 +223,8 @@ jsx 创建虚拟DOM的写法：
 5. 虚拟dom只能有一个根标签
 6. 标签必须闭合
 7. 标签首字母：
-  ① 若小写字母开头，则将该标签转为html同名元素，若HTML中无该标签对应的同名元素，则报错
-  ② 若大写字母开头，react就去渲染对应的组件，若组件没有定义，则报错
+    ① 若小写字母开头，则将该标签转为html同名元素，若HTML中无该标签对应的同名元素，则报错
+    ② 若大写字母开头，react就去渲染对应的组件，若组件没有定义，则报错
 
 ```html
 <!DOCTYPE html>
@@ -259,7 +259,46 @@ jsx 创建虚拟DOM的写法：
                 </h2>
                 <input type="text"/>
             </div>
-            )
+        )
+        // 渲染虚拟DOM到页面
+        ReactDOM.render(VDOM, document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+## 动态展示数据
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello React!</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        // 模拟一些数据
+        const data = ['Angular', 'React', 'Vue']
+        // 创建虚拟DOM
+        const VDOM = (
+            <div>
+                <h1>前端js框架列表</h1>
+                <ul>
+                    {
+                        data.map((item,index)=>{
+                            return <li key={index}>{item}</li>
+                        })
+                    }
+                </ul>
+            </div>
+        )
         // 渲染虚拟DOM到页面
         ReactDOM.render(VDOM, document.getElementById('example'))
     </script>
@@ -310,6 +349,20 @@ jsx 创建虚拟DOM的写法：
 2. 虚拟DOM 比较"轻"，真实DOM 比较"重"，因为 虚拟DOM 在React内部使用，无需 真实DOM 的那么多属性
 3. 虚拟DOM 最终会被react转化为 真实DOM，呈现在页面上
 
+# 模块与组件
+
+## 模块
+
+
+
+### 模块化
+
+## 组件
+
+
+
+
+### 组件化
 
 
 
@@ -328,7 +381,7 @@ jsx 创建虚拟DOM的写法：
 
 
 ---
-p4
+p7
 
 
 
