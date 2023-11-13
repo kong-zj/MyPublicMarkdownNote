@@ -33,7 +33,7 @@
 > 我们引入了三个库：react.development.min.js 、react-dom.development.min.js 、babel.min.js：
 > - react.min.js ：React 的核心库
 > - react-dom.min.js ：提供与 DOM 相关的功能
-> - babel.min.js ：babel 将 jsx 转为 js
+> - babel.min.js ：babel 将 jsx代码 转为 js代码
 
 新建一个 .html 文件，内容如下
 ```html
