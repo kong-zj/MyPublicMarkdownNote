@@ -40,7 +40,7 @@
     <script type="text/babel">
         // 创建函数式组件
         function MyComponent() {
-            console.log(this);  // 输出为undefined，因为babel开启了严格模式
+            console.log(this);  // 输出为undefined，因为在函数组件中写的是jsx语法, jsx语法要经过babel.js编译成js语法，而babel开启了严格模式
             return <h2>我是用函数定义的组件（适用于[简单组件]的定义）</h2>
         }
         // 渲染组件到页面
@@ -55,12 +55,15 @@
 </html>
 ```
 
-注意，原生 HTML 元素名以小写字母开头，而自定义的 React 函数名以**大写**字母开头，比如 MyComponent 不能写成 myComponent，函数必须要有**返回值**
+注意，原生 HTML 元素名以小写字母开头，而自定义的 React 函数名以**大写**字母开头，比如 MyComponent 不能写成 myComponent，函数必须要有**返回值**，返回值就是VDOM
 
 只要在 ReactDOM.render() 函数的参数中写好**组件标签** \<MyComponent/\>，React发现这个组件是使用函数定义的，会由React调用这个**函数**
 
 效果如下
 ![](resources/2023-11-15-20-50-01.png)
+
+console.log(this) 的输出为
+![](resources/2023-11-15-22-10-49.png)
 
 ## 类式组件（Class Component）
 
@@ -100,18 +103,63 @@
 </html>
 ```
 
-注意，自定义的 React 类名以**大写**字母开头，必须**继承** React.Component 这个父类，必须写 render() **方法**，且这个方法要有**返回值**
+注意，自定义的 React 类名以**大写**字母开头，必须**继承** React.Component 这个父类，必须写 render() **方法**，且这个方法要有**返回值**，返回值就是VDOM
 
 只要在 ReactDOM.render() 函数的参数中写好**组件标签** \<MyComponent/\>，React发现这个组件是使用**类**定义的，会由React创建出这个类的**实例**，并调用该实例的render()**方法**
 
 效果如下
 ![](resources/2023-11-15-21-44-18.png)
 
-## 组件的三大属性
+console.log('render()中的this:',this) 的输出为
+![](resources/2023-11-15-22-09-47.png)
+
+## 复杂组件 和 简单组件
+
+有 state 的组件是复杂组件，无 state 的组件是简单组件
+
+> 类比：
+> 人--状态--影响--行为
+> 组件--状态--驱动--页面
+> 我们的数据放在放在组件的 state 里边，状态改变驱动虚拟DOM该变，从而驱动页面的改变
+
+- **函数式组件**也叫做**无状态组件**，因为函数式组件中的 this 指向 **undefined**
+- **类式组件**也叫做**有状态组件**，因为定义类组件需要继承 React.Component 父类组件，类式组件中必须要有 render() 函数，render() 函数必须要有返回值，返回值就是VDOM。但是在类式组件中的 this 指向 **类式组件创建的实例对象**。在这个实例对象中，有 state 属性、props 属性、refs 属性
+
+### 新版React中的 hooks
+
+通过 hooks，也能让函数式组件拥有 state 属性、props 属性、refs 属性 这三大属性
+
+## 组件实例的三大属性
+
+分别为 state 属性、props 属性、refs 属性
+
+### 状态 state
+
+注意 state 是在 **组件实例对象** 身上，而不是在 组件类 身上
+
+![](resources/2023-11-15-22-09-47.png)
 
 
 
 
+
+
+
+
+
+
+### props
+
+
+
+
+
+
+
+
+
+
+### refs 与 事件处理
 
 
 
@@ -124,7 +172,7 @@
 
 
 ---
-P11
+P13
 
 
 

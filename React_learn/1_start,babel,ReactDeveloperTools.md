@@ -3,7 +3,8 @@
 [官方教程](https://react.nodejs.cn/learn)
 [菜鸟教程](https://www.runoob.com/react/react-tutorial.html)
 [w3schools教程](https://www.w3schools.cn/react/default.asp)
-[大神笔记整理](https://blog.csdn.net/yangaoyuan1999/article/details/117605896)
+[大神笔记整理1-入门](https://blog.csdn.net/yangaoyuan1999/article/details/117605896)
+[大神笔记整理2-组件实例的三大属性state,props,refs](https://blog.csdn.net/yangaoyuan1999/article/details/117651823)
 
 # React 简介
 
