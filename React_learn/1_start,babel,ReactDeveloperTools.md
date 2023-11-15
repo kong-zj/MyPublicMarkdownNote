@@ -35,6 +35,8 @@
 > - react-dom.min.js ：提供与 DOM 相关的功能
 > - babel.min.js ：babel 将 jsx代码 转为 js代码
 
+[babel在线编译器](https://babeljs.io/repl)
+
 新建一个 .html 文件，内容如下
 ```html
 <!DOCTYPE html>
@@ -122,6 +124,42 @@ my-app/
     logo.svg
 
 ```
+
+
+
+
+# 安装开发者工具 React Developer Tools
+
+![](resources/2023-11-15-20-13-52.png)
+
+## 图标颜色
+
+### 灰色
+
+该网页不是用react写的
+
+### 红色
+
+![](resources/2023-11-15-20-18-25.png)
+该网页是用react写的，但是没有打包，还处于开发者模式
+
+### 蓝色
+
+![](resources/2023-11-15-20-19-15.png)
+是用react脚手架打包后的网页
+
+## 使用
+
+![](resources/2023-11-15-20-24-39.png)
+在浏览器的开发者工具中，Components 可以查看嵌套的组件，Profiler 用来做性能分析
+
+
+
+
+
+
+
+
 
 
 
