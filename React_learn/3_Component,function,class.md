@@ -24,6 +24,8 @@
 
 ## 函数式组件（Function Component）
 
+### 示例
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -64,8 +66,119 @@
 
 console.log(this) 的输出为
 ![](resources/2023-11-15-22-10-49.png)
+这里的 this 不是 Window 而是 undefined，是因为 jsx 代码要经过 babel 的翻译，babel 开启了**严格模式**（禁止自定义函数中的 this 指向 Window）
+
+[babel在线编译器](https://babeljs.io/repl)
+
+![](resources/2023-11-18-19-53-22.png)
+jsx 其实就是 原始js 的**语法糖**
 
 ## 类式组件（Class Component）
+
+### 原生js的类的复习
+
+类的构造器方法和一般方法：
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>类的基本知识</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/javascript">
+        class Person {
+            constructor(name,age){
+                // 构造器中的 this 是谁？类的实例对象
+                this.name = name
+                this.age = age
+            }
+            // 一般方法
+            speak(){
+                // speak()方法放在了哪里？放在类的原型对象上，供实例使用
+                // 通过Person实例调用speak()时，speak()中的this就是Person实例
+                console.log(`我叫${this.name}，我的年龄是${this.age}`)
+            }
+        }
+        const p1 = new Person('tom',18)
+        const p2 = new Person('jerry',19)
+        console.log(p1)
+        console.log(p2)
+        p1.speak()
+        p2.speak()
+        // call()可以更改函数中的 this 指向
+        p1.speak.call({a:1,b:2})
+    </script>
+
+</body>
+</html>
+```
+
+![](resources/2023-11-18-20-13-31.png)
+
+类的继承：
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>类的基本知识</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/javascript">
+        class Person {
+            constructor(name,age){
+                this.name = name
+                this.age = age
+            }
+            speak(){
+                console.log(`我叫${this.name}，我的年龄是${this.age}`)
+            }
+        }
+
+        class Student extends Person {
+            constructor(name,age,grade){
+                // 要在构造器的最开始调用 super()
+                super(name,age)
+                this.grade = grade
+            }
+            // 重写从父类继承过来的方法
+            speak(){
+                console.log(`我叫${this.name}，我的年龄是${this.age}，我读的是${this.grade}年级`)
+            }
+            study(){
+                console.log('我在努力学习')
+            }
+        }
+        const s1 = new Student('zhang',15,'高一')
+        console.log(s1)
+        // 在原型链上查找这个方法
+        s1.speak()
+        s1.study()
+    </script>
+
+</body>
+</html>
+```
+
+![](resources/2023-11-18-20-23-47.png)
+
+总结：
+1. 类中的构造器不是必须写的，要对实例进行一些初始化的操作时，如添加指定属性时，才写
+2. 如果A类继承了B类，且A类中写了构造器，那么A类构造器中的super()必须要调用
+3. 类中所定义的方法，都是放在了类的原型对象上，供实例去使用
+
+### 示例
 
 ```html
 <!DOCTYPE html>
@@ -128,58 +241,4 @@ console.log('render()中的this:',this) 的输出为
 ### 新版React中的 hooks
 
 通过 hooks，也能让函数式组件拥有 state 属性、props 属性、refs 属性 这三大属性
-
-## 组件实例的三大属性
-
-分别为 state 属性、props 属性、refs 属性
-
-### 状态 state
-
-注意 state 是在 **组件实例对象** 身上，而不是在 组件类 身上
-
-![](resources/2023-11-15-22-09-47.png)
-
-
-
-
-
-
-
-
-
-
-### props
-
-
-
-
-
-
-
-
-
-
-### refs 与 事件处理
-
-
-
-
-
-
-
-
-
-
-
----
-P13
-
-
-
-剩P10  js 类的知识
-
-
-
-
-
 
