@@ -134,7 +134,6 @@ jsx 其实就是 原始js 的**语法糖**
 </head>
 <body>
 
-    <div id="example"></div>
     <script type="text/javascript">
         class Person {
             constructor(name,age){
@@ -207,8 +206,7 @@ jsx 其实就是 原始js 的**语法糖**
         ReactDOM.render(<MyComponent/>,document.getElementById('example'))
         // 执行ReactDOM.render(<MyComponent/>,document.getElementById('test')) 之后
         // 1.React解析组件标签，找到了MyComponent组件
-        // 2.发现组件是使用类定义的，随后new出来该类的实例
-        // 并通过该实例调用到原型上的render()方法
+        // 2.发现组件是使用类定义的，随后new出来该类的实例，并通过该实例调用到原型上的render()方法
         // 3.将render()返回的虚拟DOM转为真实DOM，随后呈现在页面中
     </script>
 
@@ -236,7 +234,7 @@ console.log('render()中的this:',this) 的输出为
 > 我们的数据放在放在组件的 state 里边，状态改变驱动虚拟DOM该变，从而驱动页面的改变
 
 - **函数式组件**也叫做**无状态组件**，因为函数式组件中的 this 指向 **undefined**
-- **类式组件**也叫做**有状态组件**，因为定义类组件需要继承 React.Component 父类组件，类式组件中必须要有 render() 函数，render() 函数必须要有返回值，返回值就是VDOM。但是在类式组件中的 this 指向 **类式组件创建的实例对象**。在这个实例对象中，有 state 属性、props 属性、refs 属性
+- **类式组件**也叫做**有状态组件**，因为定义类组件需要继承 React.Component 父类组件，类式组件中必须要有 render() 函数，render() 函数必须要有返回值，返回值就是VDOM。但是在类式组件的 render() 中的 this 指向 **类式组件创建的实例对象**。在这个实例对象中，有 **state 属性、props 属性、refs 属性**
 
 ### 新版React中的 hooks
 
