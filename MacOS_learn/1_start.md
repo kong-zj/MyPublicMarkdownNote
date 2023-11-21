@@ -205,6 +205,14 @@ brew services stop mysql
 
 [SwitchHosts的GitHub地址](https://github.com/oldj/SwitchHosts)
 
+## VMware Fusion 13
+
+官网注册账户，获取个人使用许可证
+
+## Oracle VirtualBox
+
+VMware Fusion 和 Oracle VirtualBox 都不可用，应该是驱动的问题
+
 # JetBrains全家桶
 
 ## IDEA 2022.2.5
