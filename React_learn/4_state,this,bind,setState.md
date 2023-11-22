@@ -425,6 +425,191 @@ onClick={this.changeWeather} **没有调用** changeWeather 函数，只是通�
 
 ### 解决类中的 this 指向问题
 
+#### 通过 bind 生成新函数
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        class Weather extends React.Component{
+            constructor(props){
+                super(props)
+                this.state = {isHot:false}
+                // bind() 给你生成了一个新的函数，且这个函数里的 this 是 bind() 中传入的参数
+                // 构造器中的 this 就是 Weather实例对象
+                // 把这个新函数起名为 changeWeather，并放到了实例自身
+                this.changeWeather = this.changeWeather.bind(this)
+            }
+            render(){
+                const {isHot} = this.state
+                return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}</h1>
+            }
+            changeWeather(){
+                console.log(this)
+            }
+        }
+        ReactDOM.render(<Weather/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+使用 bind 之后的效果如下：**实例对象自身多了一个 changeWeather 方法**
+![](resources/2023-11-22-22-19-20.png)
+
+对比没有使用 bind 时的 Weather实例对象：**只有原型上有 changeWeather 方法**
+![](resources/2023-11-18-23-13-12.png)
+
+> 问题：
+> 当我们点击 h1标签 的时候，调用的 changeWeather 是原型上的 changeWeather，还是实例对象自身的 changeWeather？
+> 答：
+> 实例对象自身的
+
+##### bind 示例
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>bind</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <script type="text/javascript">
+        function demo(){
+            console.log(this);
+        }
+        // 输出的 this 为 Window对象
+        demo()
+        const x = demo.bind({a:1,b:2})
+        // 输出的 this 为 我们自己传入的对象
+        x()
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+![](resources/2023-11-22-22-38-20.png)
+
+## 通过 setState 更改 state
+
+### 直接更改 state 导致的问题
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        class Weather extends React.Component{
+            constructor(props){
+                super(props)
+                this.state = {isHot:false}
+                this.changeWeather = this.changeWeather.bind(this)
+            }
+            render(){
+                const {isHot} = this.state
+                return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}</h1>
+            }
+            changeWeather(){
+                // 获取原来的isHot值
+                const isHot = this.state.isHot
+                // 更改state
+                this.state.isHot = !isHot
+                console.log(this.state.isHot)
+            }
+        }
+        ReactDOM.render(<Weather/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+![](resources/2023-11-22-23-38-16.png)
+从控制台输出可以看出，state 确实更改成功了，但是页面没有发生变化
+
+因为直接更改 state，React并不认可，在React开发者工具中，state 的更改没有被呈现（isHot一直保持为false）
+![](resources/2023-11-22-23-39-10.png)
+
+**注意：state 不可直接更改，要借助一个内置的API去更改**
+
+### 使用 setState
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        class Weather extends React.Component{
+            constructor(props){
+                super(props)
+                this.state = {isHot:false}
+                this.changeWeather = this.changeWeather.bind(this)
+            }
+            render(){
+                const {isHot} = this.state
+                return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}</h1>
+            }
+            changeWeather(){
+                // 获取原来的isHot值
+                const isHot = this.state.isHot
+                // 注意：state 不可直接更改，下面这行是错误的写法
+                // this.state.isHot = !isHot
+                // 注意：state 必须通过 setState 进行更改
+                this.setState({isHot:!isHot})
+                console.log(this.state.isHot)
+            }
+        }
+        ReactDOM.render(<Weather/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+经验证，点击 h1标签，页面修改成功
+
+#### 
+
+
+
+
 
 
 
@@ -435,7 +620,7 @@ onClick={this.changeWeather} **没有调用** changeWeather 函数，只是通�
 
 
 ---
-P16
+P18
 
 
 
