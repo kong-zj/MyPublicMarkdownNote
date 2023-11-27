@@ -5,8 +5,11 @@
 # 状态 state
 
 注意 state 是在 **组件实例对象** 身上，而不是在 组件类 身上
-
+组件中render()方法中的 this 为组件实例对象
 ![](resources/2023-11-15-22-09-47.png)
+
+state 可以包含多个 key:value 组合
+组件被称为 **状态机**，通过更新组件的 state 来重新渲染组件
 
 ## 创建和读取 state
 
@@ -468,7 +471,7 @@ onClick={this.changeWeather} **没有调用** changeWeather 函数，只是通�
 使用 bind 之后的效果如下：**实例对象自身多了一个 changeWeather 方法**
 ![](resources/2023-11-22-22-19-20.png)
 
-对比没有使用 bind 时的 Weather实例对象：**只有原型上有 changeWeather 方法**
+作为对比，没有使用 bind 时的 Weather实例对象：**只有原型上有 changeWeather 方法**
 ![](resources/2023-11-18-23-13-12.png)
 
 > 问题：
@@ -551,9 +554,9 @@ onClick={this.changeWeather} **没有调用** changeWeather 函数，只是通�
 </html>
 ```
 
-效果如下
+多次点击 h1标签，效果如下
 ![](resources/2023-11-22-23-38-16.png)
-从控制台输出可以看出，state 确实更改成功了，但是页面没有发生变化
+从控制台输出可以看出，state 确实更改成功了，但是页面没有发生变化，页面修改失败
 
 因为直接更改 state，React并不认可，在React开发者工具中，state 的更改没有被呈现（isHot一直保持为false）
 ![](resources/2023-11-22-23-39-10.png)
@@ -603,26 +606,176 @@ onClick={this.changeWeather} **没有调用** changeWeather 函数，只是通�
 </html>
 ```
 
-经验证，点击 h1标签，页面修改成功
+经验证，通过点击 h1标签，页面修改成功
 
-#### 
+#### setState 的操作不是替换state，是合并state
 
+state 中新增一个名为 wind 的属性
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class Weather extends React.Component{
+            constructor(props){
+                super(props)
+                // 新增一个wind属性
+                this.state = {isHot:false,wind:'微风'}
+                this.changeWeather = this.changeWeather.bind(this)
+            }
+            render(){
+                const {isHot,wind} = this.state
+                return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}，{wind}</h1>
+            }
+            changeWeather(){
+                const isHot = this.state.isHot
+                // state 必须通过 setState 进行更改，且更改是一种合并state，不是替换state
+                this.setState({isHot:!isHot})
+                console.log(this.state.isHot)
+            }
+        }
+        ReactDOM.render(<Weather/>,document.getElementById('example'))
+    </script>
 
+</body>
+</html>
+```
 
+经验证，通过点击 h1标签，state 中的 isHot 属性被修改，wind 属性保持原样，即 **重名的属性覆盖，没改的属性不动**
 
+#### constructor()、render()、changeWeather() 分别调用几次
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class Weather extends React.Component{
+            // 构造器调用几次？1次（页面上有几个Weather组件的实例，就调用几次构造器）
+            constructor(props){
+                console.log('run constructor()')
+                super(props)
+                this.state = {isHot:false,wind:'微风'}
+                this.changeWeather = this.changeWeather.bind(this)
+            }
+            // render调用几次？1+n次（1是初始化的那次，n是状态更新的次数）
+            render(){
+                console.log('run render()')
+                const {isHot,wind} = this.state
+                return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}，{wind}</h1>
+            }
+            // changeWeather()调用几次？n次（点几次就调几次）
+            changeWeather(){
+                console.log('run changeWeather()')
+                const isHot = this.state.isHot
+                this.setState({isHot:!isHot})
+                console.log(this.state.isHot)
+            }
+        }
+        ReactDOM.render(<Weather/>,document.getElementById('example'))
+    </script>
 
+</body>
+</html>
+```
 
+多次点击 h1标签，效果如下
+![](resources/2023-11-23-00-22-00.png)
 
+## state 的简写方式
 
+至此，代码显得有些繁琐：
+1. 对于类中的每个自定义方法，为了解决其中的 this 指向问题，构造器中都要写类似 **this.changeWeather = this.changeWeather.bind(this)** 的代码
+2. 构造器中初始化状态的代码 **this.state = {isHot:false,wind:'微风'}** 也有些繁琐
 
----
-P18
+做如下修改：
+1. 把代码 **this.state = {isHot:false,wind:'微风'}** 从构造器中拿出来，改为 **state = {isHot:false,wind:'微风'}** 直接放在类里
+2. 把函数 **changeWeather(){}** 改成**赋值语句**和**箭头函数** **changeWeather = ()=>{}**，changeWeather 从放到**类的原型对象**上，改成放在**实例自身**上。这样就可以去掉构造器中的 **this.changeWeather = this.changeWeather.bind(this)**。（箭头函数没有自己的 this，如果在箭头函数中使用 this 关键字，它**找其外层的 this 作为自己的 this**）
+3. 构造器可以不要了
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class Weather extends React.Component{
+            // 初始化状态
+            state = {isHot:false,wind:'微风'}
+            render(){
+                const {isHot,wind} = this.state
+                return <h1 onClick={this.changeWeather}>今天天气很{isHot ? '炎热' : '凉爽'}，{wind}</h1>
+            }
 
+            // 不要这样写
+            // changeWeather 放在类的原型对象上
+            // changeWeather(){
+            //     const isHot = this.state.isHot
+            //     this.setState({isHot:!isHot})
+            // }
+
+            // 自定义方法，写成赋值语句和箭头函数的形式
+            // changeWeather 放在实例自身上
+            changeWeather = ()=>{
+                console.log(this)
+                const isHot = this.state.isHot
+                this.setState({isHot:!isHot})
+            }
+        }
+        ReactDOM.render(<Weather/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+在之前的例子中
+
+changeWeather写成**普通函数**时，Weather实例对象如下：
+![](resources/2023-11-18-23-13-12.png)
+可见 changeWeather 只放在了 **类的原型对象** 上
+
+changeWeather写成**普通函数**并使用**bind**生成 this 是 Weather实例对象 的新函数时，Weather实例对象如下：
+![](resources/2023-11-22-22-19-20.png)
+可见 changeWeather 放在了 **类的原型对象** 和 **实例自身** 上
+
+本例中
+
+changeWeather赋值为**箭头函数**时，Weather实例对象如下：
+![](resources/2023-11-27-22-50-29.png)
+可见 changeWeather 只放在了 **实例自身** 上
+
+### 总结
+
+组件自定义方法中的 this 为 undefined，如何解决？
+1. 用 bind() 函数来强制绑定 this
+2. 使用 赋值语句 和 箭头函数
 
 
