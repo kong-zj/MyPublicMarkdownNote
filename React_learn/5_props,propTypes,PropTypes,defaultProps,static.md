@@ -1,9 +1,9 @@
 # 标签属性 props
 
-props 是**只读**的
+props 是**只读**的，组件内部不要修改 props 数据
 注意 props 是在 **组件实例对象** 身上
 
-想从 **组件外部** 向 **组件内部** **传递**数据
+想从 **组件外部** 向 **组件内部** **传递**数据，用 props
 而 state 都是组件自己家里的事
 
 ## 创建和读取 props
@@ -261,7 +261,7 @@ react + babel 就可以允许用 ... 展开对象，但也仅适用于 props 的
 html页面效果如下
 ![](resources/2023-12-04-23-04-26.png)
 
-## props 的简写方式
+## props 的简写方式，利用类的关键字 static
 
 上面代码的问题：对组件 props 的限制（Person.propTypes）和默认值（Person.defaultProps）还要放在组件外面，不太好，能不能放在类中
 
@@ -344,8 +344,6 @@ html页面效果如下
 <body>
 
     <div id="example"></div>
-    <div id="example2"></div>
-    <div id="example3"></div>
     <script type="text/babel">
         class Person extends React.Component{
             constructor(props){
@@ -388,33 +386,52 @@ html页面效果如下
 ```
 
 但是，想在构造器中访问 props 可以直接访问 props 参数，不用通过 this.props
-真实的开发中，类中的构造器能省略就省略
+真实的开发中，类中的构造器能省略就**省略**
 
-## 
+## 函数式组件使用 props
 
+对于函数式组件，它没有 this，玩不了 state 和 refs，但是能玩 props（新版本中用 hooks，三者都可以玩）
 
+想把上面代码中的类式组件改成函数式组件
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>props</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+    <script src="https://unpkg.com/prop-types@15.6/prop-types.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        // 函数可以接收 props 参数
+        function Person(props) {
+            const {name,age,sex} = props
+            return (
+                    <ul>
+                        <li>姓名：{name}</li>
+                        <li>性别：{sex}</li>
+                        <li>年龄：{age+1}</li>
+                    </ul>
+                )
+        }
+        Person.propTypes = {
+            name:PropTypes.string.isRequired,
+            sex:PropTypes.string,
+            age:PropTypes.number,
+        }
+        Person.defaultProps = {
+            sex:'不男不女',
+            age:18,
+        }
+        ReactDOM.render(<Person name="tom"/>,document.getElementById('example'))
+    </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-
-P25
-
+</body>
+</html>
+```
