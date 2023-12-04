@@ -1,6 +1,6 @@
 # 高层命令（用底层原理解释）
 
-### ```git init```
+## ```git init```
 
 这是**工作区**
 
@@ -15,7 +15,7 @@
 
 ![](resources/2022-11-30-16-07-42.png)
 
-### ```git add```
+## ```git add```
 
 ![](resources/2022-11-30-16-16-27.png)
 
@@ -35,7 +35,7 @@
 
 然后还需要写一些提交信息，会把tree对象拿出来，包裹成commit对象，再放入**本地库**
 
-### ```git commit```
+## ```git commit```
 
 ![](resources/2022-11-30-16-40-34.png)
 
@@ -50,7 +50,7 @@
 和底层命令对应：
 ![](resources/2022-11-30-16-53-51.png)
 
-### ```git status```
+## ```git status```
 
 ![](resources/2022-11-30-16-58-00.png)
 
@@ -73,7 +73,7 @@
 2. 红色→已修改状态
 3. 绿色→已暂存状态
 
-### ```git diff```
+## ```git diff```
 
 ![](resources/2022-11-30-17-18-05.png)
 
@@ -83,12 +83,12 @@
 总结：
 ![](resources/2022-11-30-17-28-25.png)
 
-### ```git rm```
+## ```git rm```
 
 操作更简单
 ![](resources/2022-11-30-17-43-22.png)
 
-### ```git mv```
+## ```git mv```
 
 ![](resources/2022-11-30-17-32-46.png)
 
@@ -97,14 +97,16 @@
 操作更简单
 ![](resources/2022-11-30-17-47-20.png)
 
-### ```git log```
+## ```git log```
 
 ![](resources/2022-11-30-17-37-56.png)
 
-#### ```git log --oneline --decorate --graph --all```
+### ```git log --oneline --decorate --graph --all```
+
 用来查看项目分叉历史
 
-总结：
+## 总结
+
 ![](resources/2022-11-30-17-45-03.png)
 
 ![](resources/2022-12-03-19-03-25.png)

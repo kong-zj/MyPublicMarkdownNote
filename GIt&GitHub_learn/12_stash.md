@@ -1,6 +1,6 @@
 # Git存储
 
-### ```git stash```
+## ```git stash```
 
 ![](resources/2022-12-05-22-07-41.png)
 
