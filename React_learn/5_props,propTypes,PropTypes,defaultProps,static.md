@@ -105,7 +105,6 @@ html页面效果如下
         const p = {name:'ll',age:'16',sex:'female'}
         // 批量传递props的方式
         ReactDOM.render(<Person {...p}/>,document.getElementById('example3'))
-
     </script>
 
 </body>
