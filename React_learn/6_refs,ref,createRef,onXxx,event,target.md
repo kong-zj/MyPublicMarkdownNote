@@ -1,4 +1,4 @@
-# refs 与 事件处理
+# refs
 
 组件内的标签可以定义 **ref 属性**来**标识**自己（类似与原生里的 id）
 
@@ -270,6 +270,7 @@ refs 属性包含多个 key:value 组合，其中 **key** 是我们定义的**�
                     </div>
                 ) 
             }
+            // 绑定到 class
             h1ref = (currentNode) => {
                 this.h1 = currentNode;
                 console.log('@',currentNode);
@@ -293,25 +294,191 @@ refs 属性包含多个 key:value 组合，其中 **key** 是我们定义的**�
 
 但是，使用内联函数，还是定义成 class 的绑定函数，在实际使用中的差别忽略不计
 
-## 
+## createRef（推荐）
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>refs</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class Demo extends React.Component{
+            // React.createRef()调用后可以返回一个容器，该容器可以存储被ref所标识的节点，该容器是专人专用的
+            myRef = React.createRef()
+            // 展示左侧输入框的数据
+            showData = ()=>{
+                alert(this.myRef.current.value)
+            }
+            render(){
+                return (
+                    <div>
+                        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />
+                        <button onClick={this.showData}>点我提示左侧的数据</button>
+                    </div>
+                )
+            }   
+        }
+        ReactDOM.render(<Demo />, document.getElementById('example'));
+    </script>
 
+</body>
+</html>
+```
 
+### React.createRef() 返回的容器是专人专用的
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>refs</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class Demo extends React.Component{
+            // React.createRef()调用后可以返回一个容器，该容器可以存储被ref所标识的节点，该容器是专人专用的
+            myRef = React.createRef()
+            // 展示左侧输入框的数据
+            showData = ()=>{
+                console.log(this.myRef)
+            }
+            render(){
+                return (
+                    <div>
+                        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />
+                        <button ref={this.myRef} onClick={this.showData}>点我提示左侧的数据</button>
+                    </div>
+                )
+            }   
+        }
+        ReactDOM.render(<Demo />, document.getElementById('example'));
+    </script>
 
+</body>
+</html>
+```
 
+效果如下
+![](resources/2023-12-11-22-34-43.png)
 
+如果在多个标签中都使用 **ref={this.myRef}**，后来者将会把前者**覆盖**掉，导致数据丢失，所以 **ref={this.myRef}** 最好**只给一个标签使用**
 
+### 多次使用 createRef
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>refs</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class Demo extends React.Component{
+            // React.createRef()调用后可以返回一个容器，该容器可以存储被ref所标识的节点，该容器是专人专用的
+            myRef = React.createRef()
+            myRef2 = React.createRef()
+            // 展示左侧输入框的数据
+            showData = ()=>{
+                alert(this.myRef.current.value)
+            }
+            // 展示右侧输入框的数据
+            showData2 = ()=>{
+                alert(this.myRef2.current.value)
+            }
+            render(){
+                return (
+                    <div>
+                        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />
+                        <button onClick={this.showData}>点我提示左侧的数据</button>
+                        <input ref={this.myRef2} onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />
+                    </div>
+                )
+            }   
+        }
+        ReactDOM.render(<Demo />, document.getElementById('example'));
+    </script>
 
+</body>
+</html>
+```
 
----
+效果和之前相同
 
+# 事件处理
 
+1. 通过 **onXxx** 属性指定事件处理函数（注意大小写）
+    1. React 使用的是**自定义（合成）事件**，而不是使用原生DOM事件（为了更好的**兼容性**）
+    2. React 中的事件是通过**事件委托**方式处理的（委托给组件最外层的元素，为了**高效**）
+2. 通过 **event.target** 得到发生事件的DOM元素对象（自身的事件，自身的操作，可以使用**事件处理**）（不要过度使用 ref）
 
-P30
+## 通过 event.target 得到发生事件的DOM元素对象（不要过度使用 ref）
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>refs</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        class Demo extends React.Component{
+            // 创建 ref 容器
+            myRef = React.createRef()
+            // 展示左侧输入框的数据
+            showData = ()=>{
+                alert(this.myRef.current.value)
+            }
+            // 展示右侧输入框的数据
+            showData2 = (event)=>{
+                // event.target 就是调用函数的input元素
+                alert(event.target.value)
+            }
+            render(){
+                return (
+                    <div>
+                        <input ref={this.myRef} type="text" placeholder="点击按钮提示数据" />
+                        <button onClick={this.showData}>点我提示左侧的数据</button>
+                        {/*<input ref={this.myRef2} onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />*/}
+                        <input onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" />
+                    </div>
+                )
+            }   
+        }
+        ReactDOM.render(<Demo />, document.getElementById('example'));
+    </script>
+
+</body>
+</html>
+```
+
+不要过度使用 ref，有些时候，ref 是可以省略的
+对于 **\<input ref={this.myRef2} onBlur={this.showData2} type="text" placeholder="失去焦点提示数据" /\>**，ref 就可以省略，因为 **发生事件的DOM元素 和 要操作的DOM元素 是同一个**
+
+其中 **onBlur={this.showData2}** 指定 this.showData2 作为元素失去焦点的回调，React 在调用函数的同时，还传入了 **event事件对象** 作为参数，通过 **event.target** 得到发生事件的DOM元素对象
 
