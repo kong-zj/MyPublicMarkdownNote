@@ -7,6 +7,18 @@
 当组件第一次被渲染到DOM中的时候，称为 **挂载（mount）**
 当组件从DOM中移除的时候，称为 **卸载（unmount）**
 
+要将React元素渲染到根DOM节点中，我们通过把它传递给 **ReactDOM.render()** 的方法来将其渲染到页面上：
+```jsx
+// ReactDOM.render(HTML代码, 一个HTML元素) 
+ReactDOM.render(VDOM, document.getElementById('example'));
+```
+
+要将React元素卸载掉，我们通过把它传递给 **ReactDOM.unmountComponentAtNode()** 的方法来将其卸载：
+```jsx
+// ReactDOM.unmountComponentAtNode(一个HTML元素)
+ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+```
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -349,8 +361,27 @@ render() 函数在第一次挂载时调用，然后开了一个循环定时器�
 
 组件的 挂载（mount）与 卸载（unmount）过程中，React会在合适的时间点去做一些事（例如componentDidMount、componentWillUnmount，这些函数称为 **生命周期回调函数** 或 **生命周期钩子函数**）
 
-## 
+## 简介
 
+1. 组件从创建到死亡它会经历一些特定的阶段
+2. React组件中包含一系列的钩子函数（生命周期回调函数），会在特定时刻调用
+3. 我们在定义组件时，会在特定的生命周期回调函数中，做特定的工作
+4. render()函数，被调用1+n次，1次是页面初次渲染，n次是页面更新的次数
+
+## 生命周期流程（旧）
+
+![](resources/2023-12-14-22-55-30.png)
+
+### 挂载时的流程
+
+```html
+
+```
+
+效果如下
+
+
+### 
 
 
 

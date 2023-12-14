@@ -36,7 +36,7 @@ const VDOM = <h1>Hello,React</h1>
 ```
 在此 div 中的所有内容都将由 React DOM 来管理，所以我们将其称为 根 DOM 节点
 
-要将React元素渲染到根DOM节点中，我们通过把它们都传递给 **ReactDOM.render()** 的方法来将其渲染到页面上：
+要将React元素渲染到根DOM节点中，我们通过把它传递给 **ReactDOM.render()** 的方法来将其渲染到页面上：
 ```jsx
 // ReactDOM.render(HTML代码, 一个HTML元素) 
 ReactDOM.render(VDOM, document.getElementById('example'));
