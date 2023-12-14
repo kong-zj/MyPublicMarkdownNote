@@ -374,22 +374,287 @@ render() 函数在第一次挂载时调用，然后开了一个循环定时器�
 
 ### 挂载时的流程
 
-```html
+如图中红线所示
+![](resources/2023-12-14-23-34-20.png)
 
+#### constructor -> componentWillMount -> render -> componentDidMount -> componentWillUnmount
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（旧）</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        // 创建组件
+        class Count extends React.Component{
+            // 构造器
+            constructor(props){
+                console.log('Count-constructor');
+                super(props);
+                // 初始化状态
+                this.state = {
+                    count: 0
+                }
+            }
+            // 点我+1 按钮的回调
+            add = ()=>{
+                const {count} = this.state
+                this.setState({
+                    count: count+1
+                })
+            }
+            // 卸载组件 按钮的回调
+            death = ()=>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+            }
+            // 组件将要挂载的钩子
+            componentWillMount(){
+                console.log('Count-componentWillMount');
+            }
+            // 组件挂载完毕的钩子
+            componentDidMount(){
+                console.log('Count-componentDidMount');
+            }
+            // 组件将要卸载的钩子
+            componentWillUnmount(){
+                console.log('Count-componentWillUnmount');
+            }
+            render(){
+                console.log('Count-render');
+                const {count} = this.state;
+                return(
+                    <div>
+                        <h2>当前求和为：{this.state.count}</h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<Count/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
 ```
 
 效果如下
+![](resources/2023-12-14-23-30-57.png)
+
+### setState()的流程
+
+如图中圈2所示
+![](resources/2023-12-14-23-30-22.png)
+
+#### shouldComponentUpdate 简介
+
+执行setState()之后，React调用 shouldComponentUpdate 这个钩子，shouldComponentUpdate 是一个**阀门**，控制是否走这个流程，如果 shouldComponentUpdate 返回 true，则继续走流程；如果返回 false，则不继续走流程
+
+如果自己不写 shouldComponentUpdate 这个钩子，它的返回值永远是 true
+
+##### 返回值为 true
+
+shouldComponentUpdate 这个钩子的返回值为 **true** 时：
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（旧）</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        // 创建组件
+        class Count extends React.Component{
+            // 构造器
+            constructor(props){
+                console.log('Count-constructor');
+                super(props);
+                // 初始化状态
+                this.state = {
+                    count: 0
+                }
+            }
+            // 点我+1 按钮的回调
+            add = ()=>{
+                const {count} = this.state
+                this.setState({
+                    count: count+1
+                })
+            }
+            // 卸载组件 按钮的回调
+            death = ()=>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+            }
+            // 组件将要挂载的钩子
+            componentWillMount(){
+                console.log('Count-componentWillMount');
+            }
+            // 组件挂载完毕的钩子
+            componentDidMount(){
+                console.log('Count-componentDidMount');
+            }
+            // 组件将要卸载的钩子
+            componentWillUnmount(){
+                console.log('Count-componentWillUnmount');
+            }
+            // 控制组件更新的阀门
+            shouldComponentUpdate(){
+                console.log('Count-shouldComponentUpdate');
+                return true;
+            }
+            render(){
+                console.log('Count-render');
+                const {count} = this.state;
+                return(
+                    <div>
+                        <h2>当前求和为：{this.state.count}</h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<Count/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+![](resources/2023-12-14-23-50-20.png)
+
+##### 返回值为 false
+
+shouldComponentUpdate 这个钩子的返回值为 **false** 时：
+```jsx
+// 其他部分与上面的例子中相同
+            // 控制组件更新的阀门
+            shouldComponentUpdate(){
+                console.log('Count-shouldComponentUpdate');
+                return false;
+            }
+```
+
+效果如下
+![](resources/2023-12-14-23-54-57.png)
+
+#### shouldComponentUpdate -> omponentWillUpdate -> render -> componentDidUpdate
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（旧）</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        // 创建组件
+        class Count extends React.Component{
+            // 构造器
+            constructor(props){
+                console.log('Count-constructor');
+                super(props);
+                // 初始化状态
+                this.state = {
+                    count: 0
+                }
+            }
+            // 点我+1 按钮的回调
+            add = ()=>{
+                const {count} = this.state
+                this.setState({
+                    count: count+1
+                })
+            }
+            // 卸载组件 按钮的回调
+            death = ()=>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+            }
+            // 组件将要挂载的钩子
+            componentWillMount(){
+                console.log('Count-componentWillMount');
+            }
+            // 组件挂载完毕的钩子
+            componentDidMount(){
+                console.log('Count-componentDidMount');
+            }
+            // 组件将要卸载的钩子
+            componentWillUnmount(){
+                console.log('Count-componentWillUnmount');
+            }
+            // 控制组件更新的阀门
+            shouldComponentUpdate(){
+                console.log('Count-shouldComponentUpdate');
+                return true;
+            }
+            // 组件将要更新的钩子
+            componentWillUpdate(){
+                console.log('Count-componentWillUpdate');
+            }
+            // 组件更新完毕的钩子
+            componentDidUpdate(){
+                console.log('Count-componentDidUpdate');
+            }
+            render(){
+                console.log('Count-render');
+                const {count} = this.state;
+                return(
+                    <div>
+                        <h2>当前求和为：{this.state.count}</h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<Count/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+![](resources/2023-12-15-00-23-09.png)
+
+### forceUpdate()的流程
+
+如图中圈3所示
+![](resources/2023-12-14-23-30-22.png)
 
 
-### 
 
 
 
 
 
+### 父组件render的流程
 
-
-
+如图中圈1所示
+![](resources/2023-12-14-23-30-22.png)
 
 
 
@@ -408,6 +673,6 @@ render() 函数在第一次挂载时调用，然后开了一个循环定时器�
 
 
 
-P38
+P40
 
 
