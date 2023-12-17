@@ -368,7 +368,7 @@ render() 函数在第一次挂载时调用，然后开了一个循环定时器�
 3. 我们在定义组件时，会在特定的生命周期回调函数中，做特定的工作
 4. render()函数，被调用1+n次，1次是页面初次渲染，n次是页面更新的次数
 
-## 生命周期流程（旧）
+## 生命周期（旧）
 
 ![](resources/2023-12-14-22-55-30.png)
 
@@ -555,7 +555,8 @@ shouldComponentUpdate 这个钩子的返回值为 **false** 时：
 效果如下
 ![](resources/2023-12-14-23-54-57.png)
 
-#### shouldComponentUpdate -> omponentWillUpdate -> render -> componentDidUpdate
+#### shouldComponentUpdate -> componentWillUpdate -> render -> componentDidUpdate
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -645,16 +646,268 @@ shouldComponentUpdate 这个钩子的返回值为 **false** 时：
 如图中圈3所示
 ![](resources/2023-12-14-23-30-22.png)
 
+forceUpdate() 即强制更新，不用对 state 进行任何修改，直接调用 render 方法，重新渲染组件
+所以 forceUpdate() 会跳过 shouldComponentUpdate 方法，即不受阀门的控制
 
+#### componentWillUpdate -> render -> componentDidUpdate
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（旧）</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        // 创建组件
+        class Count extends React.Component{
+            // 构造器
+            constructor(props){
+                console.log('Count-constructor');
+                super(props);
+                // 初始化状态
+                this.state = {
+                    count: 0
+                }
+            }
+            // 点我+1 按钮的回调
+            add = ()=>{
+                const {count} = this.state
+                this.setState({
+                    count: count+1
+                })
+            }
+            // 卸载组件 按钮的回调
+            death = ()=>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+            }
+            // 强制更新 按钮的回调
+            force = ()=>{
+                this.forceUpdate();
+            }
+            // 组件将要挂载的钩子
+            componentWillMount(){
+                console.log('Count-componentWillMount');
+            }
+            // 组件挂载完毕的钩子
+            componentDidMount(){
+                console.log('Count-componentDidMount');
+            }
+            // 组件将要卸载的钩子
+            componentWillUnmount(){
+                console.log('Count-componentWillUnmount');
+            }
+            // 控制组件更新的阀门
+            shouldComponentUpdate(){
+                console.log('Count-shouldComponentUpdate');
+                return true;
+            }
+            // 组件将要更新的钩子
+            componentWillUpdate(){
+                console.log('Count-componentWillUpdate');
+            }
+            // 组件更新完毕的钩子
+            componentDidUpdate(){
+                console.log('Count-componentDidUpdate');
+            }
+            render(){
+                console.log('Count-render');
+                const {count} = this.state;
+                return(
+                    <div>
+                        <h2>当前求和为：{this.state.count}</h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                        <button onClick={this.force}>不修改state，强制更新</button>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<Count/>,document.getElementById('example'))
+    </script>
 
+</body>
+</html>
+```
 
+效果如下
+![](resources/2023-12-17-21-18-55.png)
 
 ### 父组件render的流程
 
 如图中圈1所示
 ![](resources/2023-12-14-23-30-22.png)
+
+父组件一但重新 render()，子组件就会调用 componentWillReceiveProps 钩子
+
+#### componentWillReceiveProps
+
+坑：**第一次传的props不算**，更新props才算（调用的时机）
+而且能接收 props 参数
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（旧）</title>
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        // 父组件
+        class A extends React.Component{
+            state = {carName:'奔驰'}
+            changeCar = ()=>{
+                this.setState({carName:'奥拓'})
+            }
+            render(){
+                console.log('A-render');
+                return(
+                    <div>
+                        <h2>我是A组件</h2>
+                        <button onClick={this.changeCar}>换车</button>
+                        <B carName={this.state.carName}/>{/* 子组件 */}
+                    </div>
+                )
+            }
+        }
+        // 子组件
+        class B extends React.Component{
+            // 组件将要接收新的props的钩子
+            componentWillReceiveProps(nextProps){
+                console.log('B-componentWillReceiveProps',nextProps)
+            }
+            // 控制组件更新的阀门
+            shouldComponentUpdate(nextProps,nextState){
+                console.log('B-shouldComponentUpdate',nextProps,nextState)
+                return true
+            }
+            // 组件将要更新的钩子
+            componentWillUpdate(nextProps,nextState){
+                console.log('B-componentWillUpdate',nextProps,nextState)
+            }
+            // 组件更新完毕的钩子
+            componentDidUpdate(prevProps,prevState){
+                console.log('B-componentDidUpdate',prevProps,prevState)
+            }
+            render(){
+                console.log('B-render');
+                return(
+                    <div>
+                        <h2>我是B组件，接收到的车是：{this.props.carName}</h2>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<A/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+点击按钮之前：
+![](resources/2023-12-17-21-50-19.png)
+点击按钮之后：
+![](resources/2023-12-17-21-50-43.png)
+
+### 总结
+
+1. 初始化阶段：由 ReactDOM.render() 触发，组件第一次挂载
+    1. constructor()
+    2. componentWillMount()
+    3. render()
+    4. componentDidMount()
+2. 更新阶段：由组件内部 this.setState() 或父组件重新触发 render()
+    1. shouldComponentUpdate()
+    2. componentWillUpdate()
+    3. render()
+    4. componentDidUpdate()
+3. 卸载组件：由 ReactDOM.unmountComponentAtNode() 触发
+    1. componentWillUnmount()
+
+最常用的三个钩子：
+1. componentDidMount()：一般用这个钩子，做初始化的事，例如开启定时器、发送网络请求、订阅信息
+2. componentWillUnmount()，一般在这个钩子中做一些收尾的事，例如：关闭定时器、取消订阅信息
+3. render()：初始化渲染或更新渲染调用
+
+## 生命周期（新）
+
+### 升级React版本
+
+要更新 react、react-dom、babel 的版本
+推荐使用 [bootcdn前端常用js库的线上地址查询](https://www.bootcdn.cn/)
+
+在html代码中，把旧的
+```html
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+```
+
+换成新的
+```html
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+```
+
+### 对比新旧生命周期
+
+
+
+
+
+
+### getDerivedStateFromProps
+
+
+
+
+### getSnapshotBeforeUpdate
+
+
+
+
+### getSnapshotBeforeUpdate
+
+
+
+
+
+
+### 总结
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -673,6 +926,8 @@ shouldComponentUpdate 这个钩子的返回值为 **false** 时：
 
 
 
-P40
+P43  5min
+
+
 
 
