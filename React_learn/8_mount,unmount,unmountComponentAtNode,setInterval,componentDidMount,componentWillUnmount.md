@@ -847,7 +847,9 @@ forceUpdate() 即强制更新，不用对 state 进行任何修改，直接调�
 
 ## 生命周期（新）
 
-### 升级React版本
+![](resources/2023-12-18-19-37-04.png)
+
+### 引入React新版本（17）
 
 要更新 react、react-dom、babel 的版本
 推荐使用 [bootcdn前端常用js库的线上地址查询](https://www.bootcdn.cn/)
@@ -868,22 +870,131 @@ forceUpdate() 即强制更新，不用对 state 进行任何修改，直接调�
 
 ### 对比新旧生命周期
 
+#### 废弃3个
 
+在新版本中，即将废弃的三个钩子函数：
+1. componentWillMount
+2. componentWillReceiveProps 
+3. componentWillUpdate
 
+现在使用会出现警告，下一个大版本需要加上UNSAFE_前缀才能使用，以后可能会被彻底废弃，不建议使用
 
+![](resources/2023-12-18-19-59-19.png)
+![](resources/2023-12-18-19-59-53.png)
 
+[过时的 React API](https://zh-hans.react.dev/reference/react/Component#componentwillmount)
 
-### getDerivedStateFromProps
+废弃的原因：
+![](resources/2023-12-18-20-07-49.png)
 
+[废弃的原因网址链接](https://zh-hans.legacy.reactjs.org/blog/2018/03/27/update-on-async-rendering.html)
 
+#### 新增2个
 
+##### getDerivedStateFromProps（从props得到派生状态）
 
-### getSnapshotBeforeUpdate
+getDerivedStateFromProps 横跨挂载和更新，只要他在前面拦着，所有的 state 都要听 props 的
 
+![](resources/2023-12-18-20-13-27.png)
 
+注意：
+1. getDerivedStateFromProps 要用 **static** 修饰
+2. 此方法适用于**罕见**的用例，即 **state 的值在任何时候都取决于 props**
+3. 接收2个参数，分别是 **(nextProps, prevState)**
+4. 要**返回一个状态对象**，这个对象会**与组件的 state 合并**（如果返回null，则对 state 没有影响）
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（新）</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
 
-### getSnapshotBeforeUpdate
+    <div id="example"></div>
+    <script type="text/babel">
+        // 创建组件
+        class Count extends React.Component{
+            // 构造器
+            constructor(props){
+                console.log('Count-constructor');
+                super(props);
+                // 初始化状态
+                this.state = {
+                    count: 0
+                }
+            }
+            // 点我+1 按钮的回调
+            add = ()=>{
+                const {count} = this.state
+                this.setState({
+                    count: count+1
+                })
+            }
+            // 卸载组件 按钮的回调
+            death = ()=>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+            }
+            // 强制更新 按钮的回调
+            force = ()=>{
+                this.forceUpdate();
+            }
+            // 从props得到派生状态
+            static getDerivedStateFromProps(nextProps, prevState){
+                console.log('Count-getDerivedStateFromProps',nextProps,prevState);
+                return nextProps;
+            }
+            // 组件挂载完毕的钩子
+            componentDidMount(){
+                console.log('Count-componentDidMount');
+            }
+            // 组件将要卸载的钩子
+            componentWillUnmount(){
+                console.log('Count-componentWillUnmount');
+            }
+            // 控制组件更新的阀门
+            shouldComponentUpdate(){
+                console.log('Count-shouldComponentUpdate');
+                return true;
+            }
+            // 组件更新完毕的钩子
+            componentDidUpdate(){
+                console.log('Count-componentDidUpdate');
+            }
+            render(){
+                console.log('Count-render');
+                const {count} = this.state;
+                return(
+                    <div>
+                        <h2>当前求和为：{this.state.count}</h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                        <button onClick={this.force}>不修改state，强制更新</button>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<Count count={199}/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+![](resources/2023-12-18-20-30-42.png)
+
+##### getSnapshotBeforeUpdate
+
+getSnapshotBeforeUpdate 插在了之前的 render 和 componentDidUpdate 之间
+
+![](resources/2023-12-18-20-13-30.png)
+
 
 
 
@@ -926,7 +1037,7 @@ forceUpdate() 即强制更新，不用对 state 进行任何修改，直接调�
 
 
 
-P43  5min
+P43 
 
 
 
