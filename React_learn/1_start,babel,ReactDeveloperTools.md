@@ -73,61 +73,7 @@
 
 ### 使用 create-react-app 快速构建 React 开发环境
 
-> create-react-app 自动创建的项目是基于 Webpack + ES6
-
-推荐不要用 npm 全局安装 create-react-app，而是用 npx 单次使用 create-react-app
-```sh
-npx create-react-app my-react-app
-```
-![](resources/2023-11-08-15-50-23.png)
-命令执行完成后，会在当前目录创建名为 my-react-app 的项目目录
-
-#### npm 和 npx 的区别
-
-[npm和npx的区别链接](https://blog.csdn.net/qq_45947664/article/details/127856736)
-
-- npm：会在本地全局性的安装create-react-app，这个包会存储在node目录下面去。以后创建react项目直接执行create-react-app命令就可以了
-- npx：会把create-react-app安装包临时安装上，等项目初始化完成以后，他就删除掉
-
-### 运行 React 应用程序
-
-进入项目目录，并使用如下命令运行 React 应用程序
-```sh
-npm start
-```
-
-![](resources/2023-11-08-15-56-38.png)
-
-终端中提示如下图
-![](resources/2023-11-08-15-53-28.png)
-
-在浏览器中打开 http://localhost:3000/ ，如下图所示
-![](resources/2023-11-08-15-54-41.png)
-
-### 项目目录结构
-
-```sh
-my-app/
-  README.md
-  node_modules/
-  package.json
-  .gitignore
-  public/
-    favicon.ico
-    index.html
-    manifest.json
-  src/
-    App.css
-    App.js
-    App.test.js
-    index.css
-    index.js
-    logo.svg
-
-```
-
-
-
+此处略，详细见后面章节
 
 # 安装开发者工具 React Developer Tools
 
