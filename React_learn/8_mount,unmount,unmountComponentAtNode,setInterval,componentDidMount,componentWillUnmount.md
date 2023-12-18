@@ -989,13 +989,112 @@ getDerivedStateFromProps 横跨挂载和更新，只要他在前面拦着，所�
 效果如下
 ![](resources/2023-12-18-20-30-42.png)
 
-##### getSnapshotBeforeUpdate
+##### getSnapshotBeforeUpdate（在更新之前获取快照）
 
 getSnapshotBeforeUpdate 插在了之前的 render 和 componentDidUpdate 之间
+getSnapshotBeforeUpdate 在最近一次渲染输出（提交到DOM节点）之前调用，获取组件更新之前的信息
 
 ![](resources/2023-12-18-20-13-30.png)
 
+注意：
+1. getSnapshotBeforeUpdate 使得组件能**在发生更改前从DOM中捕获一些信息**，使用较**罕见**
+2. 接收2个参数，分别是 **(prevProps, prevState)**
+3. 任何的**返回值将作为参数传递给 componentDidUpdate()**
+    1. componentDidUpdate 接收3个参数，分别是 (prevProps, prevState,snapshotValue)
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生命周期（新）</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        // 创建组件
+        class Count extends React.Component{
+            // 构造器
+            constructor(props){
+                console.log('Count-constructor');
+                super(props);
+                // 初始化状态
+                this.state = {
+                    count: 0
+                }
+            }
+            // 点我+1 按钮的回调
+            add = ()=>{
+                const {count} = this.state
+                this.setState({
+                    count: count+1
+                })
+            }
+            // 卸载组件 按钮的回调
+            death = ()=>{
+                ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+            }
+            // 强制更新 按钮的回调
+            force = ()=>{
+                this.forceUpdate();
+            }
+            // 从props得到派生状态
+            static getDerivedStateFromProps(nextProps, prevState){
+                console.log('Count-getDerivedStateFromProps',nextProps,prevState);
+                return null;
+            }
+
+            // 在更新之前获取快照
+            getSnapshotBeforeUpdate(prevProps, prevState){
+                console.log('Count-getSnapshotBeforeUpdate',prevProps,prevState);
+                return 'getSnapshotBeforeUpdate return value';
+            }
+            // 组件挂载完毕的钩子
+            componentDidMount(){
+                console.log('Count-componentDidMount');
+            }
+            // 组件将要卸载的钩子
+            componentWillUnmount(){
+                console.log('Count-componentWillUnmount');
+            }
+            // 控制组件更新的阀门
+            shouldComponentUpdate(){
+                console.log('Count-shouldComponentUpdate');
+                return true;
+            }
+            // 组件更新完毕的钩子
+            componentDidUpdate(prevProps, prevState,snapshotValue){
+                console.log('Count-componentDidUpdate',prevProps,prevState,snapshotValue);
+            }
+            render(){
+                console.log('Count-render');
+                const {count} = this.state;
+                return(
+                    <div>
+                        <h2>当前求和为：{this.state.count}</h2>
+                        <button onClick={this.add}>点我+1</button>
+                        <button onClick={this.death}>卸载组件</button>
+                        <button onClick={this.force}>不修改state，强制更新</button>
+                    </div>
+                )
+            }
+        }
+        // 渲染组件
+        ReactDOM.render(<Count count={199}/>,document.getElementById('example'))
+    </script>
+
+</body>
+</html>
+```
+
+效果如下
+![](resources/2023-12-18-21-06-14.png)
+
+###### 新闻列表案例
 
 
 
