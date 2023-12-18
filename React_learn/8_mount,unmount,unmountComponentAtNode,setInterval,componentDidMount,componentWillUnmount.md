@@ -877,7 +877,7 @@ forceUpdate() 即强制更新，不用对 state 进行任何修改，直接调�
 2. componentWillReceiveProps 
 3. componentWillUpdate
 
-现在使用会出现警告，下一个大版本需要加上UNSAFE_前缀才能使用，以后可能会被彻底废弃，不建议使用
+现在使用会出现警告，下一个大版本需要加上 **UNSAFE_ 前缀**才能使用，以后可能会被彻底废弃，不建议使用
 
 ![](resources/2023-12-18-19-59-19.png)
 ![](resources/2023-12-18-19-59-53.png)
@@ -1094,50 +1094,157 @@ getSnapshotBeforeUpdate 在最近一次渲染输出（提交到DOM节点）之�
 效果如下
 ![](resources/2023-12-18-21-06-14.png)
 
-###### 新闻列表案例
+###### 新闻列表案例（scrollHeight、scrollTop）
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>新闻列表</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+    <style>
+        .list{
+            width: 200px;
+            height: 150px;
+            background-color: skyblue;
+            overflow: auto;
+        }
+        .news{
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
 
+    <div id="example"></div>
+    <script type="text/babel">
+        class NewsList extends React.Component {
+            state = {newsArr:[]}
+            componentDidMount(){
+                setInterval(()=>{
+                    // 获取原状态
+                    const {newsArr} = this.state;
+                    // 模拟一条新闻
+                    const news = `news${newsArr.length+1}`;
+                    // 更新状态
+                    this.setState({newsArr:[news,...newsArr]})
+                },1000);
+            }
+            render(){
+                return(
+                    <div className="list">
+                        {
+                            this.state.newsArr.map((news,index)=>{
+                                return (
+                                    <div key={index} className="news">{news}</div>
+                                )
+                            })
+                        }
+                    </div>
+                )
+            }
+        }
+        ReactDOM.render(<NewsList/>, document.getElementById('example'));
+    </script>
 
+</body>
+</html>
+```
 
+当前的效果如下
+![](resources/2023-12-18-21-25-51.png)
+如果想看一个新闻，定不住，新的新闻会把旧的新闻挤下去，滚动条会自己窜
+
+解决方法：
+想要定住新闻，需要使用 getSnapshotBeforeUpdate 获取发生更改之前的内容区高度，传递给 componentDidUpdate 来重新设置内容区垂直滚动的高度
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>新闻列表</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+    <style>
+        .list{
+            width: 200px;
+            height: 150px;
+            background-color: skyblue;
+            overflow: auto;
+        }
+        .news{
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="example"></div>
+    <script type="text/babel">
+        class NewsList extends React.Component {
+            state = {newsArr:[]}
+            componentDidMount(){
+                setInterval(()=>{
+                    // 获取原状态
+                    const {newsArr} = this.state;
+                    // 模拟一条新闻
+                    const news = `news${newsArr.length+1}`;
+                    // 更新状态
+                    this.setState({newsArr:[news,...newsArr]})
+                },1000);
+            }
+            getSnapshotBeforeUpdate(){
+                // 返回发生更改之前的内容区高度
+                return this.refs.list.scrollHeight;
+            }
+            componentDidUpdate(prevProps,prevState,height){
+                // 动态调整内容区垂直滚动的高度
+                this.refs.list.scrollTop += this.refs.list.scrollHeight - height;
+            }
+            render(){
+                return(
+                    <div ref="list" className="list">
+                        {
+                            this.state.newsArr.map((news,index)=>{
+                                return (
+                                    <div key={index} className="news">{news}</div>
+                                )
+                            })
+                        }
+                    </div>
+                )
+            }
+        }
+        ReactDOM.render(<NewsList/>, document.getElementById('example'));
+    </script>
+
+</body>
+</html>
+```
+
+修改后，混动条就不会自己窜了
+![](resources/2023-12-18-21-44-47.png)
 
 ### 总结
 
+1. 初始化阶段：由 ReactDOM.render() 触发，组件第一次挂载
+    1. constructor()
+    2. getDerivedStateFromProps()
+    3. render()
+    4. componentDidMount()
+2. 更新阶段：由组件内部 this.setState() 或父组件重新触发 render()
+    1. getDerivedStateFromProps()
+    2. shouldComponentUpdate()
+    3. render()
+    4. getSnapshotBeforeUpdate()
+    5. componentDidUpdate()
+3. 卸载组件：由 ReactDOM.unmountComponentAtNode() 触发
+    1. componentWillUnmount()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-
-P43 
-
-
-
+最常用的三个钩子和旧的生命周期中相同
 
