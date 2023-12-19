@@ -330,20 +330,88 @@ export default class App extends Component{
 }
 ```
 
-**import Hello from './components/Hello';** 中能直接通过文件夹名引用，是因为如果**省略文件名**，就默认文件名为 **index**（文件名后缀为 js 或 jsx）
+**import Hello from './components/Hello';** 中能直接**通过文件夹名引用**，是因为如果**省略文件名**，就**默认文件名**为 **index**（文件名后缀为 js 或 jsx）
 
 效果如下
 ![](resources/2023-12-19-23-06-44.png)
 
+### 样式的模块化
 
+#### 问题：后引入的样式覆盖之前的样式
 
+为了演示这个问题，新增一个 Hello2组件，文件格式同 Hello组件，样式只是把 index.css 中的 orange 改为 blue，同样作为 App组件 的子组件
 
+src/App.js 文件的内容修改为
+```js
+import React,{Component} from 'react';
+import Hello from './components/Hello';
+// 后引入的样式覆盖之前的样式
+import Hello2 from './components/Hello2';
 
+export default class App extends Component{
+    render(){
+        return (
+            <div>
+                <Hello/>
+                <Hello2/>
+            </div>
+        )
+    }
+}
+```
 
+现在项目的目录结构如下
 
+```sh
+my-react-app/
+  README.md
+  node_modules/
+  package.json
+  .gitignore
+  public/
+    index.html
+  src/
+    App.js
+    index.js
+    components/
+      Hello/
+        index.js
+        index.css
+      Hello2/
+        index.js
+        index.css
+```
 
+效果如下
+![](resources/2023-12-19-23-54-03.png)
 
+#### 避免样式冲突 方法1：less文件
 
+less文件可以产生嵌套
+
+#### 避免样式冲突 方法2：样式的模块化（module）
+
+把 src/components/Hello/index.css 文件名修改为 src/components/Hello/**index.module.css**
+
+src/components/Hello/index.jsx 文件的内容修改为
+```js
+import React,{Component} from 'react';
+// 新的引入方式
+import hello from './index.module.css';
+
+export default class Hello extends Component{
+    render(){
+        return(
+            <div>
+                <h2 className={hello.title}>Hello React</h2>
+            </div>
+        )
+    }
+}
+```
+
+效果如下
+![](resources/2023-12-20-00-06-10.png)
 
 
 
@@ -366,6 +434,6 @@ export default class App extends Component{
 
 
 
-P53
+P54
 
 
