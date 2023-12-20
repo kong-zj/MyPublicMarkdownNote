@@ -3,6 +3,7 @@
 [官方教程](https://react.nodejs.cn/learn)
 [菜鸟教程](https://www.runoob.com/react/react-tutorial.html)
 [w3schools教程](https://www.w3schools.cn/react/default.asp)
+[尚硅谷React视频教程](https://www.bilibili.com/video/BV1wy4y1D7JT/)
 [大神笔记整理1-入门](https://blog.csdn.net/yangaoyuan1999/article/details/117605896)
 [大神笔记整理2-组件实例的三大属性state,props,refs](https://blog.csdn.net/yangaoyuan1999/article/details/117651823)
 
@@ -100,8 +101,42 @@
 ![](resources/2023-11-15-20-24-39.png)
 在浏览器的开发者工具中，Components 可以查看嵌套的组件，Profiler 用来做性能分析
 
+# VSCode 插件
 
+推荐使用这个
+![](resources/2023-12-20-09-08-02.png)
 
+## rcc
+
+react class component 的简写，即 类式组件
+
+在文件中输入 rcc，会自动生成以下代码
+```js
+import React, { Component } from 'react'
+
+export default class index extends Component {
+  render() {
+    return (
+      <div>index</div>
+    )
+  }
+}
+```
+
+## rfc
+
+react function component 的简写，即 函数式组件
+
+在文件中输入 rfc，会自动生成以下代码
+```js
+import React from 'react'
+
+export default function index() {
+  return (
+    <div>index</div>
+  )
+}
+```
 
 
 

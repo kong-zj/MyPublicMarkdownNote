@@ -143,7 +143,7 @@ index.js 文件使用的样式
 
 #### index.js（重要）
 
-入口文件，将 src/App.js 中定义的 **App组件**，渲染到 public/index.html 文件定义的 **#root容器** 中
+**入口文件**，将 src/App.js 中定义的 **App组件**，渲染到 public/index.html 文件定义的 **#root容器** 中
 
 #### reportWebVitals.js
 
@@ -391,7 +391,7 @@ less文件可以产生嵌套
 
 #### 避免样式冲突 方法2：样式的模块化（module）
 
-把 src/components/Hello/index.css 文件名修改为 src/components/Hello/**index.module.css**
+把 src/components/Hello/**index.css** 文件名修改为 src/components/Hello/**index.module.css**
 
 src/components/Hello/index.jsx 文件的内容修改为
 ```js
@@ -412,28 +412,4 @@ export default class Hello extends Component{
 
 效果如下
 ![](resources/2023-12-20-00-06-10.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-
-P54
-
 
