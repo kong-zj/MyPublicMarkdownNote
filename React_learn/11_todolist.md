@@ -365,6 +365,113 @@ export default class Footer extends Component {
 
 ## 动态初始化列表
 
+比较自然的选择时，让 **List组件** 的 state 保存要渲染的列表数据
+但是现在还**没有学习组件间通信**，Header组件 要把用户输入的东西传给 List组件（Header组件 和 List组件 是**兄弟组件**），现在还实现不了
+
+App组件 是所有组件的父组件，让 **App组件** 的 state 保存要渲染的列表数据
+这样，Header组件（添加数据） 和 List组件（拿到数据并展示） 就可以通过他们的父组件 **App组件** 进行交互
+
+### src/App.js
+
+- 在App组件中，**初始化** **todos数组**，用来保存用户输入的数据
+- 把 todos数组 传递给 **List子组件**
+
+```js
+import React, { Component } from 'react';
+import Header from './components/Header';
+import List from './components/List';
+import Footer from './components/Footer';
+import './App.css';
+
+export default class App extends Component{
+  // 初始化状态
+  state = {
+    todos: [
+      {id:'001',name:'吃饭',done:true},
+      {id:'002',name:'睡觉',done:true},
+      {id:'003',name:'打代码',done:false},
+    ]
+  }
+  render(){
+    const {todos} = this.state;
+    return(
+      <div className="todo-container">
+        <div className="todo-wrap">
+          <Header />
+          <List todos={todos}/>
+          <Footer />
+        </div>
+      </div>
+    );
+  }
+}
+```
+
+### src/components/List/index.jsx
+
+- 在 List组件 中**接收** **todos数组**
+- 把 todos数组 的每一项分别传递给各个 **Item子组件**
+
+```js
+import React, { Component } from 'react';
+import Item from '../Item';
+import './index.css';
+
+export default class List extends Component {
+  render() {
+    const {todos} = this.props;
+    return (
+      <div className="todo-main">
+        {
+          todos.map((todo, index) => (
+            <Item key={index} todo={todo} />
+          ))
+        }
+      </div>
+    )
+  }
+}
+```
+
+注意：
+用 index 作为 key 不太好，在之前的 **DOM 的 diffing 算法** 中讲过
+
+### src/components/Item/index.jsx
+
+```js
+import React, { Component } from 'react';
+import './index.css';
+
+export default class Item extends Component {
+  render() {
+    const {todo} = this.props;
+    const {id,name,done} = todo;
+    return (
+      <div>
+        <li>
+            <label>
+                <input type="checkbox" defaultChecked={done}/>
+                <span>{name}</span>
+            </label>
+            <button className="btn btn-danger" style={{display:'none'}}>删除</button>
+        </li>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2023-12-20-14-44-56.png)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -392,7 +499,7 @@ export default class Footer extends Component {
 
 
 
-P57
+P58
 
 
 
