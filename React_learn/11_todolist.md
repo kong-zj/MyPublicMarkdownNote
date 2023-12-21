@@ -1041,30 +1041,470 @@ export default class Item extends Component {
 ![](resources/2023-12-21-15-32-47.png)
 ![](resources/2023-12-21-15-33-04.png)
 
-## 实现底部功能
+## 实现底部的统计功能
 
-实现以下功能：
-1. 底部组件的复选框实现**全选**功能
-2. **统计** 已完成任务 和 全部任务 的数量
-3. 完成 清除已完成任务 按钮的功能
+统计 已完成任务 和 全部任务 的数量
 
+### src/App.js
 
+- 在App组件中，把 todos数组 传递给 **Footer子组件**
 
+```js
+import React, { Component } from 'react';
+import Header from './components/Header';
+import List from './components/List';
+import Footer from './components/Footer';
+import './App.css';
 
+export default class App extends Component{
+  // 初始化状态
+  state = {
+    todos: [
+      {id:'001',name:'吃饭',done:true},
+      {id:'002',name:'睡觉',done:true},
+      {id:'003',name:'打代码',done:false},
+    ]
+  }
+  // 用于添加一个todo，接收的参数是todo对象
+  addTodo = (todoObj)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 在todos数组中追加一个todo对象，定义成一个新的todos数组
+    const newTodos = [todoObj,...todos];
+    // 更新状态
+    this.setState({todos:newTodos});
+  }
+  // 用于更新一个todo对象
+  updateTodo = (id,done)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 匹配数据并修改
+    const newTodos = todos.map((todoObj)=>{
+      if(todoObj.id === id) return {...todoObj,done:done};
+      else return todoObj;
+    })
+    this.setState({todos:newTodos});
+  }
+  // 用于删除一个todo对象
+  deleteTodo = (id)=>{
+    const {todos} = this.state;
+    // 删除指定id的todo对象
+    const newTodos = todos.filter((todoObj)=>{
+      return todoObj.id !== id;
+    })
+    this.setState({todos:newTodos});
+  }
+  render(){
+    const {todos} = this.state;
+    return(
+      <div className="todo-container">
+        <div className="todo-wrap">
+          <Header addTodo={this.addTodo}/>
+          <List todos={todos} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo}/>
+          <Footer todos={todos}/>
+        </div>
+      </div>
+    );
+  }
+}
+```
 
+### src/components/Footer/index.jsx
 
+- 在 Footer组件 中**接收** **todos数组**
+- 对 todos数组 进行统计
 
+```js
+import React, { Component } from 'react';
+import './index.css';
 
+export default class Footer extends Component {
+  render() {
+    const {todos} = this.props;
+    // 计算已完成todo的个数
+    // reduce()方法传入2个参数，第二个参数是初始值（第一轮调用回调函数的初始值），第一个参数是回调函数
+    // 回调函数有2个参数，第一个是初始值，第二个是当前遍历的数组元素，返回值作为新的初始值作为下一轮对回调函数的初始值参数
+    const doneCount = todos.reduce((pre,todoObj)=>{return pre+ (todoObj.done ? 1 : 0)},0)
+    // 计算全部todo的个数
+    const total = todos.length;
+    return (
+      <div className="todo-footer">
+        <label>
+            <input type="checkbox" />
+        </label>
+        <span>
+            <span>已完成{doneCount}</span> / 全部{total}
+        </span>
+        <button className="btn btn-danger">清除已完成任务</button>
+      </div>
+    )
+  }
+}
+```
 
+[js中reduce()的使用](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
 
+效果如下
+![](resources/2023-12-21-20-55-39.png)
 
+## 底部组件的复选框实现全选功能
 
+当列表项全部被选中时，底部组件的复选框也应该被选中；反之，不被选中；特殊的，当列表项为0个时，复选框也不应该被选中
+当我们人为更改底部组件的复选框是否被选中时，需要将状态同步到 todos 数组中
 
+### src/components/Footer/index.jsx
 
+- 实现底部组件的复选框**显示**是否全选的功能（暂时还**不能人为更改**底部组件的复选框是否被选中）
 
+```js
+import React, { Component } from 'react';
+import './index.css';
 
+export default class Footer extends Component {
+  render() {
+    const {todos} = this.props;
+    // 计算已完成todo的个数
+    // reduce()方法传入2个参数，第二个参数是初始值（第一轮调用回调函数的初始值），第一个参数是回调函数
+    // 回调函数有2个参数，第一个是初始值，第二个是当前遍历的数组元素，返回值作为新的初始值作为下一轮对回调函数的初始值参数
+    const doneCount = todos.reduce((pre,todoObj)=>{return pre+ (todoObj.done ? 1 : 0)},0)
+    // 计算全部todo的个数
+    const total = todos.length;
+    return (
+      <div className="todo-footer">
+        <label>
+            <input type="checkbox" checked={ (doneCount === total && total !== 0) ? true : false}/>
+        </label>
+        <span>
+            <span>已完成{doneCount}</span> / 全部{total}
+        </span>
+        <button className="btn btn-danger">清除已完成任务</button>
+      </div>
+    )
+  }
+}
+```
 
+效果如下
+![](resources/2023-12-21-21-38-05.png)
+![](resources/2023-12-21-21-38-37.png)
 
+### src/App.js
+
+- 在 App组件 里，给 **Footer子组件** 传递一个**checkAllTodo函数**
+
+```js
+import React, { Component } from 'react';
+import Header from './components/Header';
+import List from './components/List';
+import Footer from './components/Footer';
+import './App.css';
+
+export default class App extends Component{
+  // 初始化状态
+  state = {
+    todos: [
+      {id:'001',name:'吃饭',done:true},
+      {id:'002',name:'睡觉',done:true},
+      {id:'003',name:'打代码',done:false},
+    ]
+  }
+  // 用于添加一个todo，接收的参数是todo对象
+  addTodo = (todoObj)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 在todos数组中追加一个todo对象，定义成一个新的todos数组
+    const newTodos = [todoObj,...todos];
+    // 更新状态
+    this.setState({todos:newTodos});
+  }
+  // 用于更新一个todo对象
+  updateTodo = (id,done)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 匹配数据并修改
+    const newTodos = todos.map((todoObj)=>{
+      if(todoObj.id === id) return {...todoObj,done:done};
+      else return todoObj;
+    })
+    this.setState({todos:newTodos});
+  }
+  // 用于删除一个todo对象
+  deleteTodo = (id)=>{
+    const {todos} = this.state;
+    // 删除指定id的todo对象
+    const newTodos = todos.filter((todoObj)=>{
+      return todoObj.id !== id;
+    })
+    this.setState({todos:newTodos});
+  }
+  // 用于全选或全不选
+  checkAllTodo = (done)=>{
+    const {todos} = this.state;
+    const newTodos = todos.map((todoObj)=>{
+      return {...todoObj,done:done};
+    })
+    this.setState({todos:newTodos});
+  }
+  render(){
+    const {todos} = this.state;
+    return(
+      <div className="todo-container">
+        <div className="todo-wrap">
+          <Header addTodo={this.addTodo}/>
+          <List todos={todos} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo}/>
+          <Footer todos={todos} checkAllTodo={this.checkAllTodo}/>
+        </div>
+      </div>
+    );
+  }
+}
+```
+
+### src/components/Footer/index.jsx
+
+- 实现**人为更改**底部组件的复选框是否被选中，并将状态同步到 todos 数组中
+- 在 Footer组件 里，给底部复选框绑定 onChange事件，并在事件的回调函数中，调用接收到的 **checkAllTodo函数**，实现全选或全不选的功能
+
+```js
+import React, { Component } from 'react';
+import './index.css';
+
+export default class Footer extends Component {
+  handleCheckAll = (event) => {
+    this.props.checkAllTodo(event.target.checked);
+  }
+  render() {
+    const {todos} = this.props;
+    // 计算已完成todo的个数
+    // reduce()方法传入2个参数，第二个参数是初始值（第一轮调用回调函数的初始值），第一个参数是回调函数
+    // 回调函数有2个参数，第一个是初始值，第二个是当前遍历的数组元素，返回值作为新的初始值作为下一轮对回调函数的初始值参数
+    const doneCount = todos.reduce((pre,todoObj)=>{return pre+ (todoObj.done ? 1 : 0)},0)
+    // 计算全部todo的个数
+    const total = todos.length;
+    return (
+      <div className="todo-footer">
+        <label>
+            <input type="checkbox" onChange={this.handleCheckAll} checked={ (doneCount === total && total !== 0) ? true : false}/>
+        </label>
+        <span>
+            <span>已完成{doneCount}</span> / 全部{total}
+        </span>
+        <button className="btn btn-danger">清除已完成任务</button>
+      </div>
+    )
+  }
+}
+```
+
+但是发现，虽然 todos 数组中的数据确实改变了，但是**没有反应**到 **Item组件** 的渲染上，效果如下
+![](resources/2023-12-21-22-06-48.png)
+![](resources/2023-12-21-22-07-17.png)
+
+问题出在 Item组件 的复选框的 **defaultChecked** 属性上
+
+#### src/components/Item/index.jsx（前期埋下的坑）
+
+- 注意，复选框的 **checked** 属性与 **defaultChecked** 属性的区别：
+- defaultChecked 只在初次渲染时生效，更新时不受控制
+- checked 始终受到控制，必须通过绑定 onChange 事件来控制选中情况
+- 所以要把 Item组件 的复选框的 **defaultChecked** 属性改成 **checked** 属性
+
+[defaultChecked 跟 checked 及 defaultValue 跟 value 的区别](https://blog.csdn.net/TL18382950497/article/details/115425569)
+
+```js
+import React, { Component } from 'react';
+import PropsTypes from 'prop-types';
+import './index.css';
+
+export default class Item extends Component {
+  static propTypes = {
+    // 注意传入的key不是prop，不能在这里进行限制
+    todo: PropsTypes.object.isRequired,
+    updateTodo: PropsTypes.func.isRequired,
+  }
+  state = {mouseIsEnter:false}
+  // 高阶函数
+  // 鼠标移入、移出的回调
+  handleMouse = (isEnter) => {
+    return (event) => {
+      this.setState({mouseIsEnter:isEnter})
+    }
+  }
+  // 勾选、取消勾选某一个todo的回调
+  handleCheck = (id) => {
+    return (event) => {
+      // 向App组件传递数据
+      this.props.updateTodo(id,event.target.checked);
+    }
+  }
+  // 不用写成高阶函数了
+  // 删除一个todo的回调
+  handleDelete = (id) => {
+    if(window.confirm('确定要删除吗？')){
+      this.props.deleteTodo(id);
+    }
+  }
+  render() {
+    const {todo} = this.props;
+    const {id,name,done} = todo;
+    const {mouseIsEnter} = this.state;
+    return (
+      <div>
+        <li style={{backgroundColor:mouseIsEnter ? '#ddd' : 'white'}} onMouseEnter={this.handleMouse(true)} onMouseLeave={this.handleMouse(false)}>
+            <label>
+                {/* <input type="checkbox" defaultChecked={done} onChange={this.handleCheck(id)}/> */}
+                <input type="checkbox" checked={done} onChange={this.handleCheck(id)}/>
+                <span>{name}</span>
+            </label>
+            <button onClick={()=>{this.handleDelete(id)}} className="btn btn-danger" style={{display:mouseIsEnter ? 'block' : 'none'}}>删除</button>
+        </li>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2023-12-21-22-27-29.png)
+![](resources/2023-12-21-22-27-57.png)
+
+## 实现清除已完成任务的功能
+
+和之前的功能同理
+
+### src/App.js
+
+- 在 App组件 里，给 **Footer子组件** 传递一个**clearAllDone函数**
+
+```js
+import React, { Component } from 'react';
+import Header from './components/Header';
+import List from './components/List';
+import Footer from './components/Footer';
+import './App.css';
+
+export default class App extends Component{
+  // 初始化状态
+  state = {
+    todos: [
+      {id:'001',name:'吃饭',done:true},
+      {id:'002',name:'睡觉',done:true},
+      {id:'003',name:'打代码',done:false},
+    ]
+  }
+  // 用于添加一个todo，接收的参数是todo对象
+  addTodo = (todoObj)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 在todos数组中追加一个todo对象，定义成一个新的todos数组
+    const newTodos = [todoObj,...todos];
+    // 更新状态
+    this.setState({todos:newTodos});
+  }
+  // 用于更新一个todo对象
+  updateTodo = (id,done)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 匹配数据并修改
+    const newTodos = todos.map((todoObj)=>{
+      if(todoObj.id === id) return {...todoObj,done:done};
+      else return todoObj;
+    })
+    this.setState({todos:newTodos});
+  }
+  // 用于删除一个todo对象
+  deleteTodo = (id)=>{
+    const {todos} = this.state;
+    // 删除指定id的todo对象
+    const newTodos = todos.filter((todoObj)=>{
+      return todoObj.id !== id;
+    })
+    this.setState({todos:newTodos});
+  }
+  // 用于全选或全不选
+  checkAllTodo = (done)=>{
+    const {todos} = this.state;
+    const newTodos = todos.map((todoObj)=>{
+      return {...todoObj,done:done};
+    })
+    this.setState({todos:newTodos});
+  }
+  // 清除所有已完成的todo对象
+  clearAllDone = ()=>{
+    const {todos} = this.state;
+    // 过滤数据，只保留未完成的todo对象
+    const newTodos = todos.filter((todoObj)=>{
+      return !todoObj.done;
+    })
+    this.setState({todos:newTodos});
+  }
+  render(){
+    const {todos} = this.state;
+    return(
+      <div className="todo-container">
+        <div className="todo-wrap">
+          <Header addTodo={this.addTodo}/>
+          <List todos={todos} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo}/>
+          <Footer todos={todos} checkAllTodo={this.checkAllTodo} clearAllDone={this.clearAllDone}/>
+        </div>
+      </div>
+    );
+  }
+}
+```
+
+### src/components/Footer/index.jsx
+
+- 在 Footer组件 里，给按钮绑定 onClick事件，并在事件的回调函数中，调用接收到的 **clearAllDone函数**，实现清除所有已完成任务的功能
+
+```js
+import React, { Component } from 'react';
+import './index.css';
+
+export default class Footer extends Component {
+  handleCheckAll = (event) => {
+    this.props.checkAllTodo(event.target.checked);
+  }
+  // 清除所有已完成的回调
+  handleClearAllDone = () => {
+    if(window.confirm('确定要删除吗？')){
+      this.props.clearAllDone();
+    }
+  }
+  render() {
+    const {todos} = this.props;
+    // 计算已完成todo的个数
+    // reduce()方法传入2个参数，第二个参数是初始值（第一轮调用回调函数的初始值），第一个参数是回调函数
+    // 回调函数有2个参数，第一个是初始值，第二个是当前遍历的数组元素，返回值作为新的初始值作为下一轮对回调函数的初始值参数
+    const doneCount = todos.reduce((pre,todoObj)=>{return pre+ (todoObj.done ? 1 : 0)},0)
+    // 计算全部todo的个数
+    const total = todos.length;
+    return (
+      <div className="todo-footer">
+        <label>
+            <input type="checkbox" onChange={this.handleCheckAll} checked={ (doneCount === total && total !== 0) ? true : false}/>
+        </label>
+        <span>
+            <span>已完成{doneCount}</span> / 全部{total}
+        </span>
+        <button onClick={this.handleClearAllDone} className="btn btn-danger">清除已完成任务</button>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2023-12-21-22-53-19.png)
+![](resources/2023-12-21-22-54-13.png)
+
+## 总结
+
+![](resources/2023-12-21-22-57-05.png)
+
+## 缺点
+
+App组件过于复杂，不利于维护
 
 
 
@@ -1084,7 +1524,8 @@ export default class Item extends Component {
 
 
 
-P63
+P65
+
 
 
 
