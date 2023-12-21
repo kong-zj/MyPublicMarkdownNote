@@ -700,7 +700,7 @@ export default class List extends Component {
 
 ### src/components/Item/index.jsx
 
-- 在 Item组件 里，给复选框绑定 onChange事件，并在事件的回调函数中，把获取的**值传递**给 **祖先组件** **App组件**
+- 在 Item组件 里，给复选框绑定 onChange事件，并在事件的回调函数中，调用接收到的 **updateTodo函数**，把获取的**值传递**给 **祖先组件** **App组件**
 
 ```js
 import React, { Component } from 'react';
@@ -838,7 +838,7 @@ import './index.css';
 
 export default class Item extends Component {
   static propTypes = {
-    key: PropsTypes.string.isRequired,
+    // 注意传入的key不是prop，不能在这里进行限制
     todo: PropsTypes.object.isRequired,
     updateTodo: PropsTypes.func.isRequired,
   }
@@ -878,9 +878,175 @@ export default class Item extends Component {
 
 ## 删除一个列表项
 
+实现每一项右侧的删除按钮的功能，用户点击删除按钮后，要跳出一个弹窗让用户确认
 
+和之前的 修改列表项的选中和取消选中 类似，一层一层传递函数，**App组件** 先给 **List组件** 传递函数，但是 List组件 不用，**List组件** 转手把函数传递给 **Item组件**，Item组件 调用函数，把数据传给 **App组件**
 
+### src/App.js
 
+- 在 App组件 里，给 **List子组件** 传递一个**deleteTodo函数**
+- **状态 state 在哪里，操作状态的函数就在哪里**
+
+```js
+import React, { Component } from 'react';
+import Header from './components/Header';
+import List from './components/List';
+import Footer from './components/Footer';
+import './App.css';
+
+export default class App extends Component{
+  // 初始化状态
+  state = {
+    todos: [
+      {id:'001',name:'吃饭',done:true},
+      {id:'002',name:'睡觉',done:true},
+      {id:'003',name:'打代码',done:false},
+    ]
+  }
+  // 用于添加一个todo，接收的参数是todo对象
+  addTodo = (todoObj)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 在todos数组中追加一个todo对象，定义成一个新的todos数组
+    const newTodos = [todoObj,...todos];
+    // 更新状态
+    this.setState({todos:newTodos});
+  }
+  // 用于更新一个todo对象
+  updateTodo = (id,done)=>{
+    // 获取原todos数组
+    const {todos} = this.state;
+    // 匹配数据并修改
+    const newTodos = todos.map((todoObj)=>{
+      if(todoObj.id === id) return {...todoObj,done:done};
+      else return todoObj;
+    })
+    this.setState({todos:newTodos});
+  }
+  // 用于删除一个todo对象
+  deleteTodo = (id)=>{
+    const {todos} = this.state;
+    // 删除指定id的todo对象
+    const newTodos = todos.filter((todoObj)=>{
+      return todoObj.id !== id;
+    })
+    this.setState({todos:newTodos});
+  }
+  render(){
+    const {todos} = this.state;
+    return(
+      <div className="todo-container">
+        <div className="todo-wrap">
+          <Header addTodo={this.addTodo}/>
+          <List todos={todos} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo}/>
+          <Footer />
+        </div>
+      </div>
+    );
+  }
+}
+```
+
+### src/components/List/index.jsx
+
+- 在 List组件 中**接收** **deleteTodo函数**
+- 把 deleteTodo函数 继续传递给 **Item子组件**
+
+```js
+import React, { Component } from 'react';
+import PropsTypes from 'prop-types';
+import Item from '../Item';
+import './index.css';
+
+export default class List extends Component {
+  static propTypes = {
+    todos: PropsTypes.array.isRequired,
+    updateTodo: PropsTypes.func.isRequired,
+    deleteTodo: PropsTypes.func.isRequired,
+  }
+  render() {
+    const {todos,updateTodo,deleteTodo} = this.props;
+    return (
+      <div className="todo-main">
+        {
+          todos.map((todo, index) => (
+            // 用index作为key会导致问题，详见 DOM 的 diffing 算法
+            // <Item key={index} todo={todo} />
+            <Item key={todo.id} todo={todo} updateTodo={updateTodo} deleteTodo={deleteTodo}/>
+          ))
+        }
+      </div>
+    )
+  }
+}
+```
+
+### src/components/Item/index.jsx
+
+- 在 Item组件 里，给删除按钮绑定 onClick事件，并在事件的回调函数中，调用接收到的 **deleteTodo函数**，把要删除对象的id的**值传递**给 **祖先组件** **App组件**
+
+```js
+import React, { Component } from 'react';
+import PropsTypes from 'prop-types';
+import './index.css';
+
+export default class Item extends Component {
+  static propTypes = {
+    // 注意传入的key不是prop，不能在这里进行限制
+    todo: PropsTypes.object.isRequired,
+    updateTodo: PropsTypes.func.isRequired,
+  }
+  state = {mouseIsEnter:false}
+  // 高阶函数
+  // 鼠标移入、移出的回调
+  handleMouse = (isEnter) => {
+    return (event) => {
+      this.setState({mouseIsEnter:isEnter})
+    }
+  }
+  // 勾选、取消勾选某一个todo的回调
+  handleCheck = (id) => {
+    return (event) => {
+      // 向App组件传递数据
+      this.props.updateTodo(id,event.target.checked);
+    }
+  }
+  // 不用写成高阶函数了
+  // 删除一个todo的回调
+  handleDelete = (id) => {
+    if(window.confirm('确定要删除吗？')){
+      this.props.deleteTodo(id);
+    }
+  }
+  render() {
+    const {todo} = this.props;
+    const {id,name,done} = todo;
+    const {mouseIsEnter} = this.state;
+    return (
+      <div>
+        <li style={{backgroundColor:mouseIsEnter ? '#ddd' : 'white'}} onMouseEnter={this.handleMouse(true)} onMouseLeave={this.handleMouse(false)}>
+            <label>
+                <input type="checkbox" defaultChecked={done} onChange={this.handleCheck(id)}/>
+                <span>{name}</span>
+            </label>
+            <button onClick={()=>{this.handleDelete(id)}} className="btn btn-danger" style={{display:mouseIsEnter ? 'block' : 'none'}}>删除</button>
+        </li>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2023-12-21-15-32-47.png)
+![](resources/2023-12-21-15-33-04.png)
+
+## 实现底部功能
+
+实现以下功能：
+1. 底部组件的复选框实现**全选**功能
+2. **统计** 已完成任务 和 全部任务 的数量
+3. 完成 清除已完成任务 按钮的功能
 
 
 
@@ -918,7 +1084,7 @@ export default class Item extends Component {
 
 
 
-P62
+P63
 
 
 
