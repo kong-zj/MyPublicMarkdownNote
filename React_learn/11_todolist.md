@@ -1506,29 +1506,3 @@ export default class Footer extends Component {
 
 App组件过于复杂，不利于维护
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-
-P65
-
-
-
-
-
-
-
