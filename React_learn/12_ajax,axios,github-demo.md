@@ -28,16 +28,16 @@ npm install axios
 
 
 
-
+---
 
 
 # github 搜索案例
 
-请求地址： https://api.github.com/search/users?q=xxxxxx
+搜索请求地址： https://api.github.com/search/users?q=xxxxxx
 
 首先初始化项目
 ```sh
-npx create-react-app learn-ajax
+npx create-react-app github-demo
 ```
 然后删掉用不到的文件
 
@@ -256,7 +256,7 @@ App组件 是所有组件的父组件，让 **App组件** 的 state **保存要�
 ### src/App.js
 
 - 在App组件中，**初始化** **users数组**，用来保存搜索到的结果
-- 把 修改users数组的**saveUsers函数** 传递给 **Search子组件**
+- 把 修改users数组的 **saveUsers函数** 传递给 **Search子组件**
 
 ```js
 import React, { Component } from 'react';
@@ -409,21 +409,116 @@ List组件要在不同场景，展示不同类型的东西
 ### src/App.js
 
 - 在App组件中，需要更多的 **状态 state**
+- 如果每个 state 都写一个用来更新的函数，代码冗杂，这里只写 **通用的更新App组件的 state 的updateAppState函数**
+- 把 **updateAppState函数** 传递给 **Search子组件**
+- 把 **状态 state** 传递给 **List子组件**
 
 ```js
+import React, { Component } from 'react';
+import Search from './components/Search';
+import List from './components/List';
 
+export default class App extends Component {
+  state = {
+    users: [],  // 搜索结果数组
+    isFirst: true,  // 是否初次打开页面
+    isLoading: false,  // 是否正在搜索
+    err: '',  //存储错误信息
+  }
+  // 通用的更新App的state的方法，参数是状态对象
+  updateAppState = (stateObj) => {
+    this.setState(stateObj);
+  }
+  render() {
+    return (
+      <div className="container">
+        <Search updateAppState={this.updateAppState}/>
+        <List {...this.state}/>
+      </div>
+    )
+  }
+}
 ```
 
+### src/components/Search/index.jsx
 
+- 在 Search组件 里，调用接收到的 **updateAppState函数**，更新 **App组件** 的 state
 
+```js
+import React, { Component } from 'react';
+import axios from 'axios';
 
+export default class Search extends Component {
+  search = () => {
+    // 获取用户输入
+    // 解构赋值的连续写法，拿到 this 里的 keyWordElement 里的 value，然后重命名为 keyWord
+    const {keyWordElement:{value:keyWord}}  = this;
+    // 发送请求前，通知App更新状态
+    this.props.updateAppState({isFirst: false, isLoading: true});
+    // 发送网络请求
+    axios.get(`https://api.github.com/search/users?q=${keyWord}`).then(
+      response => {
+        // 请求成功后，通知App更新状态
+        this.props.updateAppState({isLoading: false, users: response.data.items});
+      },
+      error => {
+        this.props.updateAppState({isLoading: false, err: error.message});
+      }
+    )
+  }
+  render() {
+    return (
+      <section className="jumbotron">
+        <h3 className="jumbotron-heading">Search GitHub Users</h3>
+        <div>
+          <input ref={c => this.keyWordElement = c} type="text" placeholder="enter the name you search" />&nbsp;
+          <button onClick={this.search}>Search</button>
+        </div>
+      </section>
+    )
+  }
+}
+```
 
+### src/components/List/index.jsx
 
+- 接收 App组件 传来的更多的 **状态 state**
+- 使用 **三元表达式**，在不同场景展示不同的东西
 
+```js
+import React, { Component } from 'react';
+import Item from '../Item';
 
+export default class List extends Component {
+  render() {
+    const {users, isFirst, isLoading, err} = this.props;
+    return (
+      <div className="row">
+        {
+          isFirst ? <h2>欢迎使用，输入关键字，随后点击搜索</h2> :
+          isLoading ? <h2>Loading...</h2> :
+          err ? <h2 style={{color:'red'}}>{err}</h2> :
+          users.map((userObj, index) => {
+            return <Item key={userObj.id} userObj={userObj} />
+          })
+        }
+      </div>
+    )
+  }
+}
+```
 
+效果如下
+初次搜索前：
+![](resources/2023-12-26-23-35-46.png)
+搜索中：
+![](resources/2023-12-26-23-36-39.png)
+搜索成功，显示结果：
+![](resources/2023-12-26-23-42-55.png)
+搜索失败（断网），显示错误信息：
+![](resources/2023-12-26-23-43-37.png)
 
-
+# 消息订阅-发布机制
 
 
 
@@ -473,7 +568,7 @@ List组件要在不同场景，展示不同类型的东西
 P48 暂时跳过
 跳过 P65-66 脚手架配置代理
 
-到 P70
+到 P71
 
 
 
