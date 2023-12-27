@@ -24,7 +24,7 @@ npm install axios
 
 
 
-
+跳过 P65-66 脚手架配置代理
 
 
 
@@ -572,6 +572,19 @@ PubSub.publish('MY TOPIC', 'hello world!');
 
 # github 搜索案例（加上 消息订阅-发布机制）
 
+之前因为 Search组件 无法给 List组件 传东西，所以把数据放在了父组件中
+使用 消息订阅-发布机制 就可以更直接一点，哪个组件用数据，数据就放在哪个组件中，谁想改这些数据，就发布消息，包含数据的组件就订阅消息，收到消息后更新数据
+
+## src/App.js
+
+之前 App组件 中的 状态 state 转移到 List组件 中
+
+
+
+
+
+
+15min
 
 
 
@@ -579,6 +592,38 @@ PubSub.publish('MY TOPIC', 'hello world!');
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# fetch
+
+## 特点
+
+
+P72 暂时跳过
 
 
 
@@ -610,11 +655,16 @@ PubSub.publish('MY TOPIC', 'hello world!');
 
 P48 暂时跳过
 跳过 P65-66 脚手架配置代理
+P72 重新学习
 
 到 P71
 
 
 
+只是P74之前
+
 
 
 [代码](https://github.com/xzlaptt/React)
+
+

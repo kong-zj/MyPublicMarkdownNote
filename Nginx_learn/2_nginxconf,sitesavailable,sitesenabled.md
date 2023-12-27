@@ -78,7 +78,7 @@ sites-available 与 sites-enabled 使我们能够进行模块化配置，当我�
 
 目录```C:\Windows\System32\drivers\etc```下的hosts文件
 
-没有修改权限，那就[给当前用户增加修改权限](https://www.cnblogs.com/jepson6669/p/9737645.html#:~:text=1%E3%80%81%E6%89%93%E5%BC%80%E7%94%B5%E8%84%91C%E7%9B%98%EF%BC%8C%E5%9C%A8%E7%9B%AE%E5%BD%95C%3A%5B%26Windows%26%5DSystem32driversetc%20%E4%B8%8B%E6%89%BE%E5%88%B0hosts%E6%96%87%E4%BB%B6%202.%E5%8F%B3%E9%94%AEhosts%E6%96%87%E4%BB%B6%EF%BC%8C%E9%80%89%E6%8B%A9%E5%B1%9E%E6%80%A7,3.%E7%82%B9%E5%87%BBhosts%E5%B1%9E%E6%80%A7%E5%AF%B9%E8%AF%9D%E6%A1%86%E9%87%8C%E7%9A%84%E2%80%9C%E9%AB%98%E7%BA%A7%E2%80%9D%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%E3%80%82%204.%E5%9C%A8hosts%E7%9A%84%E9%AB%98%E7%BA%A7%E5%AE%89%E5%85%A8%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A2%E7%82%B9%E5%87%BB%E6%9B%B4%E6%94%B9%E6%9D%83%E9%99%90%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%E3%80%82%205.%E5%9C%A8%E6%96%B0%E5%BC%B9%E5%87%BA%E7%9A%84%E5%AF%B9%E8%AF%9D%E6%A1%86%E9%87%8C%E7%82%B9%E5%87%BB%E6%B7%BB%E5%8A%A0%E6%8C%89%E9%92%AE%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%E3%80%82)
+没有修改权限，那就[给当前用户增加修改权限](https://www.cnblogs.com/jepson6669/p/9737645.html)
 
 ![](resources/2023-01-03-09-45-42.png)
 
