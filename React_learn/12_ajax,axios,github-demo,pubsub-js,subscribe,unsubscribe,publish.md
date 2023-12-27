@@ -520,14 +520,57 @@ export default class List extends Component {
 
 # 消息订阅-发布机制
 
+上面的例子中，由于兄弟组件之间没法通信，所以把数据和更新数据的函数放在了父组件中，然后通过 props 传递给子组件
+如果兄弟组件之间能直接通信就好了，于是有了 **消息订阅与发布机制**
 
+## PubSubJS 工具库
 
+Pub 即 **publish**，Sub 即 **subscribe**
 
+[PubSubJS官方github仓库](https://github.com/mroderick/PubSubJS)
 
+## 安装 pubsub-js
 
+```sh
+npm install pubsub-js
+```
 
+## 使用 pubsub-js
 
+在需要**接收数据**的组件里**订阅消息**，在需要**发送数据**的组件里**发布消息**
 
+引入
+```js
+import PubSub from 'pubsub-js';
+```
+
+### subscribe、unsubscribe
+
+订阅消息部分的示例
+```js
+// 收到消息后的回调函数
+// msg 是消息名，data 是消息数据
+var mySubscriber = function (msg, data) {
+    console.log(msg, data);
+};
+
+// 在需要接收数据的组件里订阅名为 MY TOPIC 的消息，收到该消息后调用 mySubscriber 回调函数
+// 每一次订阅消息，都会返回一个 token，用于取消订阅
+var token = PubSub.subscribe('MY TOPIC', mySubscriber);
+
+// 取消订阅
+PubSub.unsubscribe(mySubscriber);
+```
+
+### publish
+
+发布消息部分的示例
+```js
+// 发布消息，名为 MY TOPIC，数据为 'hello world!'
+PubSub.publish('MY TOPIC', 'hello world!');
+```
+
+# github 搜索案例（加上 消息订阅-发布机制）
 
 
 
