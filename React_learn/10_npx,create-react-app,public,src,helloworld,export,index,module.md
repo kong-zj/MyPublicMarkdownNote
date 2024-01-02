@@ -375,10 +375,10 @@ my-react-app/
     index.js
     components/
       Hello/
-        index.js
+        index.jsx
         index.css
       Hello2/
-        index.js
+        index.jsx
         index.css
 ```
 

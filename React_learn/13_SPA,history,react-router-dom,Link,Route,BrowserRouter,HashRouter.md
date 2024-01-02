@@ -151,9 +151,7 @@ server {
 npm install react-router-dom@5
 ```
 
-## 路由的基本使用
-
-### 使用路由链接实现切换组件
+## 路由的基本使用：使用路由链接实现切换组件
 
 实现步骤：
 1. 点击导航链接，引起**路径变化**
@@ -161,9 +159,9 @@ npm install react-router-dom@5
 
 现在新建一个react项目，清空 文件夹 src/ 和 文件夹 public/ 中的文件，我们自己实现一个可运行的最简形式
 
-#### Home组件
+### Home组件
 
-##### src/components/Home/index.jsx
+#### src/components/Home/index.jsx
 
 ```js
 import React, { Component } from 'react';
@@ -177,9 +175,9 @@ export default class About extends Component {
 }
 ```
 
-#### About组件
+### About组件
 
-##### src/components/About/index.jsx
+#### src/components/About/index.jsx
 
 ```js
 import React, { Component } from 'react';
@@ -193,7 +191,7 @@ export default class Home extends Component {
 }
 ```
 
-#### public/index.html
+### public/index.html
 
 引用 bootstrap.min.css 样式文件（外部引用、CDN引用）
 
@@ -212,7 +210,7 @@ export default class Home extends Component {
 </html>
 ```
 
-#### src/index.js
+### src/index.js
 
 ```js
 import React from 'react';
@@ -227,7 +225,7 @@ root.render(
 );
 ```
 
-#### src/App.js（Link组件）
+### src/App.js（Link组件）
 
 使用 **Link组件** 编写路由链接
 
@@ -272,7 +270,7 @@ export default class App extends Component {
 ![](resources/2024-01-02-21-51-27.png)
 ![](resources/2024-01-02-21-51-42.png)
 
-#### src/App.js（Route组件）
+### src/App.js（Route组件）
 
 使用 **Route组件** 注册路由
 
@@ -322,7 +320,7 @@ export default class App extends Component {
 此时，点击路由链接，但是组件没有变，是什么问题？
 因为整个应用要用一个路由器管理，所以不要像上面代码中用两个路由器（两个路由器之间没有数据沟通），而是需要**将App组件改为路由器组件**
 
-#### src/index.js（BrowserRouter组件）
+### src/index.js（BrowserRouter组件）
 
 把 App组件 用 **BrowserRouter组件** 包住
 
@@ -342,7 +340,7 @@ root.render(
 );
 ```
 
-#### src/App.js
+### src/App.js
 
 去掉 **BrowserRouter组件**
 
@@ -389,29 +387,237 @@ export default class App extends Component {
 ![](resources/2024-01-02-22-11-33.png)
 ![](resources/2024-01-02-22-11-52.png)
 
+### 路由的基本使用 总结
 
+1. 明确好界面中的导航区、展示区
+2. 导航区的a标签（js原生）改为**Link标签**（React组件）`<Link to="/xxxx">Demo</Link>`
+3. 展示区写**Route标签**进行路径的匹配 `<Route path="/xxxx" component={Demo} />`
+4. App组件的最外侧包裹一个 `<BrowserRouter>` 或 `<HashRouter>`
 
+#### react会把Link标签变成浏览器认识的a标签
 
+![](resources/2024-01-02-22-37-52.png)
 
+#### BrowserRouter 与 HashRouter 的区别
 
+- BrowserRouter 对应前面讲的 createBrowserHistory
+- HashRouter 对应前面讲的 createHashHistory
 
+把上面代码中的App组件的最外侧包裹的 `<BrowserRouter>` 换成 `<HashRouter>`，看看有什么变化
+效果如下
+![](resources/2024-01-02-22-42-12.png)
+![](resources/2024-01-02-22-41-46.png)
 
+路径中多了 `#`，且 `/home` 或 `/about` 都是在 `#` 后面
+`#` 后面的属于 **哈希值**（也叫 **锚点值**），`#` 后面的东西（前台资源）都**不会作为资源发送给服务器**
 
+## 路由组件 与 一般组件
 
+上面例子中的 Home组件 和 About组件 都是 **路由组件**，放在 **components文件夹** 下是不规范的，要放在 **pages文件夹** 下
+现在项目的目录结构如下
+```sh
+route-demo/
+  README.md
+  node_modules/
+  package.json
+  public/
+    index.html
+  src/
+    App.js
+    index.js
+    pages/
+      Home/
+        index.jsx
+      About/
+        index.jsx
+    components/
+```
 
+### src/App.js
 
+修改 Home组件 和 About组件 的**引入地址**
 
+```js
+import React, { Component } from 'react';
+import { Link, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
 
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <div className="page-header"><h2>React Router Demo</h2></div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              <Link className="list-group-item" to="/home">Home</Link>
+              <Link className="list-group-item" to="/about">About</Link>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
 
+### Header组件（一般组件）
 
+把页面顶部的 React Router Demo 文字，抽象成组件
 
+#### src/components/Header/index.jsx
 
+打印 this.props
 
+```js
+import React, { Component } from 'react';
 
+export default class Header extends Component {
+  render() {
+    console.log('Header组件收到的props：',this.props);
+    return (
+        <div className="page-header"><h2>React Router Demo</h2></div>
+    )
+  }
+}
+```
 
+### src/App.js
 
+使用 Header组件
 
+```js
+import React, { Component } from 'react';
+import { Link, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Header from './components/Header';
 
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              <Link className="list-group-item" to="/home">Home</Link>
+              <Link className="list-group-item" to="/about">About</Link>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+### About组件（路由组件）
+
+#### src/components/About/index.jsx
+
+打印 this.props
+
+```js
+import React, { Component } from 'react';
+
+export default class About extends Component {
+  render() {
+    console.log('About组件收到的props：',this.props);
+    return (
+      <div>About组件</div>
+    )
+  }
+}
+```
+
+此时项目的目录结构如下
+```sh
+route-demo/
+  README.md
+  node_modules/
+  package.json
+  public/
+    index.html
+  src/
+    App.js
+    index.js
+    pages/
+      Home/
+        index.jsx
+      About/
+        index.jsx
+    components/
+      Header/
+        index.jsx
+```
+
+现在，可以比较 **Header组件（一般组件）** 和 **About组件（路由组件）** 收到的 props 的不同
+![](resources/2024-01-02-23-23-08.png)
+路由组件 与 一般组件 的最大的区别：**路由组件 会收到路由器给传递的 3个最重要的props信息，分别是 history、location、match**
+
+> 这里每个 console.log 会有两次输出，是因为 src/index.js 文件中 `<React.StrictMode>` 组件包裹整个应用，导致两次输出
+
+### 路由组件与一般组件 总结
+
+1. 写法不同：
+   1. 一般组件：`<Demo/>`
+   2. 路由组件：`<Route path="/demo" component={Demo} />`
+2. 存放位置不同：
+   1. 一般组件：components文件夹下
+   2. 路由组件：pages文件夹下
+3. 接收到的props不同：
+   1. 一般组件：写组件标签时传递了什么，就能收到什么
+   2. 路由组件：比一般组件**多接收到三个固定的属性：history、location、match**
+
+路由组件的三大属性中我们要重点关注的如下
+```js
+history: 
+  go: ƒ go(n)
+  goBack: ƒ goBack()
+  goForward: ƒ goForward()
+  push: ƒ push(path, state)
+  replace: ƒ replace(path, state)
+
+location: 
+  pathname: "/about"
+  search: ""
+  state: undefined
+
+match: 
+  params: {}
+  path: "/about"
+  url: "/about"
+```
 
 
 
@@ -429,7 +635,7 @@ export default class App extends Component {
 
 --- 
 
-P78
+P79
 
 
 

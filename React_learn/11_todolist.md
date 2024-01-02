@@ -38,16 +38,16 @@ todolist/
     index.js
     components/
       Header/
-        index.js
+        index.jsx
         index.css
       List/
-        index.js
+        index.jsx
         index.css
       Item/
-        index.js
+        index.jsx
         index.css
       Footer/
-        index.js
+        index.jsx
         index.css
 ```
 
