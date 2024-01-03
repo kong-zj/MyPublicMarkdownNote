@@ -622,14 +622,15 @@ match:
 ## NavLink 组件
 
 点击导航区的 Home 或 About 时，想要有蓝色的高亮
-
 那就别再用 Link，用 NavLink
+
+NavLink 可以实现路由链接的**高亮**，通过 activeClassName 指定样式名
 
 ### 使用 NavLink 组件
 
 #### src/App.js（NavLink组件）
 
-使用 NavLink 组件
+使用 NavLink组件
 
 ```js
 import React, { Component } from 'react';
@@ -707,7 +708,7 @@ export default class App extends Component {
 
 #### src/App.js
 
-给 NavLink 组件添加 `activeClassName="atguigu"` 属性，定义 NavLink 组件被点击时添加的样式名
+给 NavLink组件 添加 `activeClassName="atguigu"` 属性，定义 NavLink组件 被点击时添加的样式名
 
 ```js
 import React, { Component } from 'react';
@@ -756,7 +757,7 @@ export default class App extends Component {
 
 上面的例子中，如果页面上有很多导航链接，就要写很多 `<NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink>`，每一项里面有很多重复的东西，还有优化的空间
 
-那就对 NavLink 组件进行二次封装
+那就对 NavLink组件 进行二次封装
 
 #### src/components/MyNavLink/index.jsx
 
@@ -778,7 +779,7 @@ export default class MyNavLink extends Component {
 
 #### src/App.js
 
-把 NavLink 组件换成 MyNavLink 组件
+把 NavLink组件 换成 MyNavLink组件
 
 ```js
 import React, { Component } from 'react';
@@ -925,6 +926,176 @@ export default class MyNavLink extends Component {
 
 效果和之前相同
 
+## Switch 组件
+
+Switch组件 的作用是路由切换时，**只渲染第一个匹配到的路由**
+通常情况下，**path** 和 **component** 是**一一对应**的关系
+Switch 可以提高路由匹配效率（**单一匹配**）
+
+### Test组件（路由组件）
+
+为了演示，再添加一个名为 Test 的路由组件
+
+#### src/pages/Test/index.jsx
+
+```js
+import React, { Component } from 'react'
+
+export default class Test extends Component {
+  render() {
+    return (
+      <div>Test组件</div>
+    )
+  }
+}
+```
+
+### src/App.js
+
+让`/home`路径同时匹配 Home组件 和 Test组件（path 和 component 不是一一对应的关系）
+
+```js
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import Test from './pages/Test';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/home" component={Test} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-03-23-07-05.png)
+
+匹配的两个组件都会展示
+这就说明，找到第一个匹配的组件后，还会继续匹配
+
+如果注册的路由特别多，会有效率问题
+能不能找到第一个匹配的组件后，就不再继续匹配了？
+用 **Switch组件** 即可
+
+### src/App.js（Switch组件）
+
+用 **Switch组件** 把所有注册的路由包起来
+
+```js
+import React, { Component } from 'react';
+import { Route, Switch } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import Test from './pages/Test';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Switch>
+                  <Route path="/home" component={Home} />
+                  <Route path="/home" component={Test} />
+                  <Route path="/about" component={About} />
+                </Switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-03-23-17-31.png)
+
+使用 Switch组件，路由切换时，**只渲染第一个匹配到的路由**
+
+## 路由的 模糊匹配 与 严格匹配
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -944,7 +1115,7 @@ export default class MyNavLink extends Component {
 
 --- 
 
-P81
+P83 2min:30sec
 
 
 
