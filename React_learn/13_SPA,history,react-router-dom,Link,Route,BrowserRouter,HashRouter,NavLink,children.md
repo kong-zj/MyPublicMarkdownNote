@@ -543,7 +543,7 @@ export default class App extends Component {
 
 ### About组件（路由组件）
 
-#### src/components/About/index.jsx
+#### src/pages/About/index.jsx
 
 打印 this.props
 
@@ -619,6 +619,315 @@ match:
   url: "/about"
 ```
 
+## NavLink 组件
+
+点击导航区的 Home 或 About 时，想要有蓝色的高亮
+
+那就别再用 Link，用 NavLink
+
+### 使用 NavLink 组件
+
+#### src/App.js（NavLink组件）
+
+使用 NavLink 组件
+
+```js
+import React, { Component } from 'react';
+import { NavLink, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Header from './components/Header';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              <NavLink className="list-group-item" to="/home">Home</NavLink>
+              <NavLink className="list-group-item" to="/about">About</NavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-03-19-50-57.png)
+
+> 使用 NavLink 后，点击谁，就是给谁加了 active 属性，而碰巧了，引入的 bootstrap 样式中，active 属性的样式，就是加了一个高亮
+
+如果我们不喜欢 bootstrap 默认的高亮效果，可以自定义样式
+
+#### public/index.html
+
+添加自定义样式
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>React App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+      .atguigu{
+        background-color: orange !important;
+        color: red !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+`!important` 用于把自己写的样式的权限提到最高，不然会受 bootstrap 默认样式的影响
+
+#### src/App.js
+
+给 NavLink 组件添加 `activeClassName="atguigu"` 属性，定义 NavLink 组件被点击时添加的样式名
+
+```js
+import React, { Component } from 'react';
+import { NavLink, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Header from './components/Header';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink>
+              <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-03-20-07-36.png)
+
+### 封装 NavLink 组件
+
+上面的例子中，如果页面上有很多导航链接，就要写很多 `<NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink>`，每一项里面有很多重复的东西，还有优化的空间
+
+那就对 NavLink 组件进行二次封装
+
+#### src/components/MyNavLink/index.jsx
+
+定义一个名为 MyNavLink 的一般组件
+
+```js
+import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
+
+export default class MyNavLink extends Component {
+  render() {
+    const { to, title } = this.props;
+    return (
+        <NavLink activeClassName="atguigu" className="list-group-item" to={to}>{title}</NavLink>
+    )
+  }
+}
+```
+
+#### src/App.js
+
+把 NavLink 组件换成 MyNavLink 组件
+
+```js
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Header from './components/Header';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              <MyNavLink to="/home" title="Home" />
+              <MyNavLink to="/about" title="About" />
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果和之前相同
+
+但是 MyNavLink 的 `<MyNavLink to="/home" title="Home" />`，**用 title 属性指定标签内容**，而 NavLink 的 `<NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink>`，可以**直接在标签体处写标签内容**
+怎么能像使用 NavLink 一样使用 MyNavLink，直接在**标签体**处写标签内容？
+我们学过**使用 props 接收传递过来的标签属性**，但是怎么**接收标签体**？
+
+**标签体 是特殊的标签属性**，react 也能帮我们收集，通过 **this.props.children** 接收
+
+#### src/App.js
+
+不再使用自闭合的 MyNavLink，而是像使用 NavLink 一样使用 MyNavLink，直接在**标签体**处写标签内容
+
+```js
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Header from './components/Header';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Route path="/home" component={Home} />
+                <Route path="/about" component={About} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+#### src/components/MyNavLink/index.jsx（children属性）
+
+通过 **this.props.children** 接收**标签体**
+
+```js
+import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
+
+export default class MyNavLink extends Component {
+  render() {
+    console.log(this.props);
+    const { to, children } = this.props;
+    return (
+        <NavLink activeClassName="atguigu" className="list-group-item" to={to}>{children}</NavLink>
+    )
+  }
+}
+```
+
+效果和之前相同
+![](resources/2024-01-03-20-52-40.png)
+
+#### src/components/MyNavLink/index.jsx
+
+**标签体 是特殊的标签属性**，不用直接写标签体，用标签的 **children 属性**，就可以**定义标签体**，即 `<NavLink children="About" />` 等价于 `<NavLink>About</NavLink>`
+
+则上面的代码可以继续简化
+
+```js
+import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
+
+export default class MyNavLink extends Component {
+  render() {
+    return (
+        <NavLink activeClassName="atguigu" className="list-group-item" {...this.props} />
+    )
+  }
+}
+```
+
+代码中的 `{...this.props}` 不仅把我们自己定义的 to 属性接收过去了，同时还把react帮我们定义的 children 接收了
+
+效果和之前相同
+
+
+
+
 
 
 
@@ -635,7 +944,7 @@ match:
 
 --- 
 
-P79
+P81
 
 
 
