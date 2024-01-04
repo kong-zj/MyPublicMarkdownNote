@@ -1243,14 +1243,14 @@ export default class App extends Component {
 
 1. 默认使用的是模糊匹配（前缀匹配）
 2. 使用 exact 属性开启严格匹配：`<Route exact path="/home" component={Home} />`
-3. 但是不要滥用 严格匹配 exact（有时候开启会导致无法继续匹配二级路由），如果不开启严格匹配会引发一些问题，才开启它
+3. 但是**不要滥用** 严格匹配 exact（有时候开启会导致**无法继续匹配二级路由**），如果不开启严格匹配会引发一些问题，才开启它
 
 ## Redirect 重定向
 
 刚开始打开网页，什么路由也没有指定，也就什么组件也没匹配上，效果如下
 ![](resources/2024-01-04-22-15-03.png)
 
-Redirect组件 用来**兜底**，当所有路由都无法匹配时，跳转到 Redirect 指定的路由
+一般把 Redirect组件 写在所有路由注册的最下方，用来**兜底**，当所有路由都无法匹配时，跳转到 Redirect 指定的路由
 
 ### src/App.js
 
@@ -1307,7 +1307,238 @@ export default class App extends Component {
 我们在浏览器中输入 `http://localhost:3000`，就会自动跳到 `http://localhost:3000/home`，效果如下
 ![](resources/2024-01-04-22-27-18.png)
 
-## 
+## 嵌套路由
+
+react中路由的注册是有顺序的（父组件中的路由先注册，子组件中的路由后注册），因此在匹配的时候也是按照这个顺序进行的，因此会先匹配父组件中的路由
+
+### 拆分组件
+
+![](resources/2024-01-04-22-59-45.png)
+
+### 实现静态组件
+
+#### src/pages/Home/Message/index.jsx
+
+```js
+import React, { Component } from 'react';
+
+export default class Message extends Component {
+  render() {
+    return (
+        <div>
+            <ul>
+                <li>
+                    <a href="/message1">message001</a>&nbsp;&nbsp;
+                </li>
+                <li>
+                    <a href="/message2">message002</a>&nbsp;&nbsp;
+                </li>
+                <li>
+                    <a href="/message/3">message003</a>&nbsp;&nbsp;
+                </li>
+            </ul>
+        </div>
+    )
+  }
+}
+```
+
+#### src/pages/Home/News/index.jsx
+
+```js
+import React, { Component } from 'react';
+
+export default class News extends Component {
+  render() {
+    return (
+        <div>
+            <ul>
+                <li>news001</li>
+                <li>news002</li>
+                <li>news003</li>
+            </ul>
+        </div>
+    )
+  }
+}
+```
+
+此时项目的目录结构如下
+```sh
+route-demo/
+  README.md
+  node_modules/
+  package.json
+  public/
+    index.html
+  src/
+    App.js
+    index.js
+    pages/
+      Home/
+        index.jsx
+        Message/
+          index.jsx
+        News/
+          index.jsx
+      About/
+        index.jsx
+    components/
+      Header/
+        index.jsx
+      MyNavLink/
+        index.jsx
+```
+
+### src/pages/Home/index.jsx（嵌套路由）
+
+```js
+import React, { Component } from 'react';
+import Message from './Message';
+import News from './News';
+import MyNavLink from '../../components/MyNavLink';
+import { Route, Switch, Redirect } from 'react-router-dom';
+
+export default class Home extends Component {
+    render() {
+        return (
+            <div>
+                <h2>Home组件内容</h2>
+                <div>
+                    <ul className="nav nav-tabs">
+                        <li>
+                            {/* react中路由的注册是有顺序的（父组件中的路由先注册，子组件中的路由后注册），因此在匹配的时候也是按照这个顺序进行的，因此会先匹配父组件中的路由 */}
+                            {/* <MyNavLink to="/news">News</MyNavLink> */}
+                            <MyNavLink to="/home/news">News</MyNavLink>
+                        </li>
+                        <li>
+                            {/* <MyNavLink to="/message">Message</MyNavLink> */}
+                            <MyNavLink to="/home/message">Message</MyNavLink>
+                        </li>
+                    </ul>
+                    <Switch>
+                        <Route path="/home/news" component={News} />
+                        <Route path="/home/message" component={Message} />
+                        <Redirect to="/home/message" />
+                    </Switch>
+                </div>
+            </div>
+        )
+    }
+}
+```
+
+效果如下
+![](resources/2024-01-04-23-46-09.png)
+
+点击 Message 之后发生了什么？
+1. 路径变成 `/home/message`
+2. 在 Home组件 的父组件 App组件 中，匹配到 `/home` 路由，挂载 Home组件
+3. 在 Home组件 中，继续进行路由匹配，匹配到 `/home/message` 路由，挂载 Message组件
+
+点击 Home 之后，为什么直接能到 `/home/message`？
+1. 点击 Home 之后，路径变成 `/home`，挂载 Home组件
+2. 在 Home组件 中，继续进行路由匹配，`/home` 不能匹配 `/home/news` 和 `/home/message` 路由，被 Redirect 兜底到 `/home/message`
+3. 匹配到 `/home/message` 路由，挂载 Message组件
+
+> 也就是说，如果注册三级路由，前两级路由的名字也要写在前方，不能省略，因为**路由匹配时有先后顺序，会先匹配父组件中的路由**
+
+### src/pages/Home/index.jsx
+
+去掉 `<Redirect to="/home/message" />`，为了方便演示下面的 严格匹配导致问题
+
+```js
+import React, { Component } from 'react';
+import Message from './Message';
+import News from './News';
+import MyNavLink from '../../components/MyNavLink';
+import { Route, Switch } from 'react-router-dom';
+
+export default class Home extends Component {
+    render() {
+        return (
+            <div>
+                <h2>Home组件内容</h2>
+                <div>
+                    <ul className="nav nav-tabs">
+                        <li>
+                            <MyNavLink to="/home/news">News</MyNavLink>
+                        </li>
+                        <li>
+                            <MyNavLink to="/home/message">Message</MyNavLink>
+                        </li>
+                    </ul>
+                    <Switch>
+                        <Route path="/home/news" component={News} />
+                        <Route path="/home/message" component={Message} />
+                    </Switch>
+                </div>
+            </div>
+        )
+    }
+}
+```
+
+### src/App.js（严格匹配导致问题）
+
+```js
+import React, { Component } from 'react';
+import { Route, Switch, Redirect } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              <MyNavLink to="/home">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Switch>
+                  <Route exact path="/home" component={Home} />
+                  <Route exact path="/about" component={About} />
+                  <Redirect to="/home" />
+                </Switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-05-00-10-20.png)
+点击 Message 之后：
+![](resources/2024-01-05-00-10-53.png)
+无法继续匹配二级路由
+
+如上面的严格匹配模式中所说：严格匹配模式不要随便开启，需要时再开，有时候开启会导致**无法继续匹配二级路由**
+
+### 总结
+
+1. 注册子路由时，要写上父路由的path值
+2. 路由的匹配是按照注册路由的顺序进行的（从父到子）
+
+## 向路由组件传递 params 参数
 
 
 
@@ -1320,10 +1551,20 @@ export default class App extends Component {
 
 
 
+## 向路由组件传递 search 参数
 
 
 
 
+
+
+
+
+
+
+
+
+## 向路由组件传递 state 参数
 
 
 
@@ -1360,7 +1601,7 @@ export default class App extends Component {
 
 --- 
 
-P85
+P86
 
 
 
