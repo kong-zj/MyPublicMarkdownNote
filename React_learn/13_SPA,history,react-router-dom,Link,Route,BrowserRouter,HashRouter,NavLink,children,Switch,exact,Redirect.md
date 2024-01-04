@@ -1071,6 +1071,251 @@ export default class App extends Component {
 
 ## 路由的 模糊匹配 与 严格匹配
 
+默认是模糊匹配，使用 exact 属性开启严格匹配
+
+### src/App.js
+
+```js
+import React, { Component } from 'react';
+import { Route, Switch } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Switch>
+                  <Route path="/home/a/b" component={Home} />
+                  <Route path="/about" component={About} />
+                </Switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下（没有匹配上）
+![](resources/2024-01-04-21-39-43.png)
+
+要的是 `/home/a/b`，但是只给了 `/home`，不算匹配（给的东西**少**了）
+
+### src/App.js（模糊匹配）
+
+```js
+import React, { Component } from 'react';
+import { Route, Switch } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home/a/b">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Switch>
+                  <Route path="/home" component={Home} />
+                  <Route path="/about" component={About} />
+                </Switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下（匹配上了）
+![](resources/2024-01-04-21-41-24.png)
+
+要的是 `/home`，但是给了 `/home/a/b`，算匹配（给的东西**多**了）
+
+要的东西一个不能少，可以多给一点，他只看开头的一块（**前缀匹配**）
+
+### src/App.js（严格匹配 exact）
+
+使用 `exact` 开启严格匹配
+
+```js
+import React, { Component } from 'react';
+import { Route, Switch } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home/a/b">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Switch>
+                  <Route exact path="/home" component={Home} />
+                  <Route exact path="/about" component={About} />
+                </Switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+效果如下（没有匹配上）
+![](resources/2024-01-04-21-51-29.png)
+
+要的和给的必须完全相同才算匹配
+
+### 总结
+
+1. 默认使用的是模糊匹配（前缀匹配）
+2. 使用 exact 属性开启严格匹配：`<Route exact path="/home" component={Home} />`
+3. 但是不要滥用 严格匹配 exact（有时候开启会导致无法继续匹配二级路由），如果不开启严格匹配会引发一些问题，才开启它
+
+## Redirect 重定向
+
+刚开始打开网页，什么路由也没有指定，也就什么组件也没匹配上，效果如下
+![](resources/2024-01-04-22-15-03.png)
+
+Redirect组件 用来**兜底**，当所有路由都无法匹配时，跳转到 Redirect 指定的路由
+
+### src/App.js
+
+增加一行 `<Redirect to="/home" />`，当所有路由都无法匹配时，跳转到路由 `/home`
+
+```js
+import React, { Component } from 'react';
+import { Route, Switch, Redirect } from 'react-router-dom';
+import Header from './components/Header';
+import Home from './pages/Home';
+import About from './pages/About';
+import MyNavLink from './components/MyNavLink';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-offset-2 col-xs-8">
+            <Header />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2 col-xs-offset-2">
+            <div className="list-group">
+              {/* 编写路由链接 */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/home">Home</NavLink> */}
+              {/* <NavLink activeClassName="atguigu" className="list-group-item" to="/about">About</NavLink> */}
+              {/* <MyNavLink to="/home" title="Home" /> */}
+              {/* <MyNavLink to="/about" title="About" /> */}
+              <MyNavLink to="/home">Home</MyNavLink>
+              <MyNavLink to="/about">About</MyNavLink>
+            </div>
+          </div>
+          <div className="col-xs-6">
+            <div className="panel">
+              <div className="panel-body">
+                {/* 注册路由 */}
+                <Switch>
+                  <Route path="/home" component={Home} />
+                  <Route path="/about" component={About} />
+                  <Redirect to="/home" />
+                </Switch>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+我们在浏览器中输入 `http://localhost:3000`，就会自动跳到 `http://localhost:3000/home`，效果如下
+![](resources/2024-01-04-22-27-18.png)
+
+## 
+
+
+
+
+
+
+
+
 
 
 
@@ -1115,7 +1360,8 @@ export default class App extends Component {
 
 --- 
 
-P83 2min:30sec
+P85
+
 
 
 
