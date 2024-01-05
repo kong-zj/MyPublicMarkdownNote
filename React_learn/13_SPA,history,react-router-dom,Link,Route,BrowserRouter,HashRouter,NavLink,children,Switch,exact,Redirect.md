@@ -595,7 +595,7 @@ route-demo/
 2. 存放位置不同：
    1. 一般组件：components文件夹下
    2. 路由组件：pages文件夹下
-3. 接收到的props不同：
+3. 接收到的**props**不同：
    1. 一般组件：写组件标签时传递了什么，就能收到什么
    2. 路由组件：比一般组件**多接收到三个固定的属性：history、location、match**
 
@@ -1538,7 +1538,205 @@ export default class App extends Component {
 1. 注册子路由时，要写上父路由的path值
 2. 路由的匹配是按照注册路由的顺序进行的（从父到子）
 
-## 向路由组件传递 params 参数
+## 向路由组件传递参数
+
+**向路由组件传递参数**，有3种方式：
+1. 传递 params 参数
+2. 传递 search 参数
+3. 传递 state 参数
+
+### 拆分组件
+
+![](resources/2024-01-05-09-13-19.png)
+
+### 实现静态组件
+
+#### src/pages/Home/Message/Detail/index.jsx
+
+```js
+import React, { Component } from 'react';
+
+export default class Detail extends Component {
+  render() {
+    return (
+      <ul>
+        <li>ID: ???</li>
+        <li>TITLE: ???</li>
+        <li>CONTENT: ???</li>
+      </ul>
+    )
+  }
+}
+```
+
+此时项目的目录结构如下
+```sh
+route-demo/
+  README.md
+  node_modules/
+  package.json
+  public/
+    index.html
+  src/
+    App.js
+    index.js
+    pages/
+      Home/
+        index.jsx
+        Message/
+          index.jsx
+          Detail/
+            index.jsx
+        News/
+          index.jsx
+      About/
+        index.jsx
+    components/
+      Header/
+        index.jsx
+      MyNavLink/
+        index.jsx
+```
+
+### src/pages/Home/Message/index.jsx（嵌套路由）
+
+之前，信息列表是写死的，现在改成动态获取的
+还要 编写路由链接 和 注册路由
+
+```js
+import React, { Component } from 'react';
+import { Link, Route } from 'react-router-dom';
+import Detail from './Detail';
+
+export default class Message extends Component {
+    state = {
+        messageArr: [
+            {id: '01', title: 'message001'},
+            {id: '02', title: 'message002'},
+            {id: '03', title: 'message003'},
+        ]
+    }
+  render() {
+    const { messageArr } = this.state;
+    return (
+        <div>
+            <ul>
+                {
+                    messageArr.map((msgObj) =>{
+                        return (
+                            <li key={msgObj.id}>
+                                <Link to="/home/message/detail">{msgObj.title}</Link>&nbsp;&nbsp;
+                            </li>
+                        )
+                    })
+                }
+            </ul>
+            <hr/>
+            <Route path="/home/message/detail" component={Detail}/>
+        </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-05-09-48-10.png)
+
+但是现在展示的 Detail组件（路由组件）是写死的，想要向其中传递数据
+**向路由组件传递参数**，有几种方式？
+
+### 向路由组件传递 params 参数
+
+特点：直接在**路径**中传递参数
+
+#### src/pages/Home/Message/index.jsx
+
+在 编写路由链接 时，**向路由组件传递params参数**
+在 注册路由 时，**声明接收params参数**
+
+```js
+import React, { Component } from 'react';
+import { Link, Route } from 'react-router-dom';
+import Detail from './Detail';
+
+export default class Message extends Component {
+    state = {
+        messageArr: [
+            {id: '01', title: 'message001'},
+            {id: '02', title: 'message002'},
+            {id: '03', title: 'message003'},
+        ]
+    }
+  render() {
+    const { messageArr } = this.state;
+    return (
+        <div>
+            <ul>
+                {
+                    messageArr.map((msgObj) =>{
+                        return (
+                            <li key={msgObj.id}>
+                                {/* 向路由组件传递params参数 */}
+                                <Link to={`/home/message/detail/${msgObj.id}/${msgObj.title}`}>{msgObj.title}</Link>&nbsp;&nbsp;
+                            </li>
+                        )
+                    })
+                }
+            </ul>
+            <hr/>
+            {/* 声明接收params参数 */}
+            <Route path="/home/message/detail/:id/:title" component={Detail}/>
+        </div>
+    )
+  }
+}
+```
+
+#### src/pages/Home/Message/Detail/index.jsx
+
+通过 `this.props.match.params` 接收传入的params参数
+
+```js
+import React, { Component } from 'react';
+
+// 模拟服务器返回的数据
+const detailData = [
+    { id: '01', content: '你好，中国'},
+    { id: '02', content: '你好，尚硅谷'},
+    { id: '03', content: '你好，未来的自己'},
+]
+
+export default class Detail extends Component {
+  render() {
+    console.log('Detail组件接收到的props：',this.props);
+    // 接收params参数
+    const { id, title } = this.props.match.params;
+    const findResult = detailData.find((detailObj)=>{
+        return detailObj.id === id
+    })
+    return (
+      <ul>
+        <li>ID: {id}</li>
+        <li>TITLE: {title}</li>
+        <li>CONTENT: {findResult.content}</li>
+      </ul>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-05-10-38-05.png)
+
+#### 传递 params 参数总结
+
+- 路由链接（携带参数）：`<Link to="/home/message/detail/03/message003">message003</Link>`
+- 注册路由（声明接收）：`<Route path="/home/message/detail/:id/:title" component={Detail}/>`
+- 接收参数：`const { id, title } = this.props.match.params;`
+
+### 向路由组件传递 search 参数
+
+与 params参数 相比，传递 search参数 时简单一点，接收 search参数 时麻烦一点
 
 
 
@@ -1547,24 +1745,11 @@ export default class App extends Component {
 
 
 
+#### 传递 search 参数总结
 
 
 
-
-## 向路由组件传递 search 参数
-
-
-
-
-
-
-
-
-
-
-
-
-## 向路由组件传递 state 参数
+### 向路由组件传递 state 参数
 
 
 
@@ -1573,7 +1758,7 @@ export default class App extends Component {
 
 
 
-
+#### 传递 state 参数总结
 
 
 
@@ -1601,10 +1786,7 @@ export default class App extends Component {
 
 --- 
 
-P86
-
-
-
+P87 2min
 
 
 
