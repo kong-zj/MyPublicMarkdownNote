@@ -1738,24 +1738,136 @@ export default class Detail extends Component {
 
 与 params参数 相比，传递 search参数 时简单一点，接收 search参数 时麻烦一点
 
+#### src/pages/Home/Message/index.jsx
 
+在 编写路由链接 时，**向路由组件传递search参数**
+在 注册路由 时，**search参数无需声明接收，正常注册路由即可**
 
+```js
+import React, { Component } from 'react';
+import { Link, Route } from 'react-router-dom';
+import Detail from './Detail';
 
+export default class Message extends Component {
+    state = {
+        messageArr: [
+            {id: '01', title: 'message001'},
+            {id: '02', title: 'message002'},
+            {id: '03', title: 'message003'},
+        ]
+    }
+  render() {
+    const { messageArr } = this.state;
+    return (
+        <div>
+            <ul>
+                {
+                    messageArr.map((msgObj) =>{
+                        return (
+                            <li key={msgObj.id}>
+                                {/* 向路由组件传递search参数 */}
+                                <Link to={`/home/message/detail/?id=${msgObj.id}&title=${msgObj.title}`}>{msgObj.title}</Link>&nbsp;&nbsp;
+                            </li>
+                        )
+                    })
+                }
+            </ul>
+            <hr/>
+            {/* search参数无需声明接收，正常注册路由即可 */}
+            <Route path="/home/message/detail" component={Detail}/>
+        </div>
+    )
+  }
+}
+```
 
+#### src/pages/Home/Message/Detail/index.jsx
 
+通过 `this.props.location.search` 接收传入的search参数
+获取到的search是 **urlencoded编码字符串**，需要使用 **query-string库** 解析
+`qs.parse()` 用于把 urlencoded编码字符串 转化为 **对象**
 
+```js
+import React, { Component } from 'react';
+import qs from 'query-string';
+
+// 模拟服务器返回的数据
+const detailData = [
+    { id: '01', content: '你好，中国'},
+    { id: '02', content: '你好，尚硅谷'},
+    { id: '03', content: '你好，未来的自己'},
+]
+
+export default class Detail extends Component {
+  render() {
+    console.log('Detail组件接收到的props：',this.props);
+    // 接收search参数
+    const {search} = this.props.location;
+    const {id,title} = qs.parse(search.substring(1));
+    const findResult = detailData.find((detailObj)=>{
+        return detailObj.id === id
+    })
+    return (
+      <ul>
+        <li>ID: {id}</li>
+        <li>TITLE: {title}</li>
+        <li>CONTENT: {findResult.content}</li>
+      </ul>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-01-07-22-01-31.png)
+
+##### query-string库的使用
+
+`qs.stringify()` 用于把 对象 转化为 **urlencoded编码字符串**
+`qs.parse()` 用于把 urlencoded编码字符串 转化为 **对象**
+
+```js
+import qs from 'query-string';
+
+let obj = {name: 'tom', age: 18};
+// 想变成 name=tom&age=18 字符串，即 key=value&key=value（urlencoded编码）
+console.log(qs.stringify(obj));
+
+let str = 'name=tom&age=18';
+// 想变成 {name: 'tom', age: 18} 对象
+console.log(qs.parse(str));
+```
+
+效果如下
+![](resources/2024-01-07-21-53-47.png)
 
 #### 传递 search 参数总结
 
-
+- 路由链接（携带参数）：`<Link to="/home/message/detail/?id=03&title=message003">message003</Link>`
+- 注册路由（无需声明，正常注册即可）：`<Route path="/home/message/detail" component={Detail}/>`
+- 接收参数：`const {search} = this.props.location; const {id,title} = qs.parse(search.substring(1));`
 
 ### 向路由组件传递 state 参数
 
+这里的 state 不同于 组件里的state，虽然都叫 state，但是这里的 state 是**路由组件独有的属性**
+
+#### src/pages/Home/Message/index.jsx
+
+```js
+
+```
 
 
 
 
+#### src/pages/Home/Message/Detail/index.jsx
 
+```js
+
+```
+
+
+效果如下
 
 
 #### 传递 state 参数总结
@@ -1786,7 +1898,7 @@ export default class Detail extends Component {
 
 --- 
 
-P87 2min
+P88
 
 
 
