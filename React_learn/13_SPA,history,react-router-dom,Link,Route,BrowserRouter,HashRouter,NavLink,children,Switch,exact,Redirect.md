@@ -1850,31 +1850,137 @@ console.log(qs.parse(str));
 ### 向路由组件传递 state 参数
 
 这里的 state 不同于 组件里的state，虽然都叫 state，但是这里的 state 是**路由组件独有的属性**
+与前两者相比的优势：传递的东西**不会在路径中显示**
 
 #### src/pages/Home/Message/index.jsx
 
+在 编写路由链接 时，**向路由组件传递state参数，把 to 写成对象**
+在 注册路由 时，**state参数无需声明接收，正常注册路由即可**
+
 ```js
+import React, { Component } from 'react';
+import { Link, Route } from 'react-router-dom';
+import Detail from './Detail';
 
+export default class Message extends Component {
+    state = {
+        messageArr: [
+            {id: '01', title: 'message001'},
+            {id: '02', title: 'message002'},
+            {id: '03', title: 'message003'},
+        ]
+    }
+  render() {
+    const { messageArr } = this.state;
+    return (
+        <div>
+            <ul>
+                {
+                    messageArr.map((msgObj) =>{
+                        return (
+                            <li key={msgObj.id}>
+                                {/* 向路由组件传递state参数 */}
+                                <Link to={{pathname:'/home/message/detail',state:{id:msgObj.id,title:msgObj.title}}}>{msgObj.title}</Link>&nbsp;&nbsp;
+                            </li>
+                        )
+                    })
+                }
+            </ul>
+            <hr/>
+            {/* state参数无需声明接收，正常注册路由即可 */}
+            <Route path="/home/message/detail" component={Detail}/>
+        </div>
+    )
+  }
+}
 ```
-
-
-
 
 #### src/pages/Home/Message/Detail/index.jsx
 
-```js
+通过 `this.props.location.state` 接收传入的state参数
 
+```js
+import React, { Component } from 'react';
+
+// 模拟服务器返回的数据
+const detailData = [
+    { id: '01', content: '你好，中国'},
+    { id: '02', content: '你好，尚硅谷'},
+    { id: '03', content: '你好，未来的自己'},
+]
+
+export default class Detail extends Component {
+  render() {
+    console.log('Detail组件接收到的props：',this.props);
+    // 接收state参数
+    const {id,title} = this.props.location.state;
+    const findResult = detailData.find((detailObj)=>{
+        return detailObj.id === id
+    })
+    return (
+      <ul>
+        <li>ID: {id}</li>
+        <li>TITLE: {title}</li>
+        <li>CONTENT: {findResult.content}</li>
+      </ul>
+    )
+  }
+}
 ```
 
+点击 message003后，效果如下（**刷新**的话，**数据也不会丢失**）
+![](resources/2024-01-07-22-32-25.png)
 
-效果如下
+但是，如果 **清空缓存并硬刷新**，然后在浏览器中输入 `http://localhost:3000/home/message/detail`
+![](resources/2024-01-07-22-36-42.png)
+就会报错
+![](resources/2024-01-07-22-39-55.png)
+因为 `this.props.location.state` 的结果是 `undefined`
 
+##### src/pages/Home/Message/Detail/index.jsx（修复报错）
+
+`this.props.location.state || {}` 中的 `|| {}` 表示：如果 `this.props.location.state` 是 `undefined`，则返回一个空对象
+findResult 也同理处理
+
+```js
+import React, { Component } from 'react';
+
+// 模拟服务器返回的数据
+const detailData = [
+    { id: '01', content: '你好，中国'},
+    { id: '02', content: '你好，尚硅谷'},
+    { id: '03', content: '你好，未来的自己'},
+]
+
+export default class Detail extends Component {
+  render() {
+    console.log('Detail组件接收到的props：',this.props);
+    // 接收state参数
+    const {id,title} = this.props.location.state || {};
+    const findResult = detailData.find((detailObj)=>{
+        return detailObj.id === id
+    }) || {};
+    return (
+      <ul>
+        <li>ID: {id}</li>
+        <li>TITLE: {title}</li>
+        <li>CONTENT: {findResult.content}</li>
+      </ul>
+    )
+  }
+}
+```
+
+此时，如果 **清空缓存并硬刷新**，然后在浏览器中输入 `http://localhost:3000/home/message/detail`，就不会报错
+![](resources/2024-01-07-22-51-00.png)
 
 #### 传递 state 参数总结
 
+- 路由链接（携带参数）：`<Link to={{pathname:'/home/message/detail',state:{id:'03',title:'message003'}}}>message003</Link>`
+- 注册路由（无需声明，正常注册即可）：`<Route path="/home/message/detail" component={Detail}/>`
+- 接收参数：`const { id, title } = this.props.location.state;`
 
-
-
+### 
 
 
 
@@ -1898,7 +2004,7 @@ console.log(qs.parse(str));
 
 --- 
 
-P88
+P90
 
 
 
