@@ -44,7 +44,7 @@ mysite/
 - **manage.py**：一个让你用各种方式管理 Django 项目的命令行工具
 - **里面一层的 mysite/ 目录**：包含你的项目，它是一个纯 Python 包。它的名字就是当你引用它内部任何东西时需要用到的 Python 包名（比如 mysite.urls）
 - **mysite/__init__.py**：一个空文件，告诉 Python 这个目录应该被认为是一个 Python 包
-- **mysite/settings.py**：Django 项目的配置文件
+- **mysite/settings.py**：Django 项目的配置文件（包括数据库配置，时区，安装的APP，中间件，日志配置，以及一些基本的目录配置等，其本质上相当于一个基本的web工程的全局配置）
 - **mysite/urls.py**：Django 项目的 URL 路由配置文件
 - **mysite/asgi.py**：作为你的项目的运行在 ASGI 兼容的 Web 服务器上的入口
 - **mysite/wsgi.py**：作为你的项目的运行在 WSGI 兼容的Web服务器上的入口
