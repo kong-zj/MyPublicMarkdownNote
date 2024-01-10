@@ -74,8 +74,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',  # 管理员站点
     'django.contrib.auth',  # 认证授权系统
     'django.contrib.contenttypes',  # 内容类型框架
-    'django.contrib.sessions',  # 会话框架
-    'django.contrib.messages',  # 消息框架
+    'django.contrib.sessions',  # 会话（session）框架
+    'django.contrib.messages',  # 消息（message）框架
     'django.contrib.staticfiles',  # 管理静态文件的框架
 ]
 ```

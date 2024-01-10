@@ -76,6 +76,8 @@ from django.utils.timezone import utc
 utcnow = datetime.datetime.utcnow().replace(tzinfo=utc)
 ```
 
+## 创建博客文章模型
+
 
 
 
@@ -108,6 +110,25 @@ utcnow = datetime.datetime.utcnow().replace(tzinfo=utc)
 
 # Django Admin模块
 
+## 简介
+
+Django Admin模块 是自带的一个基于Web的后台管理工具，它能够提供对Django模型（Model）及其数据的CRUD（Create, Read, Update, Delete）操作
+
+之前使用的 Django Shell 使用起来比较复杂，Django Admin模块 使用更方便
+
+## 使用Django Admin模块
+
+### 创建管理员账号（createsuperuser）
+
+```sh
+python3 manage.py createsuperuser
+```
+
+
+这里密码设置为 123456
+
+
+### 登录页面进行管理
 
 
 
@@ -165,8 +186,9 @@ https://www.bilibili.com/video/BV1vK4y1o7jH
 P9
 
 
+P6 7min installed_apps
 
-
+跳过P11
 
 ---
 
