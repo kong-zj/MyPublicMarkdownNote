@@ -146,7 +146,7 @@ class BlogConfig(AppConfig):
 ```
 > 事实上，一个Django应用就是一个 `django.apps.AppConfig` 类的**扩展子类**
 
-所以 **BlogConfig**类 的点式路径是 `polls.apps.BlogConfig`
+所以 **BlogConfig**类 的点式路径是 `blog.apps.BlogConfig`
 添加到在 **mysite/mysite/settings.py** 文件中 **INSTALLED_APPS** 变量中
 ```py
 INSTALLED_APPS = [

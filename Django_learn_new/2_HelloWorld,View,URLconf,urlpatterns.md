@@ -14,7 +14,7 @@
 
 当用户发来一个请求request时，我们把字符串 HelloWorld 封装成 HttpResponse 并返回
 
-blog/views.py文件内容修改为
+**blog/views.py** 文件内容修改为
 ```py
 from django.http import HttpResponse
 
@@ -30,9 +30,9 @@ Django的 视图（View）通常和 URL路由 一起工作的。服务器在收�
 
 **urls.py文件**中包含一个 **urlpatterns** 变量，其实它就是一个URL Dispacher（URL分派器），用于在 **URL** 和该URL要调用的 **视图** 之间建立一个**映射**，就是告诉Django对客户端发过来的某个URL应该调用执行哪一段逻辑代码
 
-### 配置业务层次路由
+### 配置应用层次路由
 
-新建blog/urls.py文件，内容为
+新建 **blog/urls.py** 文件，内容为
 ```py
 from django.urls import path
 import blog.views as views
@@ -44,7 +44,7 @@ urlpatterns = [
 
 ### 配置项目层次路由
 
-mysite/mysite/urls.py文件内容修改为
+**mysite/mysite/urls.py** 文件内容修改为
 ```py
 from django.contrib import admin
 from django.urls import path, include
@@ -58,12 +58,6 @@ urlpatterns = [
 现在，运行开发服务器，访问 http://127.0.0.1:8000/blog/hello_world 就可以看到 "HelloWorld"
 ![](resources/2024-01-08-22-42-56.png)
 
-
+至此，我们打通了**请求和响应流程**
 ![](resources/2024-01-08-22-48-17.png)
-
-
-
-
-
-
 
