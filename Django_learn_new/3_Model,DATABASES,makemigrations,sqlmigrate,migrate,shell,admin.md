@@ -352,6 +352,10 @@ admin.site.register(Author)
 删除刚才修改的 Article
 ![](resources/2024-01-12-19-39-04.png)
 
+新增一些 Article 和 Author 数据，方便之后演示 渲染数据
+![](resources/2024-01-13-10-40-13.png)
+![](resources/2024-01-13-11-01-27.png)
+
 # 实现博客数据返回页面
 
 现在，数据库中已经有了数据，接下来实现通过网页来访问这些数据
