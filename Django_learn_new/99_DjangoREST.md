@@ -83,6 +83,16 @@
 
 
 
+djangoREST
+https://www.bilibili.com/video/BV1Dm4y1c7QQ/
+
+
+djangoREST2
+https://www.bilibili.com/video/BV1k5411p7Kp
+
+
+
+
 P2
 
 
