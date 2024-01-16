@@ -3,7 +3,23 @@
 ## 简介
 
 - 开放源代码的著名 Python Web 框架
-- MVC 模式（Model：模型，View：视图，Controller：控制器）
+- MTV 设计模式
+
+### MVC 设计模式（传统）
+
+MVC 模式（Model：模型，View：视图，Controller：控制器）
+![](resources/2024-01-16-10-29-16.png)
+
+### MTV 设计模式（Django）
+
+MTV 模式（Model：模型，Template：模板，View：视图）
+
+MTV 把传统的 MVC 进行了更细致化的拆分，把 **传统的 View（视图）** 拆分为 **View（视图）** 和 **Template（模板）**：
+- View（视图）负责查找和处理数据
+- Template（模板）负责显示数据
+
+这里其实也是有 Controller（控制器）的，就是路由（负责URL的分发）
+![](resources/2024-01-16-10-34-45.png)
 
 ## 安装
 

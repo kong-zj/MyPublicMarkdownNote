@@ -124,7 +124,40 @@ Accept:application/json
 }
 ```
 
-# Django REST framework 准备
+# Django 和 DRF 的区别和联系
+
+[一图看懂Django和DRF](https://zhuanlan.zhihu.com/p/53957464)
+
+## Django 框图
+
+![](resources/2024-01-16-21-50-05.png)
+
+## DRF 框图
+
+![](resources/2024-01-16-21-50-32.png)
+
+## 最少语言描述 Django
+
+将数据库的东西通过 ORM 的映射取出来，通过 view 文件，按照 template 文件排出的模板渲染成 HTML。当用户请求相应的 url 时，返回相应的结果
+
+## 最少语言描述 DRF
+
+将数据库的东西通过 ORM 的映射取出来，通过 view 和 serializers 文件绑定 REST 接口，当前端请求时，返回序列化好的 json
+
+## 最少语言描述 DRF 在 Django 的基础上做了什么
+
+DRF 是 Django 的超集，去掉了模板的部分，提供了一个 REST 的接口，同时也提供了满足该接口的代码工作流。同时，在 REST 的规范下，升级了权限和分页等功能，增加了限流和过滤搜索等功能
+
+## 总结
+
+Django + DRF 将后端变成一种声明式的工作流，只要按照 models -> serializers -> views -> urls 的模式去一个个py文件去配置，即可生成一个很全面的通用的后端。当然，如果需求不那么通用，这种设计就变成了一个累赘
+
+事实上，过重的设计降低了灵活性，报错基本得去翻源码实现，然后再吐槽一遍源码实现，这也是有得必有失。当然，现在 Django 和 DRF 一直在优化 middeware（中间件）的设计，也有 api_view 这种类似 flask 的装饰器的实现方式，也是在灵活性方面的一种权衡，不过对于初学者来说，仍然是个不大不小的坎
+
+# Django REST framework 准备工作
+
+[官方快速入手教程（DRF 的 tutorial）](https://www.django-rest-framework.org/tutorial/quickstart/)
+> DRF 的 tutorial 讲的是 serializers 怎么写，view 怎么写，在 DRF 中 view 这一层既可以一个个 get、post、从头开始写起，也可以采用抽象程度比较高的 viewset 去按配置生成。另外还讲了一些 DRF 相较于 Django 升级和新增的功能
 
 目标：使用 DRF 开发 RESTful API 接口（4种实现方式）
 效果：用DRF的多种视图，实现课程信息的增删改查
@@ -303,7 +336,7 @@ pip install PyYAML
 pip install uritemplate
 ```
 
-## Django Rest Framework 的模块
+## Django Rest Framework 的模块介绍
 
 20个：
 序列化
@@ -413,16 +446,26 @@ python3 manage.py runserver
 用之前创建的 admin 用户登录
 ![](resources/2024-01-15-23-00-01.png)
 
-## 1111
-
-
-
-
-
-
 ## 序列化（serializers）
 
+### 简介
 
+序列化，也叫 序列化器，用于将 **查询集QuerySet** 或 **模型类实例Instance** 这种 Django数据类型，转化为 **JSON** 或 **XML** 格式（方便前端渲染）的数据
+**序列化**：`Course.objects.all()   # queryset, instance  ->  json/xml/yaml`（处理从数据库中查询到的数据，传给前端）
+**反序列化**：`Course.objects.all()   # queryset, instance  <-  json/xml/yaml`（处理前端传来的数据，保存到数据库）
+
+序列化 与 反序列化 存在的原因：方便前后端分离架构下的数据交互
+
+### 使用 Django 默认的序列化器
+
+
+
+### 使用 DRF 默认的序列化器
+
+新建 **drf_tutorial/course_api/serializers.py** 文件，其内容如下：
+```py
+
+```
 
 
 

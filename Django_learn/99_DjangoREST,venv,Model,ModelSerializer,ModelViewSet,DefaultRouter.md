@@ -1,9 +1,4 @@
 
-Django Rest Framework，简称为DRF，它是负责将数据库模型转换为 RESTful API。这个过程有两个主要步骤：
-1. 首先通过序列化器将数据转换成JSON，这样就可以通过internet发送数据
-2. 然后使用view来定义发送的数据
-
-
 
 ### 创建序列化器（ModelSerializer）
 

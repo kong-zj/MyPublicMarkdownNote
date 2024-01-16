@@ -130,13 +130,15 @@
 3. 网页**逻辑** 和 网页**视图** 应该分开设计
 
 模板系统是什么？
-1. 模板系统的表现形式是**文本**
+1. 模板是可以**根据视图中传递的字典数据动态变化的html网页**
 2. 用来分离页面的 表现**形式** 和 表现**内容**
 3. 模板系统定义了特有的**标签占位符**
 
-## 模板系统的基本语法
+### 配置 模板系统
 
-### 标签语法
+![](resources/2024-01-16-11-02-56.png)
+
+### 模板系统的 标签语法
 
 - 变量标签：`{{ 变量 }}`
 - for循环标签：`{% for 变量 in 序列 %}, {% endfor %}`
@@ -212,6 +214,7 @@ def get_index_page(request):
     # 调用 Template 对象的 render() 方法并传递 context 来填充模板
     return HttpResponse(template.render(context, request))
 ```
+通过 `loader` 获取模板，通过 `HttpResponse` 进行响应
 
 修改 **blog/urls.py** 文件的内容为：
 ```py
@@ -482,7 +485,7 @@ from django.core.paginator import Paginator
 from .models import Article
 
 def get_index_page(request):
-    # 接收 127.0.0.1:8000/blog/index?page=1 中的page参数
+    # 接收 127.0.0.1:8000/blog/index?page=1 中的page参数（通过查询字符串 Query String 传递）
     page = request.GET.get('page')
     if page:
         page = int(page)
@@ -602,7 +605,6 @@ from django.core.paginator import Paginator
 from .models import Article
 
 def get_index_page(request):
-    # 接收 127.0.0.1:8000/blog/index?page=1 中的page参数
     page = request.GET.get('page')
     if page:
         page = int(page)
@@ -705,21 +707,4 @@ def get_detail_page(request, article_id):
 
 访问 http://127.0.0.1:8000/blog/index?page=1 就可以看到如下
 ![](resources/2024-01-15-10-40-11.png)
-
-
-
-
----
----
-
-
-
-django全套
-https://www.bilibili.com/video/BV1vK4y1o7jH
-
-
-
-2_ .md   融合网上文章内容 View URL
-
-继续 表单 学习
 
