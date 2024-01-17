@@ -26,6 +26,8 @@ Django的 视图（View）通常和 URL路由 一起工作的。服务器在收�
 
 ## Django 路由（URLconf）
 
+![](resources/2024-01-17-21-19-15.png)
+
 ### 简介
 
 **urls.py文件**中包含一个 **urlpatterns** 变量，其实它就是一个URL Dispacher（URL分派器），用于在 **URL** 和该URL要调用的 **视图** 之间建立一个**映射**，就是告诉Django对客户端发过来的某个URL应该调用执行哪一段逻辑代码

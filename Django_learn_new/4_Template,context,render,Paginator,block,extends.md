@@ -144,6 +144,14 @@
 - for循环标签：`{% for 变量 in 序列 %}, {% endfor %}`
 - if-else分支标签：`{% if 表达式 %}, {% else %}, {% endif %}`
 
+### 模板过滤器
+
+过滤器作用是在变量输出时，对输出的变量值做进一步的处理
+
+语法格式：`{{ 变量 | 过滤器1:参数值1 | 过滤器2:参数值2 ... }}`
+
+![](resources/2024-01-16-23-12-14.png)
+
 ## 使用模板系统渲染博客页面
 
 ### 渲染 博客列表页面（Template、context）
@@ -707,4 +715,164 @@ def get_detail_page(request, article_id):
 
 访问 http://127.0.0.1:8000/blog/index?page=1 就可以看到如下
 ![](resources/2024-01-15-10-40-11.png)
+
+## 模板的继承
+
+模板继承可以使父模板的内容重用，子模板直接继承父模板的全部内容，并可以覆盖父模板中相应的块
+
+![](resources/2024-01-16-23-21-30.png)
+![](resources/2024-01-16-23-22-55.png)
+
+### 博客全站添加顶部和底部内容
+
+#### 定义父模板（block）
+
+新建 **blog/templates/blog/base.html** 文件，内容为
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block mytitle %}
+    <title>base</title>
+    {% endblock %}
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="col-md-4 col-md-offset-3">
+        <nav>
+            <a href="#"> 博客 </a>
+            <a href="#"> 视频 </a>
+            <a href="#"> 游戏 </a>
+            <a href="#"> 音乐 </a>
+        </nav>
+    </div>
+
+    {% block myblog %}
+    <p>show blog or article</p>
+    {% endblock %}
+    
+    <div class="col-md-4 col-md-offset-3">
+        <nav>
+            <p>Copyright@Kzj</p>
+        </nav>
+    </div>
+</body>
+</html>
+```
+
+在父模板中创建2个 block（分别名为 mytitle 和 myblog）供子模版继承
+
+#### 子模版继承父模板（extends）
+
+修改 **blog/templates/blog/index.html** 文件的内容为：
+```html
+{% extends 'blog/base.html' %}
+
+{% block mytitle %}
+<title>blog</title>
+{% endblock %}
+
+{% block myblog %}
+<div class="container page-header">
+    <h1>博客</h1>
+    <small>by Kzj</small>
+</div>
+<div class="container page-body">
+    <div class="col-md-9" role="main">
+        <div class="body-main">
+            {% for article in page_articles %}
+            <div>
+                <h2><a href="/blog/detail/{{ article.article_id }}">{{ article.title }}</a></h2>
+                <p>
+                    {{ article.brief_content }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="body-footer">
+            <div class="col-md-4 col-md-offset-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li>
+                            <a href="/blog/index?page={{ prev_page }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% for num in page_range %}
+                        <li><a href="/blog/index?page={{ num }}">{{ num }}</a></li>
+                        {% endfor %}
+                        <li>
+                            <a href="/blog/index?page={{ next_page }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3" role="complementary">
+        <h2>最新文章</h2>
+        {% for article in top5_articles %}
+        <h4><a href="/blog/detail/{{ article.article_id }}">{{ article.title }}</a></h4>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+```
+
+在子模板中继承 `'blog/base.html'`父模板，并重写 创建2个 block（分别名为 mytitle 和 myblog）
+
+修改 **blog/templates/blog/detail.html** 文件的内容为：
+```html
+{% extends 'blog/base.html' %}
+
+{% block mytitle %}
+<title>article</title>
+{% endblock %}
+
+{% block myblog %}
+<div class="container page-header">
+    <p>No.{{ article.article_id }}</p>
+    <h1>{{ article.title }}</h1>
+    <p>{{ article.brief_content }}</p>
+    <p>作者：{{ article.author.name }}</p>
+    <p>发布时间：{{ article.publish_time }}</p>
+    <p>支持：{{ article.support }}</p>
+</div>
+<div class="container body-main">
+    <div>
+        {% for each_content in content_list %}
+        <p>{{ each_content }}</p>
+        {% endfor %}
+    </div>
+</div>
+<div>
+    <nav>
+        <ul class="pager">
+            <li><a href="/blog/detail/{{ prev_article.article_id }}">上一篇：{{ prev_article.title }}</a></li>
+            <li><a href="/blog/detail/{{ next_article.article_id }}">下一篇：{{ next_article.title }}</a></li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+```
+
+同理，在子模板中继承 `'blog/base.html'`父模板，并重写 创建2个 block（分别名为 mytitle 和 myblog）
+
+访问 http://127.0.0.1:8000/blog/index?page=1 就可以看到如下
+![](resources/2024-01-17-00-08-16.png)
+
+访问 http://127.0.0.1:8000/blog/detail/4 就可以看到如下
+![](resources/2024-01-17-00-08-43.png)
+
+可见，不管是 博客列表页面，还是 文章详情页面，都有 顶部的导航 和 底部的版权（子模版继承自父模板）
+
 

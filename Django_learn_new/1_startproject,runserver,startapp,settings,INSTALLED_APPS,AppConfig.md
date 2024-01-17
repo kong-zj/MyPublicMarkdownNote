@@ -181,6 +181,24 @@ INSTALLED_APPS = [
 
 现在，项目就包含了 blog 应用
 
+##### 简写
+
+如果嫌上面这种 注册自己创建的应用到项目中 太麻烦，可以简写
+只需在 **mysite/mysite/settings.py** 文件中 **INSTALLED_APPS** 变量中添加 `'blog'`
+```py
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'blog',  # 新增
+]
+```
+
+现在，项目就包含了 blog 应用
+
 #### 注册应用到项目中的作用
 
 [Django 添加到INSTALLED_APPS的目的是什么](https://geek-docs.com/django/django-questions/81_django_what_is_the_purpose_of_adding_to_installed_apps_in_django.html)

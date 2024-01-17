@@ -95,6 +95,8 @@ pymysql.install_as_MySQLdb()
 
 ## 创建博客文章模型（Model）
 
+![](resources/2024-01-17-21-27-59.png)
+
 在这个博客应用中，需要创建两个模型，即 文章Article 和 作者Author：
 - Article 模型有7个字段，文章id、标题、文章摘要、文章内容、发布时间、点赞数、作者，每个 Article 属于一个 Author（**多对一**的关系）
 - Author 模型有2个字段，作者id、作者名
@@ -124,6 +126,63 @@ class Article(models.Model):
     # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：多对一、多对多和一对一
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 ```
+
+### 字段类型
+
+- BooleanField()：对应数据库中 tinyint(1)
+- CharField()：需要 max_length 参数，对应数据库中 varchar(max_length)
+- TextField()：对应数据库中 longtext
+- IntegerField()：对应数据库中 int
+- DateField()：对应数据库中 date
+- DateTimeField()：对应数据库中 datetime(6)
+- TimeField()
+- DecimalField()：对应数据库中 decimal(max_digits,decimal_places)
+- FloatField()：对应数据库中 double
+- AutoField()
+- FileField()
+- ImageField()：继承自 FileField，用来保存图片的路径（注意并不是图片本身），对应数据库中 varchar(100)
+- URLField()
+- EmailField()：继承自 CharField，多了对email的特殊处理（用正则表达式检查），对应数据库中 varchar
+- PositiveIntegerField()
+- PositiveSmallIntegerField()
+- SmallIntegerField()
+- BigIntegerField()
+- BinaryField()
+- NullBooleanField()
+- OneToOneField()
+- ForeignKey()
+- ManyToManyField()
+- OneToOneRel()
+- ManyToManyRel()
+- ManyToOneRel()
+
+
+
+
+#### 字段选项（字段参数）
+
+- primary_key：若为 True，则该字段会成为模型的**主键**字段，默认值是 False，一般作为 AutoField 的选项使用
+- blank：如果为 True，则该字段允许为空白（在**Django Admin后台管理**中），默认值是 False，和 MySQL 中控制该列值是否可以为 NULL 是两回事
+- null：如果为 True，表示允许为空，默认值是 False，对应 **MySQL 中控制该列值是否可以为 NULL**（建议 null 设置为 False，配合 default 选项使用）
+- default：设置所在列的**默认值**
+- db_index：若值为 True, 则在表中会为此字段创建**索引**（相当于目录），默认值是 False
+- unique：如果为 True, 这个字段在表中是**唯一索引**，默认值是 False
+- db_column：指定**列的名称**（一般情况下用不到），如果不指定，则使用字段名
+- verbose_name：设置该字段在 Admin 界面上的显示名称，默认值为字段名
+
+### 模型类的 Meta内部类
+
+使用内部 Meat类 来给模型赋予属性，Meta类下有很多内建的类属性，可对模型类做一些控制
+
+
+
+
+
+
+
+
+
+
 
 ## 为模型的改变生成迁移文件（makemigrations）
 
@@ -404,4 +463,11 @@ urlpatterns = [
 
 现在，运行开发服务器，访问 http://127.0.0.1:8000/blog/first_article 就可以看到如下
 ![](resources/2024-01-12-20-02-33.png)
+
+# ORM 操作
+
+![](resources/2024-01-17-22-31-40.png)
+
+关键是 **管理器对象**
+![](resources/2024-01-17-22-33-13.png)
 
