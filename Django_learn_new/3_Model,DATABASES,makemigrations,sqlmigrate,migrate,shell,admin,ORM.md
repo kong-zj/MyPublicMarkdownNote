@@ -288,6 +288,8 @@ migrate 命令选中所有还没有执行过的迁移（Django 通过在数据�
 
 Django的manager提供了shell工具，可以让我们在命令行中测试python代码，这样就极大的方便了调试Django代码
 
+利用 Django Shell 可以替代编写 View视图 的代码来进行直接操作
+
 ## 使用Django Shell
 
 通过以下命令打开 Python 命令行
@@ -370,7 +372,7 @@ python3 manage.py createsuperuser
 
 ### 登录页面进行管理
 
-DDjango Admin模块 默认就是启用的
+Django Admin模块 默认就是启用的
 
 启动开发服务器，看看它是什么样的
 ```sh
@@ -470,4 +472,89 @@ urlpatterns = [
 
 关键是 **管理器对象**
 ![](resources/2024-01-17-22-33-13.png)
+
+## 创建数据（Create）
+
+### 方式1
+
+执行 objects.create() 方法创建数据
+```py
+MyModel.objects.create(属性1=值1, 属性2=值2, ...)
+```
+成功：返回创建好的实体对象
+失败：抛出异常
+
+### 方式2
+
+创建 MyModel 实体对象，然后调用 save() 方法进行保存
+```py
+obj=MyModel(属性=值, 属性=值, ...)
+obj.属性=值
+obj.save()
+```
+
+## 查询数据（Read）
+
+![](resources/2024-01-17-23-26-28.png)
+
+**只要返回结果是 QuerySet，其后可继续叠加使用这些查询方法**
+
+### all() 方法
+
+用法：`MyModel.objects.all()`
+作用：查询 MyModel 实体中的**所有的数据**
+等同于：`select * from table`
+返回值：**QuerySet容器对象**，内部存放 **MyModel实例**
+
+### values('列1', '列2') 方法
+
+用法：`MyModel.objects.values('列1', '列2')`
+作用：查询**部分列的数据**
+等同于：`select 列1, 列2 from table`
+返回值：**QuerySet容器对象**，内部存放 **字典**，每个字典代表一条数据，格式为 `{'列1':值1, '列2':值2}`
+
+### values_list('列1', '列2') 方法
+
+用法：`MyModel.objects.values_list('列1', '列2')`
+作用：返回**元组形式**的查询结果
+等同于：`select 列1, 列2 from table`
+返回值：**QuerySet容器对象**，内部存放 **元组**，会将查询出来的数据封装到元组中，再封装到查询集合QuerySet中
+
+### order_by('-列', '列') 方法
+
+用法：`MyModel.objects.order_by('-列', '列')`
+作用：与 all() 方法不同，它会用SQL语句的 **ORDER BY 子句** 对查询结果进行根据某个字段选择性地进行**排序**
+说明：默认是按照**升序**排序，降序排序则需要在列前加`-`表示
+
+### get() 方法
+
+
+
+
+### filter() 方法
+
+
+
+
+
+### exclude() 方法
+
+
+
+
+
+
+
+## 更新数据（Update）
+
+
+
+
+
+## 删除数据（Delete）
+
+
+
+
+
 

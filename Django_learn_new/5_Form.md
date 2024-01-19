@@ -48,14 +48,15 @@
 
 django全套
 https://www.bilibili.com/video/BV1vK4y1o7jH
-到 P19
+
 
 
 剩P10  post form
 P13 静态文件
 
-P18 13min 创建数据
-P19 查询
+
+P19 查询 23min
+
 
 P23 F：并发 锁 Q：
 P26 注册自定义模型类（让admin管理） 模型管理器类（指定列表中那些信息）
@@ -76,6 +77,7 @@ csrf 防范（403 状态码）
 2_ .md   融合网上文章内容 View URL
 
 
+完善 字段类型
 
 
 
