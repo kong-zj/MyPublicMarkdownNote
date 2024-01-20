@@ -26,6 +26,7 @@ Django的 视图（View）通常和 URL路由 一起工作的。服务器在收�
 
 ## Django 路由（URLconf）
 
+分布式路由
 ![](resources/2024-01-17-21-19-15.png)
 
 ### 简介

@@ -156,6 +156,7 @@ class Article(models.Model):
 - `TimeField()`：对应数据库中 `time`
 
 #### 关系型
+
 - `ForeignKey()`：一对多关系，外键字段
 - `OneToOneField()`：一对一关系，外键字段
 - `ManyToManyField()`：多对多关系，第三张表
@@ -529,5 +530,4 @@ urlpatterns = [
 
 现在，运行开发服务器，访问 http://127.0.0.1:8000/blog/first_article 就可以看到如下
 ![](resources/2024-01-12-20-02-33.png)
-
 
