@@ -96,9 +96,10 @@ pymysql.install_as_MySQLdb()
 ## 创建博客文章模型（Model）
 
 ![](resources/2024-01-17-21-27-59.png)
+模型类 继承 `django.db.models.Model`
 
 在这个博客应用中，需要创建两个模型，即 文章Article 和 作者Author：
-- Article 模型有7个字段，文章id、标题、文章摘要、文章内容、发布时间、点赞数、作者，每个 Article 属于一个 Author（**多对一**的关系）
+- Article 模型有7个字段，文章id、标题、文章摘要、文章内容、发布时间、点赞数、作者，每个 Article 属于一个 Author，一个 Author 可对应 多个 Article（**一对多**的关系）
 - Author 模型有2个字段，作者id、作者名
 
 修改 **blog/models.py** 文件的内容为：
@@ -123,43 +124,45 @@ class Article(models.Model):
     # 使用参数 auto_now=True 后，无法使用ORM手动修改该字段，哪怕填充了字段的值也会被覆盖
     publish_time = models.DateTimeField(auto_now=True)
     support = models.IntegerField(default=0)
-    # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：多对一、多对多和一对一
+    # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：一对多、多对多、一对一
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 ```
 
 ### 字段类型
 
-- BooleanField()：对应数据库中 tinyint(1)
-- CharField()：需要 max_length 参数，对应数据库中 varchar(max_length)
-- TextField()：对应数据库中 longtext
-- IntegerField()：对应数据库中 int
-- DateField()：对应数据库中 date
-- DateTimeField()：对应数据库中 datetime(6)
-- TimeField()
-- DecimalField()：对应数据库中 decimal(max_digits,decimal_places)
-- FloatField()：对应数据库中 double
-- AutoField()
-- FileField()
-- ImageField()：继承自 FileField，用来保存图片的路径（注意并不是图片本身），对应数据库中 varchar(100)
-- URLField()
-- EmailField()：继承自 CharField，多了对email的特殊处理（用正则表达式检查），对应数据库中 varchar
-- PositiveIntegerField()
-- PositiveSmallIntegerField()
-- SmallIntegerField()
-- BigIntegerField()
-- BinaryField()
-- NullBooleanField()
-- OneToOneField()
-- ForeignKey()
-- ManyToManyField()
-- OneToOneRel()
-- ManyToManyRel()
-- ManyToOneRel()
+#### 数值型
 
+- `IntegerField()`：整数，对应数据库中 `int`
+- `AutoField()`：自动增长的 `IntegerField()`，对应数据库中 `int`
+- `BooleanField()`：布尔类型字段，对应数据库中 `tinyint(1)`
+- `DecimalField()`：对应数据库中 `decimal(max_digits,decimal_places)`，开发对数据精准要求较高的业务时考虑使用
+- `PositiveIntegerField()`：只可是正数的 `IntegerField()`
+- `SmallIntegerField()`：只支持从 -32768 到 32767 的值的 `IntegerField()`
 
+#### 字符型
 
+- `CharField()`：需要 max_length 参数，对应数据库中 `varchar(max_length)`
+- `URLField()`：继承自 `CharField()`，但是实现了对URL特特殊处理。用来存储URL数据，非URL数据可以在业务层就拒绝掉，不会存入数据库中
+- `EmailField()`：继承自 `CharField()`，多了对email的特殊处理（用正则表达式检查）
+- `FileField()`：继承自 `CharField()`，多了对文件的特殊处理
+- `ImageField()`：继承自 `FileField()`，用来保存图片的路径（注意并不是图片本身）
+- `UUIDField()`：用于保存UUID格式的数据，对应数据库中 `varchar(32)`
+- `TextField()`：用于存放大量文本内容，对应数据库中 `longtext`
 
-#### 字段选项（字段参数）
+#### 日期型
+
+- `DateField()`：对应数据库中 `date`
+- `DateTimeField()`：对应数据库中 `datetime(6)`
+- `TimeField()`：对应数据库中 `time`
+
+#### 关系型
+- `ForeignKey()`：一对多关系，外键字段
+- `OneToOneField()`：一对一关系，外键字段
+- `ManyToManyField()`：多对多关系，第三张表
+
+注意：这里 对应的数据库，特指 MySQL数据库
+
+### 字段选项（字段参数）
 
 - primary_key：若为 True，则该字段会成为模型的**主键**字段，默认值是 False，一般作为 AutoField 的选项使用
 - blank：如果为 True，则该字段允许为空白（在**Django Admin后台管理**中），默认值是 False，和 MySQL 中控制该列值是否可以为 NULL 是两回事
@@ -174,15 +177,7 @@ class Article(models.Model):
 
 使用内部 Meat类 来给模型赋予属性，Meta类下有很多内建的类属性，可对模型类做一些控制
 
-
-
-
-
-
-
-
-
-
+![](resources/2024-01-20-21-15-48.png)
 
 ## 为模型的改变生成迁移文件（makemigrations）
 
@@ -288,7 +283,7 @@ migrate 命令选中所有还没有执行过的迁移（Django 通过在数据�
 
 Django的manager提供了shell工具，可以让我们在命令行中测试python代码，这样就极大的方便了调试Django代码
 
-利用 Django Shell 可以替代编写 View视图 的代码来进行直接操作
+利用 Django Shell 可以**替代编写 View视图 的代码**来进行直接操作
 
 ## 使用Django Shell
 
@@ -330,7 +325,7 @@ class Article(models.Model):
     # 使用参数 auto_now=True 后，无法使用ORM手动修改该字段，哪怕填充了字段的值也会被覆盖
     publish_time = models.DateTimeField(auto_now=True)
     support = models.IntegerField(default=0)
-    # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：多对一、多对多和一对一
+    # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：一对多、多对多、一对一
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     # 添加一个自定义方法
     def was_published_recently(self):
@@ -355,7 +350,7 @@ class Article(models.Model):
 
 ## 简介
 
-Django Admin模块 是自带的一个基于Web的后台管理工具，它能够提供对Django模型（Model）及其数据的CRUD（Create,Read,Update,Delete）操作
+Django Admin模块 是自带的一个基于Web的后台管理工具，它能够提供对Django模型（Model）及其数据的CRUD（Create、Read、Update、Delete）操作
 
 之前使用的 Django Shell 使用起来比较复杂，Django Admin模块 使用更方便
 
@@ -385,7 +380,9 @@ python3 manage.py runserver
 看到几种可编辑的内容：组和用户。它们是由 `django.contrib.auth` 提供的，这是 Django 开发的认证框架
 但是没有看到我们创建的 **文章Article** 和 **作者Author** 模型，这是因为没有把它们注册到 Admin 里面
 
-### 注册模型到 Admin
+### 注册模型到 Admin（register）
+
+通过 `admin.site.register()` 方法来注册模型到 Admin 里面
 
 修改 **blog/admin.py** 文件的内容为：
 ```py
@@ -416,6 +413,73 @@ admin.site.register(Author)
 新增一些 Article 和 Author 数据，方便之后演示 渲染数据
 ![](resources/2024-01-13-10-40-13.png)
 ![](resources/2024-01-13-11-01-27.png)
+
+### 完善列表中的数据显示样式（ModelAdmin）（完善 注册模型到 Admin）
+
+发现 Django 自带的 **用户User** 模型，能显示好几个列，很直观
+![](resources/2024-01-20-20-10-02.png)
+
+但是我们自己写的 **文章Article** 和 **作者Author** 模型，只能显示一列，不直观，怎么设置？
+![](resources/2024-01-13-10-40-13.png)
+![](resources/2024-01-13-11-01-27.png)
+
+答：使用 **模型管理器类**（必须继承 `django.contrib.admin.ModelAdmin`）
+
+修改 **blog/admin.py** 文件的内容为：
+```py
+from django.contrib import admin
+from .models import Article, Author
+
+# 模型管理器类
+class ArticleAdmin(admin.ModelAdmin):
+    # 列表页显示哪些字段的列
+    list_display = ['article_id', 'title', 'brief_content', 'publish_time', 'support', 'author']
+    # 控制 list_display 中的哪些字段，可以链接跳转到详情页
+    list_display_links = ['title']
+    # 过滤器，用来分类查询
+    list_filter = ['author']
+    # 添加搜索框，对指定的字段进行模糊查询
+    search_fields = ['title', 'brief_content']
+    # 添加可在列表页编辑的字段
+    list_editable = ['support', 'author']
+
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ['author_id', 'name']
+
+admin.site.register(Article, ArticleAdmin)
+admin.site.register(Author, AuthorAdmin)
+
+# admin.site.register(Article)
+# admin.site.register(Author)
+```
+新定义的 **模型管理器类**，作为**第二个参数**传给 `admin.site.register()` 函数，这样就实现了自定义显示样式
+
+访问 http://127.0.0.1:8000/admin/blog/article/ 页面和 http://127.0.0.1:8000/admin/blog/author/ 页面，效果如下
+![](resources/2024-01-20-21-00-53.png)
+![](resources/2024-01-20-21-01-40.png)
+
+#### 简写（使用 装饰器）
+
+修改 **blog/admin.py** 文件的内容为：
+```py
+from django.contrib import admin
+from .models import Article, Author
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ['article_id', 'title', 'brief_content', 'publish_time', 'support', 'author']
+    list_display_links = ['title']
+    list_filter = ['author']
+    search_fields = ['title', 'brief_content']
+    list_editable = ['support', 'author']
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ['author_id', 'name']
+```
+在新定义的 **模型管理器类** 前面加上 `@admin.register()`
+
+效果不变
 
 # 实现博客数据返回页面
 
@@ -465,96 +529,5 @@ urlpatterns = [
 
 现在，运行开发服务器，访问 http://127.0.0.1:8000/blog/first_article 就可以看到如下
 ![](resources/2024-01-12-20-02-33.png)
-
-# ORM 操作
-
-![](resources/2024-01-17-22-31-40.png)
-
-关键是 **管理器对象**
-![](resources/2024-01-17-22-33-13.png)
-
-## 创建数据（Create）
-
-### 方式1
-
-执行 objects.create() 方法创建数据
-```py
-MyModel.objects.create(属性1=值1, 属性2=值2, ...)
-```
-成功：返回创建好的实体对象
-失败：抛出异常
-
-### 方式2
-
-创建 MyModel 实体对象，然后调用 save() 方法进行保存
-```py
-obj=MyModel(属性=值, 属性=值, ...)
-obj.属性=值
-obj.save()
-```
-
-## 查询数据（Read）
-
-![](resources/2024-01-17-23-26-28.png)
-
-**只要返回结果是 QuerySet，其后可继续叠加使用这些查询方法**
-
-### all() 方法
-
-用法：`MyModel.objects.all()`
-作用：查询 MyModel 实体中的**所有的数据**
-等同于：`select * from table`
-返回值：**QuerySet容器对象**，内部存放 **MyModel实例**
-
-### values('列1', '列2') 方法
-
-用法：`MyModel.objects.values('列1', '列2')`
-作用：查询**部分列的数据**
-等同于：`select 列1, 列2 from table`
-返回值：**QuerySet容器对象**，内部存放 **字典**，每个字典代表一条数据，格式为 `{'列1':值1, '列2':值2}`
-
-### values_list('列1', '列2') 方法
-
-用法：`MyModel.objects.values_list('列1', '列2')`
-作用：返回**元组形式**的查询结果
-等同于：`select 列1, 列2 from table`
-返回值：**QuerySet容器对象**，内部存放 **元组**，会将查询出来的数据封装到元组中，再封装到查询集合QuerySet中
-
-### order_by('-列', '列') 方法
-
-用法：`MyModel.objects.order_by('-列', '列')`
-作用：与 all() 方法不同，它会用SQL语句的 **ORDER BY 子句** 对查询结果进行根据某个字段选择性地进行**排序**
-说明：默认是按照**升序**排序，降序排序则需要在列前加`-`表示
-
-### get() 方法
-
-
-
-
-### filter() 方法
-
-
-
-
-
-### exclude() 方法
-
-
-
-
-
-
-
-## 更新数据（Update）
-
-
-
-
-
-## 删除数据（Delete）
-
-
-
-
 
 

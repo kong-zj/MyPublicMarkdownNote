@@ -48,18 +48,17 @@
 
 django全套
 https://www.bilibili.com/video/BV1vK4y1o7jH
-
+P27
 
 
 剩P10  post form
 P13 静态文件
 
 
-P19 查询 23min
+P21-22 get post 表单学习时看
 
 
-P23 F：并发 锁 Q：
-P26 注册自定义模型类（让admin管理） 模型管理器类（指定列表中那些信息）
+
 P27-28 一对一、一对多、多对多
 P29-30 session cookies
 

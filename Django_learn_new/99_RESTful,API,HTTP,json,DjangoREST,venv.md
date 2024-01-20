@@ -381,7 +381,7 @@ INSTALLED_APPS = [
 
 ### urlpatterns 中加入 `path('api-auth/', include('rest_framework.urls'))`
 
-修改 **drf_tutorial/course_api/admin.py** 文件的内容为：
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
 ```py
 from django.contrib import admin
 from django.urls import path, include
