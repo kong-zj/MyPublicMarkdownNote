@@ -43,14 +43,14 @@ obj.save()
 用法：`MyModel.objects.values('列1', '列2', ...)`
 作用：查询**部分列的数据**
 等同于：`select 列1, 列2 from table`
-返回值：**QuerySet容器对象**，内部存放 **字典**，每个字典代表一条数据，格式为 `{'列1':值1, '列2':值2}`
+返回值：**ValuesQuerySet**（QuerySet 的子类），内部存放 **字典**，每个字典代表一条数据，格式为 `{'列1':值1, '列2':值2}`
 
 ### values_list('列1', '列2', ...) 方法
 
 用法：`MyModel.objects.values_list('列1', '列2', ...)`
 作用：返回**元组形式**的查询结果
 等同于：`select 列1, 列2 from table`
-返回值：**QuerySet容器对象**，内部存放 **元组**，会将查询出来的数据封装到元组中，再封装到查询集合QuerySet中
+返回值：**ValuesListQuerySet**（类似 List），内部存放 **元组**，每个元组代表一条数据，格式为 `(值1, 值2)`
 
 ### order_by('-列', '列', ...) 方法
 
@@ -177,7 +177,7 @@ obj.save()
 
 ```py
 from django.db.models import F
-F("列名")
+F('列名')
 ```
 
 注意：F对象出现在 `=` 的右边 
@@ -264,56 +264,68 @@ Q(条件1) | Q(条件2)
 
 ## 整表聚合（aggregate）
 
+### 简介
+
 整表聚合就是**不带分组的聚合查询**，即将全部数据进行集中统计查询
 
-聚合查询需要导入聚合函数
+### 语法
+
 ```py
+# 导入聚合函数
 from django.db.models import *
-常见的聚合函数有Sum，Avg，Count，Max，Min
+# 常见的聚合函数有 Sum、Avg、Count、Max、Min
+MyModel.objects.aggregate(结果变量的别名=聚合函数('列名'))
 ```
 
+聚合函数 `aggregate()` 是 QuerySet 的一个终止子句，生成的一个汇总值，相当于 `count()`
+使用 `aggregate()` 后，数据类型就变为**字典**，不能再使用 QuerySet 数据类型的一些API了
+
+返回值：**字典**，**键**的名称默认是 `列名__聚合函数名`（可以起别名），**值**是计算出来的聚合值， 格式为 `{'结果变量的别名': 值}`
+
+### 示例
+
+需求：统计文章的总数
+
+![](resources/2024-01-21-17-14-22.png)
+
+## 分组聚合（annotate）
+
+为了演示，又增加了一些文章
+![](resources/2024-01-21-17-30-17.png)
+
+### 简介
+
+分组聚合就是**先对数据进行分组**，再对每个组内的数据进行统计查询
+
 ### 语法
-
-
-聚合函数aggregate()是QuerySet的一个终止子句，生成的一个汇总值，相当于count()。
-
-使用aggregate()后，数据类型就变为字典，不能再使用QuerySet数据类型的一些API了。
-
-返回的字典中：键的名称默认是（属性名称加上__聚合函数名），值是计算出来的聚合值
-
-要自定义返回字典的键的名称，可以起别名：
-
 
 ```py
-MyModel.objects.aggregate(别名=聚合函数（‘列’）)
-
+# 导入聚合函数
+from django.db.models import *
+# 常见的聚合函数有 Sum、Avg、Count、Max、Min
+# 注意不是 MyModel.objects.annotate(结果变量的别名=聚合函数('列名'))
+QuerySet = MyModel.objects.values('用于分组的列名')
+QuerySet.annotate(结果变量的别名=聚合函数('列名'))
 ```
 
-返回结果：结果变量名和值 组成的**字典**，即 `{'结果变量名': 值}`
+返回值：**QuerySet容器对象**（后面可以继续链式调用其他方法，比如 `HAVING`）
 
+#### 分组（values）
 
+这里使用 `values()` 而不是 `all()` 或 `values_list()` 进行分组
+![](resources/2024-01-21-17-47-07.png)
 
+### 示例1
 
+需求：对文章按作者进行分组，统计每组文章的最大 support 值
 
+![](resources/2024-01-21-17-50-18.png)
 
+### 示例2：HAVING 操作
 
+需求：对文章按作者进行分组，统计每组文章的最大 support 值，要求最大 support 值大于 50
 
-## 分组聚合
-
-分组聚合就是指通过计算查询结果中的每一个对象所关联的对象集合，从而得出总计值，即为查询集的每一项生成聚合
-
-### 语法
-
-QuerySet.annotate(结果变量名=聚合函数（‘列’）)
-返回值为QuerySet
-
-
-P24 11min
-
-having
-
-
-
+![](resources/2024-01-21-17-54-22.png)
 
 # ORM 中使用 原生数据库操作
 
