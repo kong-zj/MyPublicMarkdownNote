@@ -295,7 +295,7 @@ MyModel.objects.aggregate(结果变量的别名=聚合函数('列名'))
 
 ### 简介
 
-分组聚合就是**先对数据进行分组**，再对每个组内的数据进行统计查询
+分组聚合就是**先对数据进行分组**（对应数据库中的 `GROUP BY`），再对每个组内的数据进行统计查询
 
 ### 语法
 
@@ -321,26 +321,59 @@ QuerySet.annotate(结果变量的别名=聚合函数('列名'))
 
 ![](resources/2024-01-21-17-50-18.png)
 
-### 示例2：HAVING 操作
+### 示例2：继续 HAVING 操作
 
 需求：对文章按作者进行分组，统计每组文章的最大 support 值，要求最大 support 值大于 50
 
 ![](resources/2024-01-21-17-54-22.png)
 
-# ORM 中使用 原生数据库操作
+# ORM 中使用 原生数据库操作（不推荐）
 
-## 查询
+## raw（只能用于查询，需要模型类）
 
-语法1：MyModel.objects.raw(sql语句)，不安全，存在SQL注入风险
-语法2：MyModel.objects.raw(sql语句，条件参数),此种安全，django默认处理掉SQL注入风险
+### 语法1
+
+```py
+MyModel.objects.raw(sql语句)
+```
+
+不安全，存在**SQL注入**风险
 返回值：**RawQuerySet集合对象**，只支持基础操作，比如循环
 
-P24
+### 示例1
 
-SQL注入
+![](resources/2024-01-21-18-09-31.png)
 
-## 
+### 语法2
 
+```py
+MyModel.objects.raw(sql语句, 拼接参数)
+```
+
+安全，django默认处理掉SQL注入风险
+返回值：**RawQuerySet集合对象**，只支持基础操作，比如循环
+
+### 示例2
+
+![](resources/2024-01-21-18-21-09.png)
+
+## cursor（增删改查都可以，完全跨过模型类操作数据库）
+
+### 语法
+
+```py
+# 导入cursor所在的包
+from django.db import connection
+# 用创建cursor类的构造函数创建cursor对象，再使用cursor对象，为保证在出现异常时能释放cursor资源，通常使用with语句
+with connection.cursor() as cursor:
+	cursor.execute(sql语句，拼接参数)
+```
+
+### 示例
+
+![](resources/2024-01-21-18-31-37.png)
+
+# ORM 中的 关系映射
 
 
 
