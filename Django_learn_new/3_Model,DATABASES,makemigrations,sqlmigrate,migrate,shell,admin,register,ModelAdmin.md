@@ -124,7 +124,7 @@ class Article(models.Model):
     # 使用参数 auto_now=True 后，无法使用ORM手动修改该字段，哪怕填充了字段的值也会被覆盖
     publish_time = models.DateTimeField(auto_now=True)
     support = models.IntegerField(default=0)
-    # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：一对多、多对多、一对一
+    # 使用 ForeignKey 定义了一对多关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：一对多、多对多、一对一
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 ```
 
@@ -326,7 +326,7 @@ class Article(models.Model):
     # 使用参数 auto_now=True 后，无法使用ORM手动修改该字段，哪怕填充了字段的值也会被覆盖
     publish_time = models.DateTimeField(auto_now=True)
     support = models.IntegerField(default=0)
-    # 使用 ForeignKey 定义了一个关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：一对多、多对多、一对一
+    # 使用 ForeignKey 定义了一对多关系。这将告诉 Django，每个 Article 对象都关联到一个 Author 对象。Django 支持所有常用的数据库关系：一对多、多对多、一对一
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     # 添加一个自定义方法
     def was_published_recently(self):

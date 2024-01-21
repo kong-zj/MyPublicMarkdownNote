@@ -337,7 +337,7 @@ QuerySet.annotate(结果变量的别名=聚合函数('列名'))
 MyModel.objects.raw(sql语句)
 ```
 
-不安全，存在**SQL注入**风险
+自己拼接字符串，不安全，存在**SQL注入**风险
 返回值：**RawQuerySet集合对象**，只支持基础操作，比如循环
 
 ### 示例1
@@ -375,5 +375,32 @@ with connection.cursor() as cursor:
 
 # ORM 中的 关系映射
 
+![](resources/2024-01-21-20-49-22.png)
 
+## 一对一 映射（OneToOneField）
 
+![](resources/2024-01-21-20-51-08.png)
+![](resources/2024-01-21-20-54-49.png)
+![](resources/2024-01-21-20-56-38.png)
+![](resources/2024-01-21-21-01-03.png)
+![](resources/2024-01-21-21-00-18.png)
+![](resources/2024-01-21-21-04-28.png)
+![](resources/2024-01-21-21-06-17.png)
+
+## 一对多 映射（ForeignKey）
+
+![](resources/2024-01-21-21-12-14.png)
+![](resources/2024-01-21-21-13-07.png)
+![](resources/2024-01-21-21-14-29.png)
+![](resources/2024-01-21-21-17-37.png)
+![](resources/2024-01-21-21-20-19.png)
+![](resources/2024-01-21-21-21-21.png)
+
+## 多对多 映射（ManyToManyField）
+
+![](resources/2024-01-21-21-25-10.png)
+![](resources/2024-01-21-21-27-27.png)
+![](resources/2024-01-21-21-29-23.png)
+![](resources/2024-01-21-21-30-02.png)
+![](resources/2024-01-21-21-35-05.png)
+![](resources/2024-01-21-21-36-12.png)

@@ -48,7 +48,7 @@
 
 django全套
 https://www.bilibili.com/video/BV1vK4y1o7jH
-P27
+P29
 
 
 剩P10  post form
@@ -59,7 +59,6 @@ P21-22 get post 表单学习时看
 
 
 
-P27-28 一对一、一对多、多对多
 P29-30 session cookies
 
 P31 项目
