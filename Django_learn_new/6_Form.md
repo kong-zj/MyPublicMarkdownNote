@@ -150,10 +150,73 @@ def get_detail_page(request, article_id):
     # 省略
 
 def new_article_page(request):
-
+    if request.method == 'POST':
+        new_article_dict = request.POST
+        # 创建Article实体对象
+        new_article = Article()
+        new_article.title = new_article_dict.get('title')
+        new_article.brief_content = new_article_dict.get('brief_content')
+        new_article.content = new_article_dict.get('content')
+        new_article.author_id = new_article_dict.get('author_id')
+        # 保存到数据库
+        new_article.save()
+        
+    return render(request, "blog/newarticle.html", {})
 ```
 
 点击提交按钮，效果如下
+![](resources/2024-01-22-19-27-18.png)
+![](resources/2024-01-22-19-27-59.png)
+可见，成功将表单提交的数据保存到数据库中
+
+### 响应表单提交的数据
+
+表单提交后，跳转到博客列表页面
+
+修改 **blog/views.py** 文件的内容为：
+```py
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .models import Article
+
+def get_index_page(request):
+    # 省略
+
+def get_detail_page(request, article_id):
+    # 省略
+
+def new_article_page(request):
+    if request.method == 'POST':
+        new_article_dict = request.POST
+        # 创建Article实体对象
+        new_article = Article()
+        new_article.title = new_article_dict.get('title')
+        new_article.brief_content = new_article_dict.get('brief_content')
+        new_article.content = new_article_dict.get('content')
+        new_article.author_id = new_article_dict.get('author_id')
+        # 保存到数据库
+        new_article.save()
+        # 路由重定向
+        return redirect('/blog/index')
+    else:
+        return render(request, "blog/newarticle.html", {})
+```
+
+点击提交按钮，效果如下
+![](resources/2024-01-22-19-50-57.png)
+![](resources/2024-01-22-19-57-23.png)
+可见，表单提交后，成功跳转到博客列表页面
+
+## 使用 Django 表单
+
+
+
+
+
+
+
+
+
 
 
 
@@ -172,7 +235,8 @@ https://www.bilibili.com/video/BV1vK4y1o7jH
 P29
 
 
-剩P10  post form
+
+
 P13 静态文件
 
 
@@ -192,8 +256,8 @@ P41 跳过
 
 2_ .md   融合网上文章内容 View URL
 
-
-完善 字段类型
+redirect 路由重定向
+https://zhuanlan.zhihu.com/p/139292534
 
 
 

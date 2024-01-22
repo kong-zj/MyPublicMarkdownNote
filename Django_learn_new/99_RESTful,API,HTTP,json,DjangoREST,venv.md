@@ -34,11 +34,12 @@ API 即 应用程序接口（英文：Application Programming Interface，简称
 
 比如说我们有一个可以允许我们查看（view），创建（create），编辑（edit），删除（delete）图书的应用程序。我们可以创建一个可以让我们执行这些功能的 HTTP API：
 `http://demo.com/view_books`
+`http://demo.com/view_book?id=1`
 `http://demo.com/create_new_book?name=shuxue`
 `http://demo.com/update_book?id=1&name=shuxue`
 `http://demo.com/delete_book?id=1`
 
-这是4个 HTTP API，分别实现了图书的查看、新增、编辑、删除的操作，当我们把接口发布出去的时候，别人就可以通过这四个接口来调用相关的服务了。但是这样做有什么不方便的地方呢？你可能发现了，这种API的写法有一个缺点，那就是没有一个统一的风格，比如说第一个接口表示查询全部图书的信息，我们也可以写成这样：
+这是5个 HTTP API，分别实现了图书的查看全部、查看一本、新增、编辑、删除的操作，当我们把接口发布出去的时候，别人就可以通过这些接口来调用相关的服务了。但是这样做有什么不方便的地方呢？你可能发现了，这种API的写法有一个缺点，那就是没有一个统一的风格，比如说第一个接口表示查询全部图书的信息，我们也可以写成这样：
 `http://demo.com/books/list`
 
 那这样就会造成使用我们接口的其他人，必须得参考API才能知道它是怎么运作的
@@ -67,24 +68,32 @@ HTTP 总共包含以下动词：
 
 REST 的作用是将我们上面提到的查看（view），创建（create），编辑（edit），删除（delete）直接映射到 HTTP 中已实现的 GET，POST，PUT，DELETE 方法
 
-我们重新将上面的四个接口改写成REST风格
+我们重新将上面的5个接口改写成REST风格
 
 查看所有图书：
 - GET http://demo.com/books
+
+查看一本图书：
+- GET http://demo.com/books/1
 
 新增一本书：
 - POST http://demo.com/books
 - Data: name=shuxue
 
 修改一本书：
-- PUT http://demo.com/books
-- Data: id=1,name=shuxue
+- PUT http://demo.com/books/1
+- Data: name=shuxue
 
 删除一本书：
-- DELETE http://demo.com/books
-- Data: id=1
+- DELETE http://demo.com/books/1
+
+> 统一资源接口要求使用标准的HTTP方法对资源进行操作，所以URL只应该来表示资源的名称，而不应该包括资源的操作（**URL不应该使用动作来描述**）
 
 这样改动之后API变得统一了，我们只需要改变请求方式就可以完成相关的操作，这样大大简化了我们接口的理解难度，变得易于调用，这就是REST风格的意义
+
+### 过滤
+
+![](resources/2024-01-22-10-36-34.png)
 
 ### HTTP 状态码
 
@@ -100,7 +109,7 @@ REST 的另一重要部分就是为既定好请求的类型来响应正确的状
 
 上面介绍了REST API的写法，响应状态码，剩下就是请求的数据格式以及响应的数据格式。说的通俗点就是，我们用什么格式的参数去请求接口并且我们能得到什么格式的响应结果
 
-我这里只介绍一种用的最多的格式：JSON格式
+我这里只介绍一种用的最多的格式：**JSON格式**（**前端的js对象** 和 **后端的字典** 之前的桥梁）
 目前json已经发展成了一种最常用的数据格式，由于其轻量、易读的优点
 
 所以我们经常会看到一个请求的header信息中有这样的参数：
@@ -123,6 +132,16 @@ Accept:application/json
 	}]
 }
 ```
+
+### 返回结果
+
+针对不同操作（如GET、POST），服务器向用户返回的结果应该符合以下规范：
+- GET /collections：返回资源对象的列表（数组）
+- GET /collections/identity：读取资源时，传入标识符（identity），服务端返回标识符指定的单个资源对象
+- POST /collections：返回新生成的资源对象
+- PUT /collections/identity：返回完整的资源对象
+- PATCH /collections/identity：返回完整的资源对象
+- DELETE /collections/identity：返回空的资源对象
 
 # Django 和 DRF 的区别和联系
 
@@ -320,6 +339,10 @@ python3 manage.py runserver
 
 到此，我们已经完成了Django部分，由于本示例是为了创建一个API服务，所以我们不需要创建模板和视图。相反，我们还需要继续添加 **Django Rest** 库来处理将模型数据转换为 **RESTful API**
 
+# 如果不使用 Django REST framework
+
+
+
 # 使用 Django REST framework
 
 [Django REST framework 官网](https://www.django-rest-framework.org/)
@@ -339,6 +362,7 @@ pip install uritemplate
 ## Django Rest Framework 的模块介绍
 
 20个：
+
 序列化
 视图
 路由
@@ -470,7 +494,7 @@ python3 manage.py runserver
 
 
 
-
+ 
 
 
 
@@ -546,12 +570,6 @@ djangoREST
 https://www.bilibili.com/video/BV1Dm4y1c7QQ/
 
 
-djangoREST2
-https://www.bilibili.com/video/BV1k5411p7Kp
-
-
-
-
 P7
 
 
@@ -564,3 +582,15 @@ P4 配置文件 static
 
 教学资源
 https://github.com/liaogx/drf-tutorial
+
+
+
+---
+
+
+djangoREST2
+https://www.bilibili.com/video/BV1k5411p7Kp
+
+P5
+
+
