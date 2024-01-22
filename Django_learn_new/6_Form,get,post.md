@@ -128,8 +128,9 @@ def new_article_page(request):
     return render(request, "blog/newarticle.html", {})
 ```
 
-点击提交按钮，效果如下
+访问 http://127.0.0.1:8000/blog/newarticle 就可以看到如下
 ![](resources/2024-01-21-23-40-31.png)
+输入信息并点击提交按钮，效果如下
 ![](resources/2024-01-21-23-41-07.png)
 可见，可以拿到表单提交的数据
 
@@ -164,8 +165,9 @@ def new_article_page(request):
     return render(request, "blog/newarticle.html", {})
 ```
 
-点击提交按钮，效果如下
+访问 http://127.0.0.1:8000/blog/newarticle 就可以看到如下
 ![](resources/2024-01-22-19-27-18.png)
+输入信息并点击提交按钮，效果如下
 ![](resources/2024-01-22-19-27-59.png)
 可见，成功将表单提交的数据保存到数据库中
 
@@ -202,10 +204,86 @@ def new_article_page(request):
         return render(request, "blog/newarticle.html", {})
 ```
 
-点击提交按钮，效果如下
+访问 http://127.0.0.1:8000/blog/newarticle 就可以看到如下
 ![](resources/2024-01-22-19-50-57.png)
+输入信息并点击提交按钮，效果如下
 ![](resources/2024-01-22-19-57-23.png)
 可见，表单提交后，成功跳转到博客列表页面
+
+### 表单中展示数据，供用户选择
+
+![](resources/2024-01-21-23-02-39.png)
+表单中的 文章作者ID 信息，需要用户手动输入，不直观。应该展示数据库中已有的作者信息，供用户选择
+
+修改 **blog/views.py** 文件的内容为：
+```py
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .models import Article, Author
+
+def get_index_page(request):
+    # 省略
+
+def get_detail_page(request, article_id):
+    # 省略
+
+def new_article_page(request):
+    if request.method == 'POST':
+        new_article_dict = request.POST
+        new_article = Article()
+        new_article.title = new_article_dict.get('title')
+        new_article.brief_content = new_article_dict.get('brief_content')
+        new_article.content = new_article_dict.get('content')
+        new_article.author_id = new_article_dict.get('author_id')
+        new_article.save()
+        return redirect('/blog/index')
+    else:
+        # 获取所有作者
+        all_authors = Author.objects.all()
+        context = {"all_authors": all_authors,}
+        return render(request, "blog/newarticle.html", context)
+```
+
+修改 **blog/templates/blog/newarticle.html** 文件的内容为：
+```html
+{% extends 'blog/base.html' %}
+
+{% block mytitle %}
+<title>newarticle</title>
+{% endblock %}
+
+{% block myblog %}
+<div class="container page-header">
+    <h3>新增文章</h3>
+</div>
+<div class="container body-main">
+    <form action="/blog/newarticle" method="post">
+        <label for="title">文章标题:</label>
+        <input type="text" id="title" name="title" />
+        <br>
+        <label for="brief_content">文章概要:</label>
+        <input type="text" id="brief_content" name="brief_content" />
+        <br>
+        <label for="content">文章内容:</label>
+        <input type="text" id="content" name="content" />
+        <br>
+        <label for="author_id">文章作者:</label>
+        <select id="author_id" name="author_id">
+            {% for author in all_authors %}
+            <option value="{{ author.author_id }}">{{ author.name }}</option>
+            {% endfor %}
+        </select>    
+        <br>
+        <input type="submit" value="提交" />
+    </form>
+</div>
+{% endblock %}
+```
+
+访问 http://127.0.0.1:8000/blog/newarticle 就可以看到如下
+![](resources/2024-01-22-20-25-40.png)
+输入信息并点击提交按钮，效果如下
+![](resources/2024-01-22-20-27-03.png)
 
 ## 使用 Django 表单
 
