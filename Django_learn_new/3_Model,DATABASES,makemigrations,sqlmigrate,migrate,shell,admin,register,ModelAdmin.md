@@ -93,7 +93,7 @@ import pymysql
 pymysql.install_as_MySQLdb()
 ```
 
-## 创建博客文章模型（Model）
+## 创建 博客文章模型类 和 作者模型类（Model）
 
 ![](resources/2024-01-17-21-27-59.png)
 模型类 继承 `django.db.models.Model`
