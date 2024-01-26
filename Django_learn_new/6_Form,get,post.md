@@ -1,4 +1,4 @@
-# Django 表单（Form）
+# Django Form表单
 
 之前浏览器发送过来的请求都是 GET 请求，网站只发布内容且不接受客户的输入
 接下来，我们需要需要客户输入内容来做交互，要让浏览器发送过来的请求是 POST 请求，接收、处理、响应客户在HTML页面的输入
@@ -17,7 +17,7 @@ HTML 表单用于收集用户的输入信息
 
 ### 添加新文章页面
 
-新建 **blog/templates/blog/newarticle.html** 文件，内容为
+新建 **blog/templates/blog/newarticle.html** 文件，内容为：
 ```html
 {% extends 'blog/base.html' %}
 
@@ -286,15 +286,26 @@ def new_article_page(request):
 输入信息并点击提交按钮，效果如下
 ![](resources/2024-01-22-20-27-03.png)
 
-## Django 表单 简介
+## Django Form表单 简介
 
 在Web站点中与后端服务进行交互，通常使用表单提交的方式。表单提交数据到达后端，首先要对数据做校验，对于不合法的数据需要拒绝并提示给前端，通过校验之后才能执行服务返回响应。由于所有的表单创建与处理流程都是相似的，所以，Django将这一过程抽象出来，形成表单系统。从在浏览器中显示表单到数据验证，再到对错误的处理，都可以由表单系统来完成
 
-Django中的表单丰富了传统的HTML语言中的表单。在Django中的表单，主要做以下两件事：
-1. 渲染表单模板
-2. 验证数据是否合法
+![](resources/2024-01-26-09-47-25.png)
 
-## 使用 Django 表单
+基于上图，Django 表单处理的主要内容是：
+1. 在用户第一次请求时，显示默认表单
+    1. 表单可能包含空白字段（例如，如果你正在创建新记录），或者可能预先填充了初始值（例如，如果你要更改记录，或者具有有用的默认初始值）
+    2. 此时表单被称为未绑定，因为它与用户输入的数据无关（尽管它可能具有初始值）
+2. 从提交请求接收数据，并将其绑定到表单
+    1. 将数据绑定到表单，意味着当我们需要重新显示表单时，用户输入的数据和任何错误都可取用
+3. 清理并验证数据
+    1. 清理数据会对输入执行清理（例如，删除可能用于向服务器发送恶意内容的无效字符）并将其转换为一致的 Python 类型
+    2. 验证检查值是否适合该字段（例如，在正确的日期范围内，不是太短或太长等）
+4. 如果任何数据无效，重新显示表单，这次使用任何用户填充的值，和问题字段的错误消息
+5. 如果所有数据都有效，执行必要的操作（例如保存数据，发送表单，返回搜索结果，上传文件等）
+6. 完成所有操作后，将用户重定向到另一个页面
+
+## 使用 Django Form表单
 
 ### 定义表单类（Form类）
 
@@ -303,7 +314,7 @@ Django中的表单丰富了传统的HTML语言中的表单。在Django中的表�
 表单类 继承 `django.forms.Form`
 **Form类** 的声明语法，与声明 **Model类** 非常相似，并且共享相同的**字段类型**（以及一些类似的**字段参数**）
 
-新建 **blog/forms.py** 文件，内容为
+新建 **blog/forms.py** 文件，内容为：
 ```py
 from django import forms
 
@@ -356,10 +367,11 @@ BooleanField, CharField, ChoiceField, TypedChoiceField, DateField, DateTimeField
 
 django网站的表单数据会交给后台的视图来处理，为了处理表单数据
 
-在视图中，使用 `form = RenewBookForm()` 创建一个表单对象
+在视图中，使用 `form = ArticleForm()` 创建一个表单对象
 
 修改 **blog/views.py** 文件的内容为：
 ```py
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from .models import Article, Author
@@ -394,7 +406,7 @@ def new_article_page2(request):
         return render(request, "blog/newarticle2.html", context)
 ```
 
-如果我们访问这个视图用的是 **GET请求**，它会创建一个空的表单实例并将其放置在模板上下文中进行渲染：`form = ArticleForm()`
+如果我们访问这个视图用的是 **GET请求**，它会创建一个空的表单实例并将其放置在模板上下文中进行渲染：`form = ArticleForm()`（**非绑定表单**）
 
 如果表单提交用的是 **POST请求**，那么该视图将再次创建一个表单实例并使用请求中的数据填充它：`form = ArticleForm(request.POST)` （**绑定数据到表单**）
 
@@ -405,11 +417,11 @@ def new_article_page2(request):
 
 2. 如果为 `True`，我们就能在 `form.cleaned_data` 属性中找到所有通过验证的表单数据。我们可以在发送一个HTTP重定向告诉浏览器下一步去向之前用这些数据更新数据库或者做其他处理（这里暂时只输出表单数据）
 
-### 创建模板文件
+### 创建添加新文章页面模板文件
 
 创建视图中要引用的模板
 
-新建 **blog/templates/blog/newarticle2.html** 文件，内容为
+新建 **blog/templates/blog/newarticle2.html** 文件，内容为：
 ```html
 {% extends 'blog/base.html' %}
 
@@ -430,7 +442,9 @@ def new_article_page2(request):
 {% endblock %}
 ```
 
-其中 `form` 是我们传入模板的**表单类实例对象**，使用 `{{ form }}` 渲染表单
+其中 `form` 是我们传入模板的**表单类实例对象**，使用 `{{ form }}` 渲染表单（渲染它相应的 `<label>` 和 `<input>` 元素）
+
+> 不要忘记，一张表单的输出**不**包含外层 `<form>标签` 以及 `submit控件`，这些必须由你自己提供
 
 ### URL 配置
 
@@ -448,7 +462,98 @@ urlpatterns = [
 ```
 
 访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到如下
-![](resources/2024-01-25-21-50-49.png)
+![](resources/2024-01-25-22-41-23.png)
+输入信息并点击提交按钮，效果如下
+![](resources/2024-01-25-22-44-12.png)
+可见，可以拿到表单提交的数据
+
+### 使用自定义表单模板
+
+[django文档-使用表单](https://docs.djangoproject.com/zh-hans/4.2/topics/forms/)
+
+但是，上面生成的HTML表单稍微有些格式上的问题：各个输入框之间不会自动换行
+下面，我们来解决这个问题
+
+> 在渲染表单时生成的 HTML 输出本身是通过模板生成的：
+> 1. 你可以通过创建一个合适的模板文件，并设置自定义的 `FORM_RENDERER` 来控制这个过程，以在整个站点范围内使用 `form_template_name`
+> 2. 你也可以通过覆盖表单的 `template_name` 属性来自定义每个表单，以使用自定义模板呈现表单
+> 3. 或者直接将模板名称传递给 `form.render()`
+
+这里只演示第2种方法
+
+新建 **blog/templates/blog/form_snippet.html** 文件，内容为：
+```html
+{% for field in form %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+    </div>
+{% endfor %}
+```
+
+修改 **blog/forms.py** 文件的内容为：
+```py
+from django import forms
+
+class ArticleForm(forms.Form):
+    template_name = "blog/form_snippet.html"
+    title = forms.CharField(widget=forms.TextInput, max_length=3,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
+    brief_content = forms.CharField(widget=forms.TextInput,label='文章概要')
+    content = forms.CharField(widget=forms.TextInput,label='文章内容')
+    author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
+```
+
+访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到如下
+![](resources/2024-01-26-09-40-30.png)
+
+#### 使用表单模板变量的自带方法
+
+要实现各个输入框之间自动换行，有更简单的办法，不用使用自定义表单模板
+
+删除 **blog/templates/blog/form_snippet.html** 文件
+
+复原 **blog/forms.py** 文件的内容为：
+```py
+from django import forms
+
+class ArticleForm(forms.Form):
+    title = forms.CharField(widget=forms.TextInput, max_length=3,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
+    brief_content = forms.CharField(widget=forms.TextInput,label='文章概要')
+    content = forms.CharField(widget=forms.TextInput,label='文章内容')
+    author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
+```
+
+删除 `ArticleForm` 类中的 `template_name = "blog/form_snippet.html"`
+
+修改 **blog/templates/blog/newarticle2.html** 文件的内容为：
+```html
+{% extends 'blog/base.html' %}
+
+{% block mytitle %}
+<title>newarticle</title>
+{% endblock %}
+
+{% block myblog %}
+<div class="container page-header">
+    <h3>新增文章</h3>
+</div>
+<div class="container body-main">
+    <form action="/blog/newarticle2" method="post">
+        {{ form.as_p }}
+        <input type="submit" value="提交" />
+    </form>
+</div>
+{% endblock %}
+```
+
+把 `{{ form }}` 改成了 `{{ form.as_p }}`
+
+在模板文件中我们可以通过一下方式渲染表单：
+- `{{ form.as_table }}` 将每个字段包裹在 `<tr>` 标签中
+- `{{ form.as_p }}` 将每个字段包裹在 `<p>` 标签中
+- `{{ form.as_ul }}` 将每个字段包裹在 `<li>` 标签中
+
+访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到显示效果和上面相比不变
 
 
 
@@ -461,23 +566,27 @@ urlpatterns = [
 
 
 
-f = CommentForm(auto_id=False)
->>> f.as_table()
-<tr><th>Name:</th><td><input type="text" name="name" required /></td></tr>
-<tr><th>Url:</th><td><input type="url" name="url" required /></td></tr>
-<tr><th>Comment:</th><td><input type="text" name="comment" required /></td></tr>
-
-
-在Django中，渲染表单模板是通过Form对象的as_p()方法实现的。
-
-在视图函数中，通过调用表单对象的as_p()方法，将表单渲染成HTML代码，并返回给浏览器。
 
 
 
 
 
 
-## ModelForm类
+
+
+
+
+
+
+# Django ModelForm表单
+
+
+
+## 使用 Django ModelForm表单
+
+
+
+
 
 
 不仅如此，基于数据表（Model）创建表单也是很常见的情况，Django同样考虑到了这一点，并提供了ModelForm来简化功能实现。
@@ -544,6 +653,8 @@ csrf 防范
 redirect 路由重定向
 https://zhuanlan.zhihu.com/p/139292534
 
+
+ORM 的三种映射
 
 
 继续 表单 学习

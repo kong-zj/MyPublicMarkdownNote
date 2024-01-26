@@ -727,7 +727,7 @@ def get_detail_page(request, article_id):
 
 #### 定义父模板（block）
 
-新建 **blog/templates/blog/base.html** 文件，内容为
+新建 **blog/templates/blog/base.html** 文件，内容为：
 ```html
 <!DOCTYPE html>
 <html lang="en">
