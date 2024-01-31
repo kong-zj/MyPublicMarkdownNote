@@ -319,7 +319,7 @@ def new_article_page(request):
 from django import forms
 
 class ArticleForm(forms.Form):
-    title = forms.CharField(widget=forms.TextInput, max_length=3,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
+    title = forms.CharField(widget=forms.TextInput, max_length=100,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
     brief_content = forms.CharField(widget=forms.TextInput,label='文章概要')
     content = forms.CharField(widget=forms.TextInput,label='文章内容')
     author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
@@ -363,7 +363,7 @@ BooleanField, CharField, ChoiceField, TypedChoiceField, DateField, DateTimeField
 
 
 
-### 渲染并绑定数据到表单
+### 渲染表单、绑定数据到表单
 
 django网站的表单数据会交给后台的视图来处理，为了处理表单数据
 
@@ -497,7 +497,7 @@ from django import forms
 
 class ArticleForm(forms.Form):
     template_name = "blog/form_snippet.html"
-    title = forms.CharField(widget=forms.TextInput, max_length=3,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
+    title = forms.CharField(widget=forms.TextInput, max_length=100,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
     brief_content = forms.CharField(widget=forms.TextInput,label='文章概要')
     content = forms.CharField(widget=forms.TextInput,label='文章内容')
     author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
@@ -517,7 +517,7 @@ class ArticleForm(forms.Form):
 from django import forms
 
 class ArticleForm(forms.Form):
-    title = forms.CharField(widget=forms.TextInput, max_length=3,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
+    title = forms.CharField(widget=forms.TextInput, max_length=100,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
     brief_content = forms.CharField(widget=forms.TextInput,label='文章概要')
     content = forms.CharField(widget=forms.TextInput,label='文章内容')
     author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
@@ -555,11 +555,52 @@ class ArticleForm(forms.Form):
 
 访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到显示效果和上面相比不变
 
+### 保存表单提交数据到数据库
 
+修改 **blog/views.py** 文件的内容为：
+```py
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .models import Article, Author
+from .forms import ArticleForm
 
+def get_index_page(request):
+    # 省略
 
+def get_detail_page(request, article_id):
+    # 省略
 
+def new_article_page(request):
+    # 省略
+   
+def new_article_page2(request):
+    if request.method == 'POST':
+        form = ArticleForm(request.POST)
+        print(form.is_valid())
+        if form.is_valid():
+            print(form.cleaned_data)
+            # 保存表单数据到数据库
+            title = form.cleaned_data['title']
+            brief_content = form.cleaned_data['brief_content']
+            content = form.cleaned_data['content']
+            author_id = form.cleaned_data['author_id']
+            Article.objects.create(title=title, brief_content=brief_content, content=content, author_id=author_id)
+            return HttpResponseRedirect('/blog/index')
+        else:
+            context = {"form": form,}
+            return render(request, "blog/newarticle2.html", context)
+    else:
+        form = ArticleForm()
+        context = {"form": form,}
+        return render(request, "blog/newarticle2.html", context)
+```
 
+访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到如下
+![](resources/2024-01-26-13-19-06.png)
+输入信息并点击提交按钮，效果如下
+![](resources/2024-01-31-20-17-32.png)
+可见，可以将表单提交的数据保存到数据库
 
 
 

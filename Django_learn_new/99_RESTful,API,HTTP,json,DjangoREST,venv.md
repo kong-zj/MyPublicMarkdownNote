@@ -57,7 +57,7 @@ HTTP 总共包含以下动词：
 - **GET**：从服务器取出资源（一项或多项）
 - **POST**：在服务器新建一个资源
 - **PUT**：在服务器更新资源（客户端提供改变后的完整资源）
-- PATCH：在服务器更新(更新)资源（客户端只提供需要改变的属性）
+- PATCH：在服务器更新资源（客户端只提供需要改变的属性）
 - **DELETE**：从服务器删除资源
 - OPTIONS：获取信息，关于资源的哪些属性是客户端可以改变的
 - HEAD：获取资源的元数据（描述数据的数据）
@@ -169,11 +169,11 @@ DRF 是 Django 的超集，去掉了模板的部分，提供了一个 REST 的�
 
 ## 总结
 
-Django + DRF 将后端变成一种声明式的工作流，只要按照 models -> serializers -> views -> urls 的模式去一个个py文件去配置，即可生成一个很全面的通用的后端。当然，如果需求不那么通用，这种设计就变成了一个累赘
+Django + DRF 将后端变成一种声明式的工作流，只要按照 **models -> serializers -> views -> urls** 的模式去一个个py文件去配置，即可生成一个很全面的通用的后端。当然，如果需求不那么通用，这种设计就变成了一个累赘
 
 事实上，过重的设计降低了灵活性，报错基本得去翻源码实现，然后再吐槽一遍源码实现，这也是有得必有失。当然，现在 Django 和 DRF 一直在优化 middeware（中间件）的设计，也有 api_view 这种类似 flask 的装饰器的实现方式，也是在灵活性方面的一种权衡，不过对于初学者来说，仍然是个不大不小的坎
 
-# Django REST framework 准备工作
+# 准备工作
 
 [官方快速入手教程（DRF 的 tutorial）](https://www.django-rest-framework.org/tutorial/quickstart/)
 > DRF 的 tutorial 讲的是 serializers 怎么写，view 怎么写，在 DRF 中 view 这一层既可以一个个 get、post、从头开始写起，也可以采用抽象程度比较高的 viewset 去按配置生成。另外还讲了一些 DRF 相较于 Django 升级和新增的功能
@@ -339,10 +339,6 @@ python3 manage.py runserver
 
 到此，我们已经完成了Django部分，由于本示例是为了创建一个API服务，所以我们不需要创建模板和视图。相反，我们还需要继续添加 **Django Rest** 库来处理将模型数据转换为 **RESTful API**
 
-# 如果不使用 Django REST framework
-
-
-
 # 使用 Django REST framework
 
 [Django REST framework 官网](https://www.django-rest-framework.org/)
@@ -475,38 +471,230 @@ python3 manage.py runserver
 ### 简介
 
 序列化，也叫 序列化器，用于将 **查询集QuerySet** 或 **模型类实例Instance** 这种 Django数据类型，转化为 **JSON** 或 **XML** 格式（方便前端渲染）的数据
-**序列化**：`Course.objects.all()   # queryset, instance  ->  json/xml/yaml`（处理从数据库中查询到的数据，传给前端）
-**反序列化**：`Course.objects.all()   # queryset, instance  <-  json/xml/yaml`（处理前端传来的数据，保存到数据库）
+**序列化**：`queryset, instance  ->  json/xml/yaml`（处理从数据库中查询到的数据，传给前端）
+**反序列化**：`queryset, instance  <-  json/xml/yaml`（处理前端传来的数据，保存到数据库）
 
 序列化 与 反序列化 存在的原因：方便前后端分离架构下的数据交互
 
-### 使用 Django 默认的序列化器
+### 如果使用 Django 默认的序列化器
 
+进入 Django Shell
+```sh
+python3 manage.py shell
+```
 
+```py
+from course_api.models import Course
+from django.core import serializers
+# 把查询到的数据，序列化为json格式
+serializers.serialize('json', Course.objects.all())
+# fields参数，可以指定只序列化哪些字段
+serializers.serialize('json', Course.objects.all(), fields=("name"))
+```
+
+![](resources/2024-01-31-21-03-03.png)
+
+![](resources/2024-01-31-21-03-31.png)
+
+Django 默认的序列化器还有许多要完善的地方：
+1. 对前端提交的数据进行验证（前端传来的数据放到 request.data 中）
+2. 验证器的参数
+3. 不方便同时序列化多个对象
+4. 序列化的过程中添加上下文（在序列化的结果中，添加 查询集QuerySet 没有的数据）
+5. 没有对无效的数据异常处理
+
+而 DRF 默认的序列化器 已经帮我们做好了
 
 ### 使用 DRF 默认的序列化器
 
+模型类序列化器 的写法，类似 ModelForm表单类
+
+继承 ModelSerializer
+
 新建 **drf_tutorial/course_api/serializers.py** 文件，其内容如下：
 ```py
+from rest_framework import serializers
+from .models import Course
+from django.contrib.auth.models import User
 
+class CourseSerializer(serializers.ModelSerializer):
+    
+    teacher = serializers.ReadOnlyField(source='teacher.username')  # 外键字段，只读
+    
+    class Meta:
+        # 关联数据表（前面不是变量名）
+        model = Course
+        # 确定需要序列化的字段（返回给用户的具体表中的字段）（前面不是变量名）
+        fields = ['id', 'name', 'introduction', 'price', 'created_at', 'updated_at', 'teacher']
+        # 表示全部字段
+        # fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
 ```
 
 
+继承 HyperlinkedModelSerializer
+
+https://www.jianshu.com/p/a66e04af8a31
+
+---
+
+跳过p9
 
 
  
 
 
 
+## 开发 RESTful API 接口
+
+### 仅使用 Django 而不使用 DRF
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+import json
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views import View
+
+course_dict = {
+    'name': '课程名称',
+    'introduction': '课程介绍',
+    'price': 0.11,
+}
+
+# Django FBV 编写API接口
+@csrf_exempt
+def course_list(request):
+    if request.method == 'GET':
+        # return HttpResponse(json.dumps(course_dict), content_type='application/json')
+        # 等价于
+        return JsonResponse(course_dict)
+    if request.method == 'POST':
+        course = json.loads(request.body.decode('utf-8'))
+        return JsonResponse(course, safe=False)
+
+
+# Django CBV 编写API接口
+class CourseList(View):
+    def get(self, request):
+        return JsonResponse(course_dict)
+    
+    @csrf_exempt
+    def post(self, request):
+        course = json.loads(request.body.decode('utf-8'))
+        return JsonResponse(course, safe=False)
+```
+
+#### 配置路由
+
+新建 **drf_tutorial/course_api/urls.py** 文件，其内容如下：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    path("fbv/list", views.course_list, name="fbv-list"),
+    # CBV
+    path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+]
+```
+
+修改 **drf_tutorial/drf_tutorial/urls.py** 文件的内容为：
+```py
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
+    path('course/', include('course_api.urls')),
+]
+```
+
+### 函数式编程 Function Based View（FBV）
+
+#### 获取所有课程信息、新增一个课程 的接口
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Course
+from .serializers import CourseSerializer
+
+# FBV
+@api_view(["GET", "POST"])
+def course_list(request):
+    # 获取所有课程信息，或新增一个课程
+    if request.method == "GET":
+        # 序列化
+        # many=True参数，实现序列化多个对象
+        s = CourseSerializer(instance=Course.objects.all(), many=True)
+        return Response(data=s.data, status=status.HTTP_200_OK)
+    elif request.method == "POST":
+        # 反序列化
+        # partial=True参数，表示允许部分更新（非必填的字段可以不填）
+        s = CourseSerializer(data=request.data, partial=True)
+        # 对数据进行校验
+        if s.is_valid():
+            # teacher为当前登录的用户
+            s.save(teacher=request.user)
+            return Response(data=s.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(s.errors, status=status.HTTP_400_BAD_REQUEST)
+```
+
+#### 配置路由
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    path("fbv/list", views.course_list, name="fbv-list"),
+]
+```
+
+启动 django web 服务
+```sh
+python3 manage.py runserver
+```
+进入 http://127.0.0.1:8000/course/fbv/list
+可以用 GET方法 获取所有课程信息
+![](resources/2024-01-31-23-29-00.png)
+
+可以用 POST方法 新增一个课程
+![](resources/2024-01-31-23-41-20.png)
+![](resources/2024-01-31-23-40-28.png)
+
+#### 获取单个课程信息、更新课程信息、删除课程信息 的接口
+
+
+
+### 类视图 Class Based View（CBV）
 
 
 
 
 
 
-## 视图集（viewsets）
 
 
+### 通用类视图 Generic Class Based View
+
+
+
+
+
+### 视图集 Viewset
 
 
 
@@ -570,13 +758,14 @@ djangoREST
 https://www.bilibili.com/video/BV1Dm4y1c7QQ/
 
 
-P7
+P11
 
 
 
 剩 P1 演示postman
 P3 postman github API
 P4 配置文件 static
+跳过 P9
 
 
 
