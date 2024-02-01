@@ -311,7 +311,8 @@ def new_article_page(request):
 
 表单系统的核心是 **Form对象**，它将表单中的字段封装成一系列**Field**和**验证规则**，以此来自动地生成HTML表单标签
 
-表单类 继承 `django.forms.Form`
+Form表单类 继承 `django.forms.Form`
+
 **Form类** 的声明语法，与声明 **Model类** 非常相似，并且共享相同的**字段类型**（以及一些类似的**字段参数**）
 
 新建 **blog/forms.py** 文件，内容为：
@@ -397,17 +398,66 @@ class ArticleForm(forms.Form):
 
 #### 验证
 
-##### 常用验证器
+##### 常用验证器（validators）
 
+在验证某个字段的时候，可以传递一个 validators 参数用来指定验证器，进一步对数据进行过滤
 
+- MaxValueValidator：验证最大值
+- MinValueValidator：验证最小值
+- MinLengthValidator：验证最小长度
+- MaxLengthValidator：验证最大长度
+- EmailValidator：验证是否是邮箱格式
+- URLValidator：验证是否是URL格式
+- RegexValidator：如果还需要更加复杂的验证正则表达式的验证器
 
+比如要验证手机号码是否合格，那么我们可以通过以下代码实现：
+```py
+from django import forms
+from django.core import validators
 
+class MyForm(forms.Form):
+    telephone = forms.CharField(validators=[validators.RegexValidator("1[345678]\d{9}",message='请输入正确格式的手机号码！')])
+```
 
 ##### 自定义验证
 
-有时候对一个字段验证，不是一个长度，一个正则表达式能够写清楚的，还需要一些其他复杂的逻辑，那么我们可以对某个字段，进行自定义的验证。比如在注册的表单验证中，我们想要验证手机号码是否已经被注册过了，那么这时候就需要在数据库中进行判断才知道。对某个字段进行自定义的验证方式是，定义一个方法，这个方法的名字定义规则是：clean_fieldname。如果验证失败，那么就抛出一个验证错误。比如要验证用户表中手机号码之前是否在数据库中存在，那么可以通过以下代码实现：
+有时候对一个字段验证，不是一个长度，一个正则表达式能够写清楚的，还需要一些其他复杂的逻辑，那么我们可以对某个字段，进行自定义的验证
 
+###### 验证一个字段 clean_fieldname()
 
+比如在注册的表单验证中，我们想要验证手机号码是否已经被注册过了，那么这时候就需要在数据库中进行判断才知道。对某个字段进行自定义的验证方式是，定义一个方法，这个方法的名字定义规则是：`clean_fieldname()`。如果验证失败，那么就抛出一个验证错误
+
+比如要验证用户表中手机号码之前是否在数据库中存在，那么可以通过以下代码实现：
+```py
+class MyForm(forms.Form):
+    telephone = forms.CharField(validators=[validators.RegexValidator("1[345678]\d{9}",message='请输入正确格式的手机号码！')])
+
+    def clean_telephone(self):
+        telephone = self.cleaned_data.get('telephone')
+        exists = User.objects.filter(telephone=telephone).exists()
+        if exists:
+            raise forms.ValidationError("手机号码已经存在！")
+        return telephone
+```
+
+###### 验证多个字段 clean()
+
+以上是对某个字段进行验证，如果验证数据的时候，需要针对多个字段进行验证，那么可以重写 `clean()` 方法。
+
+比如要在注册的时候，要判断提交的两个密码是否相等。那么可以使用以下代码来完成：
+```py
+class MyForm(forms.Form):
+    telephone = forms.CharField(validators=[validators.RegexValidator("1[345678]\d{9}",message='请输入正确格式的手机号码！')])
+    pwd1 = forms.CharField(max_length=12)
+    pwd2 = forms.CharField(max_length=12)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pwd1 = cleaned_data.get('pwd1')
+        pwd2 = cleaned_data.get('pwd2')
+        if pwd1 != pwd2:
+            raise forms.ValidationError('两个密码不一致！')
+```
 
 ### 渲染表单、绑定数据到表单
 
@@ -713,38 +763,119 @@ def new_article_page2(request):
 ![](resources/2024-02-01-22-03-22.png)
 可见，可以将表单提交的数据保存到数据库
 
-# Django ModelForm表单
+# Django ModelForm模型表单
 
-## Django ModelForm表单 简介
+## Django ModelForm模型表单 简介
 
-ModelForm表单 是基于Model定制的 Form表单
+在写 Form表单 的时候，会发现 Form表单 中的 Field 和 Model模型 中的 Field 基本上是一模一样的，而且 Form表单 中需要验证的数据，也就是我们 Model模型 中需要保存的。那么这时候我们就可以将 **Model模型** 中的字段和 **Form表单** 中的字段进行绑定
 
-将Model翻译成表单是很常见的业务场景，利用Form对象并不难实现，只需要将Model中定义的字段翻译成Form对象中的表单字段即可。但是，如果这种需求很多，且Model中定义的字段也较多，那么重复实现这种表单的过程会很烦琐的。Django表单系统考虑到了这个问题，提供了ModelForm，可以基于Model的定义自动生成表单，很大程度上简化了Model翻译成表单的过程。译成表单字段类型，但是，并不会翻译所有的字段，editable=False的模型字段都不会出现在ModelForm中，如自增主键、自动添加的时间字段等。
+ModelForm模型表单 是基于Model定制的 Form表单
 
+将Model翻译成表单是很常见的业务场景，利用Form对象并不难实现，只需要将Model中定义的字段翻译成Form对象中的表单字段即可。但是，如果这种需求很多，且Model中定义的字段也较多，那么重复实现这种表单的过程会很烦琐的。Django表单系统考虑到了这个问题，提供了ModelForm，可以基于Model的定义自动生成表单，很大程度上简化了Model翻译成表单的过程。译成表单字段类型，但是，并不会翻译所有的字段，editable=False的模型字段都不会出现在ModelForm中，如自增主键、自动添加的时间字段等
 
-大家在写表单的时候，会发现表单中的Field和模型中的Field基本上是一模一样的，而且表单中需要验证的数据，也就是我们模型中需要保存的。那么这时候我们就可以将模型中的字段和表单中的字段进行绑定。
+## 使用 Django ModelForm模型表单
 
+### 定义模型表单类（ModelForm类）
 
-## 使用 Django ModelForm表单
+ModelForm模型表单 继承 `django.forms.ModelForm`
 
+所有表单类都作为 `django.forms.Form` 或者 `django.forms.ModelForm` 的子类来创建。可以把 ModelForm 想象成 Form 的子类。实际上 Form 和 ModelForm 从 BaseForm 类继承了通用功能
 
+创建表单所需要做的，就是添加带有相关模型的class Meta、和要包含在表单中的模型字段列表（你可以使用 fields = '__all__'，以包含所有字段，或者你可以使用 exclude （而不是字段），指定不包含在模型中的字段
 
-
-
-### 定义表单类（ModelForm类）
-
-
-
-不仅如此，基于数据表（Model）创建表单也是很常见的情况，Django同样考虑到了这一点，并提供了ModelForm来简化功能实现。
+修改 **blog/forms.py** 文件的内容为：
 
 
 
 
-所有表单类都作为 django.forms.Form 或者 django.forms.ModelForm 的子类来创建。您可以把 ModelForm 想象成 Form 的子类。实际上 Form 和 ModelForm 从（私有） BaseForm 类继承了通用功能，但是这个实现细节不怎么重要。
 
-模型和表单
 
-实际上，如果您的表单是要直接用来添加或编辑Django模型，用 ModelForm ，可以省时、省力、省代码，因为它会根据 Model 类构建一张对应字段及其属性的表单。
+
+
+#### 常用的 Meta 选项
+
+##### fields
+
+- 列表或元组类型
+- 指定当前的表单应该包含哪些字段，如果要所有的Model字段都包含在表单中，可以设定 `fields = '__all__'`
+- ModelForm 的定义中必须要包含 fields 或 exclude 选项，否则将会抛出异常
+
+##### exclude
+
+- 与 fields 类似，不过是指向当前的表单不应该包含哪些字段（与 fields 相反）
+
+##### labels
+
+- 字典类型
+- 用于指定表单中字段的标签（输入框左边显示的名称），表单字段的名称首先会使用 Model 字段定义设置的verbose_name，如果没有设置，则直接使用字段名。因此当没有定义 verbose_name 时，就可以使用 labels 选项来指定字段名
+
+##### help_texts
+
+- 字典类型
+- 用于给表单字段添加帮助信息（输入框下方显示的内容）
+
+##### widgets
+
+- 字典类型
+- 用于定义表单字段选用的控件。默认情况下，ModelForm会根据Model字段的类型映射表单Field类，因此会应用Field类中默认定义的widgets。这个选项用于自定义控件类型
+
+##### field_classes
+
+- 字典类型
+- 用于指定表单字段使用的Field类型
+
+#### 表单的常用方法
+
+##### is_valid()
+
+- 验证表单数据，如果验证通过返回True，否则返回False
+
+##### clean_<field_name>()
+
+- 用于自定义字段的验证
+
+##### clean()
+
+- 用于自定义表单的验证
+
+##### cleaned_data
+
+##### save()
+
+##### instance
+
+##### errors
+
+
+
+##### label
+
+##### add_error
+
+
+
+
+
+
+
+
+
+
+### 渲染表单、绑定数据到表单
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
