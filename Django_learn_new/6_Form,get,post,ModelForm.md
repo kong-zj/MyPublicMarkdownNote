@@ -325,15 +325,62 @@ class ArticleForm(forms.Form):
     author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
 ```
 
-#### 字段类型
+#### 字段类型（内置 Field 类）
 
-BooleanField, CharField, ChoiceField, TypedChoiceField, DateField, DateTimeField, DecimalField, DurationField, EmailField, FileField, FilePathField, FloatField, ImageField, IntegerField, GenericIPAddressField, MultipleChoiceField, TypedMultipleChoiceField, NullBooleanField, RegexField, SlugField, TimeField, URLField, UUIDField, ComboField, MultiValueField, SplitDateTimeField, ModelMultipleChoiceField, ModelChoiceField.
+##### CharField
 
+- 字符串类型的表单字段，是最常见的表单字段类型，widget 默认使用 TextInput
+- max_length 限制字段值的最大长度，min_length 限制字段值的最小长度
+- strip 属性默认会执行Python字符串的 strip 方法，用于去除字符串开头和尾部的空格。如果不需要这样做，可以将strip 属性设置为 False
+- empty_value 参数用来表示"空"的值。默认为空字符串
 
+##### IntegerField
 
+- 整数类型的表单字段，widget 默认使用 NumberInput
+- 可选的 max_value 与 min_value 参数用于限定字段值的取值范围，且它们都是闭区间
 
+##### BooleanField
 
+- 布尔类型的表单字段，widget 默认使用 CheckboxInput
+- 由于基类 Field 的 required 属性默认是 True，所以，在不做设置的情况下，BooleanField 实例的 required 属性也是 True。由于 required 为 True 要求这个字段值必须提供，所以，这种情况下，BooleanField 类型的实例必须是 True，否则将抛出异常，并提示 "This fieldis required"
+- 如果要在表单中使用 BooleanField 字段，则需要指定 required 为 False
 
+##### ChoiceField
+
+[Django forms组件里的ChoiceField、ModelChoiceField、ModelMutipleChoiceField的区别](https://www.cnblogs.com/pungchur/p/11969844.html)
+
+- 选择类型的表单字段，widget 默认使用 Select
+- choices 参数需要一个可迭代的二元组或能够返回可迭代二元组的函数对象。每个二元组的第一个元素是实际用于存储的数据，而第二个元素是用户将看到的选项
+
+##### ModelChoiceField
+
+- 继承自 ChoiceField
+- ModelChoiceField 字段是对 models 里 ForeignKey 的渲染（单选）
+- queryset 参数用于指定该字段所使用的数据源（可以使用 ORM 查询数据库中的数据）
+
+##### ModelMutipleChoiceField
+
+- 继承自 ModelChoiceField
+- ModelMutipleChoiceField 字段是对 models 里 ManyToManyField 的渲染（多选）
+- queryset 参数用于指定该字段所使用的数据源（可以使用 ORM 查询数据库中的数据）
+
+##### EmailField
+
+- 继承自 CharField，但是提供了 Email验证器，用于校验传递的字段值是否是合法的电子邮件地址。widget 默认使用 EmailInput
+- 除了 EmailField 之外，表单系统还提供了 UUIDField、GenericIPAddressField、URLField 等基于 CharField 的字段类型用于校验特定结构的字符串
+
+##### UUIDField
+
+- 与 EmailField 类似，不过它只会验证数据是否会空，并会自动将数据生成唯一列，并设置为主键
+
+##### JSONField
+
+- 接受 JSON 编码数据的字段，验证给定值是否为有效的 JSON
+
+##### DateTimeField
+
+- 日期时间类型的表单字段，widget 默认使用 DateTimeInput
+- 接受一个可选的参数input_formats，这个参数是一个列表，列表元素规定允许输入的时间格式
 
 #### 字段选项（字段参数）
 
@@ -348,18 +395,17 @@ BooleanField, CharField, ChoiceField, TypedChoiceField, DateField, DateTimeField
 - label_suffix：标签后缀，默认情况下，标签后面会显示冒号
 - widget：要使用的显示小部件
 
+#### 验证
+
+##### 常用验证器
 
 
 
 
 
+##### 自定义验证
 
-#### 验证器
-
-
-
-
-
+有时候对一个字段验证，不是一个长度，一个正则表达式能够写清楚的，还需要一些其他复杂的逻辑，那么我们可以对某个字段，进行自定义的验证。比如在注册的表单验证中，我们想要验证手机号码是否已经被注册过了，那么这时候就需要在数据库中进行判断才知道。对某个字段进行自定义的验证方式是，定义一个方法，这个方法的名字定义规则是：clean_fieldname。如果验证失败，那么就抛出一个验证错误。比如要验证用户表中手机号码之前是否在数据库中存在，那么可以通过以下代码实现：
 
 
 
@@ -602,31 +648,90 @@ def new_article_page2(request):
 ![](resources/2024-01-31-20-17-32.png)
 可见，可以将表单提交的数据保存到数据库
 
+### 表单中展示数据，供用户选择
 
+表单中的 文章作者ID 信息，需要用户手动输入，不直观。应该展示数据库中已有的作者信息，供用户选择
 
+修改 **blog/forms.py** 文件的内容为：
+```py
+from django import forms
+from .models import Author
 
+class ArticleForm(forms.Form):
+    title = forms.CharField(widget=forms.TextInput, max_length=100,label='文章标题',min_length=2,error_messages={"min_length":'标题字符段不符合要求！'})
+    brief_content = forms.CharField(widget=forms.TextInput,label='文章概要')
+    content = forms.CharField(widget=forms.TextInput,label='文章内容')
+    # author_id = forms.IntegerField(widget=forms.NumberInput,label='文章作者')
+    author = forms.ModelChoiceField(empty_label='请选择', label='文章作者', queryset=Author.objects.all())
+```
 
+修改 **blog/views.py** 文件的内容为：
+```py
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .models import Article, Author
+from .forms import ArticleForm
 
+def get_index_page(request):
+    # 省略
 
+def get_detail_page(request, article_id):
+    # 省略
 
+def new_article_page(request):
+    # 省略
+    
+def new_article_page2(request):
+    if request.method == 'POST':
+        form = ArticleForm(request.POST)
+        print(form.is_valid())
+        if form.is_valid():
+            print(form.cleaned_data)
+            # 保存表单数据到数据库
+            title = form.cleaned_data['title']
+            brief_content = form.cleaned_data['brief_content']
+            content = form.cleaned_data['content']
+            author = form.cleaned_data['author']
+            # 解析Author对象
+            author_id = author.author_id
+            Article.objects.create(title=title, brief_content=brief_content, content=content, author_id=author_id)
+            return HttpResponseRedirect('/blog/index')
+        else:
+            context = {"form": form,}
+            return render(request, "blog/newarticle2.html", context)
+    else:
+        form = ArticleForm()
+        context = {"form": form,}
+        return render(request, "blog/newarticle2.html", context)
+```
 
-
-
-
-
-
-
-
-
+访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到如下
+![](resources/2024-02-01-22-00-47.png)
+输入信息并点击提交按钮，效果如下
+![](resources/2024-02-01-22-02-47.png)
+![](resources/2024-02-01-22-03-22.png)
+可见，可以将表单提交的数据保存到数据库
 
 # Django ModelForm表单
 
+## Django ModelForm表单 简介
+
+ModelForm表单 是基于Model定制的 Form表单
+
+将Model翻译成表单是很常见的业务场景，利用Form对象并不难实现，只需要将Model中定义的字段翻译成Form对象中的表单字段即可。但是，如果这种需求很多，且Model中定义的字段也较多，那么重复实现这种表单的过程会很烦琐的。Django表单系统考虑到了这个问题，提供了ModelForm，可以基于Model的定义自动生成表单，很大程度上简化了Model翻译成表单的过程。译成表单字段类型，但是，并不会翻译所有的字段，editable=False的模型字段都不会出现在ModelForm中，如自增主键、自动添加的时间字段等。
+
+
+大家在写表单的时候，会发现表单中的Field和模型中的Field基本上是一模一样的，而且表单中需要验证的数据，也就是我们模型中需要保存的。那么这时候我们就可以将模型中的字段和表单中的字段进行绑定。
 
 
 ## 使用 Django ModelForm表单
 
 
 
+
+
+### 定义表单类（ModelForm类）
 
 
 

@@ -128,7 +128,7 @@ class Article(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 ```
 
-### 字段类型
+### 字段类型（内置 Field 类）
 
 #### 数值型
 
