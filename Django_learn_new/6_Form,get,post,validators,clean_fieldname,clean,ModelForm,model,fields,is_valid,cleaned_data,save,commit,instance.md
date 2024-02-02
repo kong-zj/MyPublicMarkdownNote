@@ -356,13 +356,13 @@ class ArticleForm(forms.Form):
 ##### ModelChoiceField
 
 - 继承自 ChoiceField
-- ModelChoiceField 字段是对 models 里 ForeignKey 的渲染（单选）
+- ModelChoiceField 字段是对 models 里 **ForeignKey** 的渲染（单选）
 - queryset 参数用于指定该字段所使用的数据源（可以使用 ORM 查询数据库中的数据）
 
 ##### ModelMutipleChoiceField
 
 - 继承自 ModelChoiceField
-- ModelMutipleChoiceField 字段是对 models 里 ManyToManyField 的渲染（多选）
+- ModelMutipleChoiceField 字段是对 models 里 **ManyToManyField** 的渲染（多选）
 - queryset 参数用于指定该字段所使用的数据源（可以使用 ORM 查询数据库中的数据）
 
 ##### EmailField
@@ -397,6 +397,8 @@ class ArticleForm(forms.Form):
 - widget：要使用的显示小部件
 
 #### 验证
+
+表单的验证是在调用 `is_valid()` 方法或访问 `errors` 属性时**隐式触发**，在调用 `full_clean()` 时**显式触发**
 
 ##### 常用验证器（validators）
 
@@ -771,7 +773,11 @@ def new_article_page2(request):
 
 ModelForm模型表单 是基于Model定制的 Form表单
 
-将Model翻译成表单是很常见的业务场景，利用Form对象并不难实现，只需要将Model中定义的字段翻译成Form对象中的表单字段即可。但是，如果这种需求很多，且Model中定义的字段也较多，那么重复实现这种表单的过程会很烦琐的。Django表单系统考虑到了这个问题，提供了ModelForm，可以基于Model的定义自动生成表单，很大程度上简化了Model翻译成表单的过程。译成表单字段类型，但是，并不会翻译所有的字段，editable=False的模型字段都不会出现在ModelForm中，如自增主键、自动添加的时间字段等
+**将Model翻译成表单**是很常见的业务场景，利用Form对象并不难实现，只需要将Model中定义的字段翻译成Form对象中的表单字段即可。但是，如果这种需求很多，且Model中定义的字段也较多，那么重复实现这种表单的过程会很烦琐的。Django表单系统考虑到了这个问题，提供了ModelForm，可以基于Model的定义自动生成表单，很大程度上简化了Model翻译成表单的过程
+
+ModelForm 相比于 Form 的优势：
+1. ModelForm 增加了 Form组件 和对应数据库之间的联系，进而简化了 Form类 的代码
+2. ModelForm 继承了 Form组件 中的所有方法的同时，简化了前端获取数据和对应数据库之间的数据对接，不需要在对数据的内容做过多的操作
 
 ## 使用 Django ModelForm模型表单
 
@@ -781,24 +787,33 @@ ModelForm模型表单 继承 `django.forms.ModelForm`
 
 所有表单类都作为 `django.forms.Form` 或者 `django.forms.ModelForm` 的子类来创建。可以把 ModelForm 想象成 Form 的子类。实际上 Form 和 ModelForm 从 BaseForm 类继承了通用功能
 
-创建表单所需要做的，就是添加带有相关模型的class Meta、和要包含在表单中的模型字段列表（你可以使用 fields = '__all__'，以包含所有字段，或者你可以使用 exclude （而不是字段），指定不包含在模型中的字段
+在模型表单中定义了一个 **Meta类**，在 Meta类 中指定了 `model = Article`（设置**model属性**为你要关联的ORM模型，这里是Article），以及 `fields = '__all__'`（设置**fields属性**为你要在表单中使用的字段列表），这样就可以将 **Article模型** 中所有的**字段**都复制过来，进行验证
 
 修改 **blog/forms.py** 文件的内容为：
+```py
+from django import forms
+from .models import Article
 
+class ArticleModelForm(forms.ModelForm):
+    class Meta:
+        model = Article
+        fields = '__all__'
+```
 
-
-
-
-
-
+访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到如下
+![](resources/2024-02-02-00-00-23.png)
 
 #### 常用的 Meta 选项
+
+##### model
+
+- 指定当前的表单所对应的模型类
 
 ##### fields
 
 - 列表或元组类型
 - 指定当前的表单应该包含哪些字段，如果要所有的Model字段都包含在表单中，可以设定 `fields = '__all__'`
-- ModelForm 的定义中必须要包含 fields 或 exclude 选项，否则将会抛出异常
+- ModelForm 的定义中必须要包含 `fields` 或 `exclude` 选项，否则将会抛出异常
 
 ##### exclude
 
@@ -807,7 +822,7 @@ ModelForm模型表单 继承 `django.forms.ModelForm`
 ##### labels
 
 - 字典类型
-- 用于指定表单中字段的标签（输入框左边显示的名称），表单字段的名称首先会使用 Model 字段定义设置的verbose_name，如果没有设置，则直接使用字段名。因此当没有定义 verbose_name 时，就可以使用 labels 选项来指定字段名
+- 用于指定表单中字段的标签（输入框左边显示的名称），表单字段的名称首先会使用 Model 字段定义设置的`verbose_name`，如果没有设置，则直接使用字段名。因此当没有定义 `verbose_name` 时，就可以使用 `labels` 选项来指定字段名
 
 ##### help_texts
 
@@ -817,74 +832,151 @@ ModelForm模型表单 继承 `django.forms.ModelForm`
 ##### widgets
 
 - 字典类型
-- 用于定义表单字段选用的控件。默认情况下，ModelForm会根据Model字段的类型映射表单Field类，因此会应用Field类中默认定义的widgets。这个选项用于自定义控件类型
+- 用于定义表单字段选用的控件。默认情况下，ModelForm 会根据 Model字段 的类型映射表单 Field类，因此会应用 Field类 中默认定义的 widgets
 
 ##### field_classes
 
 - 字典类型
-- 用于指定表单字段使用的Field类型
+- 用于指定表单字段使用的 Field类型
 
-#### 表单的常用方法
+##### error_messages
 
-##### is_valid()
+- 字典类型
+- 自定义错误信息
+
+#### 验证
+
+验证ModelForm主要分两步：
+1. 表单本身的验证
+2. 验证模型实例
+
+与普通的表单验证类似，模型表单的验证也是在调用 `is_valid()` 方法或访问 `errors` 属性时**隐式触发**，在调用 `full_clean()` 时**显式触发**
+
+作为验证过程的一部分， ModelForm 将调用模型上与表单字段对应的 **每个字段的 `clean_fieldname()` 方法**，**模型的整体 `clean()` 方法** 和 **最后的唯一性验证方法**
+
+### 表单的常用方法、属性、参数
+
+#### is_valid() 方法
 
 - 验证表单数据，如果验证通过返回True，否则返回False
 
-##### clean_<field_name>()
+#### cleaned_data 属性
 
-- 用于自定义字段的验证
+- 字典类型
+- 拿到验证后的数据
 
-##### clean()
+#### save() 方法
 
-- 用于自定义表单的验证
+- 直接保存 **Model实例对象** 到数据库
 
-##### cleaned_data
+##### commit 参数
 
-##### save()
+- save() 方法可接受一个 commit 参数，默认为 True。如果在使用 save 方法时设置了 `commit = False`，则不会执行保存动作，而是会返回对应的 **Model实例对象**，可以对返回的实例对象做一些操作后，再执行 save() 方法
 
-##### instance
+#### 构造实例对象 方法
 
-##### errors
+##### instance 参数
 
+- 构造实例对象 方法可接受一个 instance 参数
+- 从数据库中取出 **Model实例对象**，然后通过 instance 参数传入（但没有 `request.POST`），可以绑定 **Model实例对象** 的数据到模型表单中，然后可以渲染到页面
+- 如果既有 `request.POST` 又有 instance，通过调用 `save()` 方法，可以把从数据库取出的这个 **Model实例对象** 修改后再存入数据库（更新操作）
 
+### 保存信息到数据库
 
-##### label
+修改 **blog/views.py** 文件的内容为：
+```py
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .models import Article, Author
+from .forms import ArticleModelForm
 
-##### add_error
+def get_index_page(request):
+    # 省略
 
+def get_detail_page(request, article_id):
+    # 省略
 
+def new_article_page(request):
+    # 省略
+    
+def new_article_page2(request):
+    if request.method == 'POST':
+        # 拿到表单提交的数据，作为参数传递给 ArticleModelForm
+        modelform = ArticleModelForm(request.POST)
+        # 调用is_valid()方法校验数据
+        if modelform.is_valid():
+            print(modelform.errors)
+            # 直接保存到数据库中
+            modelform.save()
+            return HttpResponseRedirect('/blog/index')
+        else:
+            context = {"form": modelform,}
+            return render(request, "blog/newarticle2.html", context)
+    else:
+        modelform = ArticleModelForm()
+        context = {"form": modelform,}
+        return render(request, "blog/newarticle2.html", context)
+```
 
+与 **Form表单** 对应的 View视图 处理相比，**ModelForm模型表单** 的 View视图 处理要简单很多，不需要自己解析数据，也不需要自己创建 Model模型对象，直接用 `save()` 方法保存数据即可
 
+访问 http://127.0.0.1:8000/blog/newarticle2 就可以看到如下
+![](resources/2024-02-02-23-42-43.png)
+输入信息并点击提交按钮，效果如下
+![](resources/2024-02-02-23-43-13.png)
+可见，可以将表单提交的数据保存到数据库
 
+### 更新数据库中的信息
 
+之前，是保存新的一条记录到数据库
+现在的需求是，更新数据库中的最新的一条记录，并且在更新之前，先从数据库中获取最新的记录来展示
 
+修改 **blog/views.py** 文件的内容为：
+```py
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .models import Article, Author
+from .forms import ArticleModelForm
 
+def get_index_page(request):
+    # 省略
 
+def get_detail_page(request, article_id):
+    # 省略
 
-### 渲染表单、绑定数据到表单
+def new_article_page(request):
+    # 省略
+    
+def new_article_page2(request):
+    # 拿出当前最新的文章
+    last_article = Article.objects.order_by('-article_id').first()
+    if request.method == 'POST':
+        # 拿到表单提交的数据，作为参数传递给 ArticleModelForm
+        # 覆盖当前最新的文章
+        modelform = ArticleModelForm(request.POST, instance=last_article)
+        # 调用is_valid()方法校验数据
+        if modelform.is_valid():
+            print(modelform.errors)
+            # 直接保存到数据库中
+            modelform.save()
+            return HttpResponseRedirect('/blog/index')
+        else:
+            context = {"form": modelform,}
+            return render(request, "blog/newarticle2.html", context)
+    else:
+        # 展示当前最新的文章
+        modelform = ArticleModelForm(instance=last_article)
+        context = {"form": modelform,}
+        return render(request, "blog/newarticle2.html", context)
+```
 
+访问 http://127.0.0.1:8000/blog/newarticle2 然后输入信息并点击提交按钮，效果如下
+![](resources/2024-02-02-23-57-59.png)
+![](resources/2024-02-02-23-58-28.png)
+可见，可以更新数据库中的最新的一条记录
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### 自定义表单验证validators
-
-对于表单验证除了通过clean方法自定义验证外，你还可以选择自定义validators。
 
 
 
@@ -936,3 +1028,10 @@ ORM 的三种映射
 
 继续 表单 学习
 
+
+Django表单集合Formset的高级用法:
+https://zhuanlan.zhihu.com/p/41730175
+
+
+文件上传
+https://www.cnblogs.com/fisherbook/p/11068554.html
