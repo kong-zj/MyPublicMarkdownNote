@@ -932,18 +932,147 @@ urlpatterns = [
 
 ![](resources/2024-02-03-23-20-04.png)
 
-### DRF的 通用类视图 Generic Class Based View（CBV）（GenericAPIView）
+### DRF的 通用类视图 Generic Class Based View（GCBV）（generics）
 
 上面的 基础函数视图（FBV）和 基础类视图（CBV）中，代码的重复率还是比较高的，下面，我们使用更简洁的编写方法
 
-#### GenericAPIView
+通用类视图 就是把一些常见的增删改查操作对应的类，通过 **mixin混合**，然后通过继承，来快速实现这些功能
 
-GenericAPIView
+#### 需要继承 `generics` 类
 
-GenericAPIView是DRF中的通用视图类，它继承自DRF基础视图类APIView，通用视图类，可以让你只需要配置好类属性，就可以实现一整套的增删查改流程
+GenericAPIView 是DRF中的通用视图类，**继承自 APIView**，通用视图类，可以让你只需要配置好类属性，就可以实现一整套的增删查改流程
 
 
 其中GenericAPIView直接继承APIView，其他类又直接继承GenericAPIView
+
+##### queryset
+
+queryset 属性，用来指定查询集，queryset 属性是用来指定视图所要查询的数据集合
+
+##### serializer_class
+
+
+
+
+#### 获取所有课程信息、新增一个课程 的接口（ListCreateAPIView）
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Course
+from .serializers import CourseSerializer
+
+# GCBV
+class GCourseList(generics.ListCreateAPIView):
+    # ListCreateAPIView 中的 List 代表查看所有，Create 代表新增一个
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    # 本来只要写上面两行代码就好，但是
+    # ListCreateAPIView 的 mixins.CreateModelMixin 的源代码中，直接 serializer.save()，不符合我们的要求，那就重写
+    def perform_create(self, serializer):
+        serializer.save(teacher=self.request.user)
+```
+
+`ListCreateAPIView` 中的 `List` 代表**查看所有**，`Create` 代表**新增一个**
+
+##### 配置路由
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    # path("fbv/list", views.course_list, name="fbv-list"),
+    # path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+    # CBV
+    # path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+    # path("cbv/detail/<int:pk>", views.CourseDetail.as_view(), name="cbv-detail"),
+    # GCBV
+    path("gcbv/list", views.GCourseList.as_view(), name="gcbv-list"),
+]
+```
+
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/gcbv/list
+
+测试 **GET方法**
+
+![](resources/2024-02-04-00-06-42.png)
+与前面的 FBV 和 CBV 不同，GCBV 的这个接口还帮我们做了其他的事情，比如分页
+
+测试 **POST方法**
+
+![](resources/2024-02-04-00-12-56.png)
+
+#### 获取单个课程信息、更新课程信息、删除课程信息 的接口（RetrieveUpdateDestroyAPIView）
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Course
+from .serializers import CourseSerializer
+
+# GCBV
+class GCourseList(generics.ListCreateAPIView):
+    # 省略
+
+class GCourseDetail(generics.RetrieveUpdateDestroyAPIView):
+    # RetrieveUpdateDestroyAPIView 中的 Retrieve 代表查询一个，Update 代表修改一个，Destroy 代表删除一个
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    # 这里不需要重写 perform_create()方法
+```
+
+`RetrieveUpdateDestroyAPIView` 中的 `Retrieve` 代表**查询一个**，`Update` 代表**修改一个**，`Destroy` 代表**删除一个**
+
+按住`Ctrl`点击 `RetrieveUpdateDestroyAPIView`，可以查看源代码
+![](resources/2024-02-04-00-30-08.png)
+这里对 修改一条记录，提供了两种方法，分别是 **PUT方法**（整体修改）和 **PATCH方法**（部分修改）
+
+##### 配置路由
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    # path("fbv/list", views.course_list, name="fbv-list"),
+    # path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+    # CBV
+    # path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+    # path("cbv/detail/<int:pk>", views.CourseDetail.as_view(), name="cbv-detail"),
+    # GCBV
+    path("gcbv/list", views.GCourseList.as_view(), name="gcbv-list"),
+    path("gcbv/detail/<int:pk>", views.GCourseDetail.as_view(), name="gcbv-detail"),
+]
+```
+
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/gcbv/detail/3
+
+测试 **GET方法**
+
+![](resources/2024-02-04-00-14-31.png)
+
+测试 **PUT方法**
+
+![](resources/2024-02-04-00-39-24.png)
+源代码中使用参数 `partial=False`，所以不能部分修改
+
+测试 **PATCH方法**
+
+![](resources/2024-02-04-00-39-51.png)
+源代码中使用参数 `partial=True`，所以可以部分修改
+
+测试 **DELETE方法**
+
+![](resources/2024-02-04-00-40-23.png)
 
 ### DRF的 视图集 ViewSet（CBV）
 
@@ -1009,7 +1138,7 @@ djangoREST
 https://www.bilibili.com/video/BV1Dm4y1c7QQ/
 
 
-P13
+P15
 
 
 
