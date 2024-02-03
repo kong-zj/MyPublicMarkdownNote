@@ -532,6 +532,8 @@ class UserSerializer(serializers.ModelSerializer):
 ```
 
 
+### HyperlinkedModelSerializer
+
 继承 HyperlinkedModelSerializer
 
 https://www.jianshu.com/p/a66e04af8a31
@@ -616,9 +618,9 @@ urlpatterns = [
 ]
 ```
 
-### DRF的 函数视图 Function Based View（FBV）
+### DRF的 基础函数视图 Function Based View（FBV）
 
-REST framework 允许使用基于函数的视图。它提供了一套简单的装饰器来包装你的函数视图，以确保它们接收 `Request`（而不是 Django `HttpRequest`）实例，并允许它们返回 `Response`（而不是 Django `HttpResponse`），并允许你配置该请求的处理方式
+REST framework 允许使用基于函数的视图。它提供了一套简单的**装饰器**来包装你的函数视图，以确保它们接收 `Request`（而不是 Django `HttpRequest`）实例，并允许它们返回 `Response`（而不是 Django `HttpResponse`），并允许你配置该请求的处理方式
 
 #### 装饰器 `@api_view()`
 
@@ -719,7 +721,7 @@ def course_detail(request, pk):
 
 注意 模型类序列化器 的 构造实例对象 方法的参数中：
 1. `instance` 参数，表示要 **序列化** 的 **模型类对象实例**
-2. `data` 参数，表示要 **反序列化** 的 **数据**
+2. `data` 参数，表示要 **反序列化** 的 **前端传来的数据**
 
 ##### 配置路由
 
@@ -739,7 +741,7 @@ urlpatterns = [
 可以用 **GET方法** 获取id为1的课程信息
 ![](resources/2024-02-03-17-31-51.png)
 
-接下来使用 Postman 来测试接口
+接下来使用 Postman 来测试接口 http://127.0.0.1:8000/course/fbv/detail/1
 
 测试 **GET方法**
 
@@ -757,23 +759,193 @@ urlpatterns = [
 
 ![](resources/2024-02-03-17-52-26.png)
 
-### DRF的 类视图 Class Based View（CBV）
+### DRF的 基础类视图 Class Based View（CBV）（APIView）
 
+REST framework 允许使用基于类的视图。APIView 与 Django 的 View 类似，我们的业务类只需要**继承** `APIView`，在URL传递过程，我们只需要调用 APIView 的 `as_view()` 方法，然后 URL 就会调用业务类对应的 HTTP 方法
 
+#### 需要继承 `APIView` 类
 
+APIView 是 DRF框架 视图的基本类，**继承自 View**，在 View 的基础上封装了大量基础功能
 
+##### APIView 属性
 
+renderer_classes：渲染器类
+parser_classes：解析器类
+authentication_classes：验证类
+throttle_classes：限流类
+permission_classes：权限类
+content_negotiation_class：内容协商类
 
+##### APIView 的get型方法
 
+get_renderers(self)：获取渲染器方法
+get_parsers(self)：获取解释器方法
+get_authenticators(self)：获取认证方法
+get_throttles(self)：获取限流方法
+get_permissions(self)：获取权限方法
+get_content_negotiator(self)：获取内容协商方法
 
-### DRF的 通用类视图 Generic Class Based View
+##### APIView 的check型方法
+
+check_permissions(self, request)：检查权限
+check_throttles(self, request)：检查节流
+check_content_negotiation(self, request, force=False)：检查内容协商
+
+##### APIView 的调度方法
+
+initial(self, request, *args, **kwargs)：执行任何操作,需要发生在处理程序方法之前被调用。这个方法是用来执行权限和节流,并执行内容协商
+handle_exception(self, exc)：抛出的任何异常处理程序方法将被传递给这个方法,而返回响应实例,或者re-raises异常
+initialize_request(self, request, *args, **kwargs)：确保请求对象传递给处理程序方法是request的一个实例，而不是django的HttpRequest
+finalize_response(self, request, response, *args, **kwargs)：确保任何响应处理程序方法返回的对象将被呈现到正确的内容类型
+
+#### 获取所有课程信息、新增一个课程 的接口
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Course
+from .serializers import CourseSerializer
+
+# CBV
+class CourseList(APIView):
+    def get(self, request):
+        queryset = Course.objects.all()
+        s = CourseSerializer(instance=queryset, many=True)
+        return Response(data=s.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        s = CourseSerializer(data=request.data, partial=True)
+        if s.is_valid():
+            s.save(teacher=self.request.user)
+            return Response(data=s.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(s.errors, status=status.HTTP_400_BAD_REQUEST)
+```
+
+##### 配置路由
+
+和上面 FBV 中不同的是，这里需要使用 `as_view()`
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    # path("fbv/list", views.course_list, name="fbv-list"),
+    # path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+    # CBV
+    path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+]
+```
+
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/cbv/list
+
+测试 **GET方法**
+
+![](resources/2024-02-03-22-55-49.png)
+
+测试 **POST方法**
+
+![](resources/2024-02-03-22-57-46.png)
+
+#### 获取单个课程信息、更新课程信息、删除课程信息 的接口
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Course
+from .serializers import CourseSerializer
+
+# CBV
+class CourseList(APIView):
+    # 省略
+
+class CourseDetail(APIView):
+    @staticmethod
+    def get_object(pk):
+        try:
+            return Course.objects.get(pk=pk)
+        except Course.DoesNotExist:
+            return None
+    
+    def get(self, request, pk):
+        course = self.get_object(pk)
+        if not course:
+            return Response(data={"msg": "没有此课程信息"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            s = CourseSerializer(instance=course)
+            return Response(data=s.data, status=status.HTTP_200_OK)
+        
+    def put(self, request, pk):
+        course = self.get_object(pk)
+        if not course:
+            return Response(data={"msg": "没有此课程信息"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            s = CourseSerializer(instance=course, data=request.data, partial=True)
+            if s.is_valid():
+                s.save()
+                return Response(data=s.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, pk):
+        course = self.get_object(pk)
+        if not course:
+            return Response(data={"msg": "没有此课程信息"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            course.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+##### 配置路由
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    # path("fbv/list", views.course_list, name="fbv-list"),
+    # path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+    # CBV
+    path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+    path("cbv/detail/<int:pk>", views.CourseDetail.as_view(), name="cbv-detail"),
+]
+```
+
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/cbv/detail/2
+
+测试 **GET方法**
+
+![](resources/2024-02-03-23-17-32.png)
+
+测试 **PUT方法**
+
+![](resources/2024-02-03-23-19-11.png)
+
+测试 **DELETE方法**
+
+![](resources/2024-02-03-23-20-04.png)
+
+### DRF的 通用类视图 Generic Class Based View（CBV）（GenericAPIView）
+
+上面的 基础函数视图（FBV）和 基础类视图（CBV）中，代码的重复率还是比较高的，下面，我们使用更简洁的编写方法
+
+#### GenericAPIView
 
 GenericAPIView
 
 GenericAPIView是DRF中的通用视图类，它继承自DRF基础视图类APIView，通用视图类，可以让你只需要配置好类属性，就可以实现一整套的增删查改流程
 
 
-### DRF的 视图集 Viewset
+其中GenericAPIView直接继承APIView，其他类又直接继承GenericAPIView
+
+### DRF的 视图集 ViewSet（CBV）
 
 
 
@@ -837,7 +1009,7 @@ djangoREST
 https://www.bilibili.com/video/BV1Dm4y1c7QQ/
 
 
-P11
+P13
 
 
 
