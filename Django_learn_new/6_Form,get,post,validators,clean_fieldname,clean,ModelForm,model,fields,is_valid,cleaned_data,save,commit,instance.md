@@ -769,9 +769,9 @@ def new_article_page2(request):
 
 ## Django ModelForm模型表单 简介
 
-在写 Form表单 的时候，会发现 Form表单 中的 Field 和 Model模型 中的 Field 基本上是一模一样的，而且 Form表单 中需要验证的数据，也就是我们 Model模型 中需要保存的。那么这时候我们就可以将 **Model模型** 中的字段和 **Form表单** 中的字段进行绑定
+在写 Form表单 的时候，会发现 **Form表单 中的 Field 和 Model模型 中的 Field 基本上是一模一样的**，而且 Form表单 中需要验证的数据，也就是我们 Model模型 中需要保存的。那么这时候我们就可以将 **Model模型** 中的字段和 **Form表单** 中的字段进行绑定
 
-ModelForm模型表单 是基于Model定制的 Form表单
+ModelForm模型表单 是**基于Model定制**的 Form表单
 
 **将Model翻译成表单**是很常见的业务场景，利用Form对象并不难实现，只需要将Model中定义的字段翻译成Form对象中的表单字段即可。但是，如果这种需求很多，且Model中定义的字段也较多，那么重复实现这种表单的过程会很烦琐的。Django表单系统考虑到了这个问题，提供了ModelForm，可以基于Model的定义自动生成表单，很大程度上简化了Model翻译成表单的过程
 
@@ -787,7 +787,7 @@ ModelForm模型表单 继承 `django.forms.ModelForm`
 
 所有表单类都作为 `django.forms.Form` 或者 `django.forms.ModelForm` 的子类来创建。可以把 ModelForm 想象成 Form 的子类。实际上 Form 和 ModelForm 从 BaseForm 类继承了通用功能
 
-在模型表单中定义了一个 **Meta类**，在 Meta类 中指定了 `model = Article`（设置**model属性**为你要关联的ORM模型，这里是Article），以及 `fields = '__all__'`（设置**fields属性**为你要在表单中使用的字段列表），这样就可以将 **Article模型** 中所有的**字段**都复制过来，进行验证
+在模型表单中定义了一个 **Meta类**，在 Meta类 中指定了 `model = Article`（设置**model属性**为你要关联的ORM模型，这里是Article），以及 `fields = '__all__'`（设置**fields属性**为你要在表单中使用的字段列表），这样就可以将 **Article模型** 中所有的**字段**都复制过来
 
 修改 **blog/forms.py** 文件的内容为：
 ```py
@@ -817,7 +817,7 @@ class ArticleModelForm(forms.ModelForm):
 
 ##### exclude
 
-- 与 fields 类似，不过是指向当前的表单不应该包含哪些字段（与 fields 相反）
+- 与 fields 类似，不过是指向当前的表单**不应该包含**哪些字段（与 fields 相反）
 
 ##### labels
 
@@ -854,7 +854,7 @@ class ArticleModelForm(forms.ModelForm):
 
 作为验证过程的一部分， ModelForm 将调用模型上与表单字段对应的 **每个字段的 `clean_fieldname()` 方法**，**模型的整体 `clean()` 方法** 和 **最后的唯一性验证方法**
 
-### 表单的常用方法、属性、参数
+### 模型表单的常用方法、属性、参数
 
 #### is_valid() 方法
 
@@ -930,7 +930,7 @@ def new_article_page2(request):
 ### 更新数据库中的信息
 
 之前，是保存新的一条记录到数据库
-现在的需求是，更新数据库中的最新的一条记录，并且在更新之前，先从数据库中获取最新的记录来展示
+现在的需求是，**更新数据库中的最新的一条记录**，并且在更新之前，**先从数据库中获取最新的记录来展示**
 
 修改 **blog/views.py** 文件的内容为：
 ```py
@@ -972,10 +972,29 @@ def new_article_page2(request):
         return render(request, "blog/newarticle2.html", context)
 ```
 
+上面提出的两个需求，都可以用 `instance=last_article` 解决
+
 访问 http://127.0.0.1:8000/blog/newarticle2 然后输入信息并点击提交按钮，效果如下
 ![](resources/2024-02-02-23-57-59.png)
 ![](resources/2024-02-02-23-58-28.png)
 可见，可以更新数据库中的最新的一条记录
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1026,7 +1045,7 @@ https://zhuanlan.zhihu.com/p/139292534
 ORM 的三种映射
 
 
-继续 表单 学习
+表单 学习 阶段性完成
 
 
 Django表单集合Formset的高级用法:
@@ -1035,3 +1054,4 @@ https://zhuanlan.zhihu.com/p/41730175
 
 文件上传
 https://www.cnblogs.com/fisherbook/p/11068554.html
+

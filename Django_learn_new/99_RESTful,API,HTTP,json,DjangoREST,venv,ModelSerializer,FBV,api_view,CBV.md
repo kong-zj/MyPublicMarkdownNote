@@ -176,10 +176,8 @@ Django + DRF 将后端变成一种声明式的工作流，只要按照 **models 
 # 准备工作
 
 [官方快速入手教程（DRF 的 tutorial）](https://www.django-rest-framework.org/tutorial/quickstart/)
-> DRF 的 tutorial 讲的是 serializers 怎么写，view 怎么写，在 DRF 中 view 这一层既可以一个个 get、post、从头开始写起，也可以采用抽象程度比较高的 viewset 去按配置生成。另外还讲了一些 DRF 相较于 Django 升级和新增的功能
 
-目标：使用 DRF 开发 RESTful API 接口（4种实现方式）
-效果：用DRF的多种视图，实现课程信息的增删改查
+> DRF 的 tutorial 讲的是 serializers 怎么写，view 怎么写，在 DRF 中 view 这一层既可以一个个 get、post 从头开始写起，也可以采用抽象程度比较高的 viewset 去按配置生成。另外还讲了一些 DRF 相较于 Django 升级和新增的功能
 
 ## 项目前置配置（Django部分）
 
@@ -476,7 +474,7 @@ python3 manage.py runserver
 
 序列化 与 反序列化 存在的原因：方便前后端分离架构下的数据交互
 
-### 如果使用 Django 默认的序列化器
+### 如果使用 Django 默认的序列化器（serializers）
 
 进入 Django Shell
 ```sh
@@ -505,11 +503,11 @@ Django 默认的序列化器还有许多要完善的地方：
 
 而 DRF 默认的序列化器 已经帮我们做好了
 
-### 使用 DRF 默认的序列化器
+### 使用 DRF 默认的模型类序列化器（ModelSerializer）
 
-模型类序列化器 的写法，类似 ModelForm表单类
+**ModelSerializer模型类序列化器** 的写法和用法，类似 **ModelForm模型表单类**
 
-继承 ModelSerializer
+模型类序列化器 继承 `serializers.ModelSerializer`
 
 新建 **drf_tutorial/course_api/serializers.py** 文件，其内容如下：
 ```py
@@ -518,9 +516,7 @@ from .models import Course
 from django.contrib.auth.models import User
 
 class CourseSerializer(serializers.ModelSerializer):
-    
     teacher = serializers.ReadOnlyField(source='teacher.username')  # 外键字段，只读
-    
     class Meta:
         # 关联数据表（前面不是变量名）
         model = Course
@@ -551,7 +547,10 @@ https://www.jianshu.com/p/a66e04af8a31
 
 ## 开发 RESTful API 接口
 
-### 仅使用 Django 而不使用 DRF
+目标：使用 DRF 开发 RESTful API 接口（4种实现方式）
+效果：用DRF的多种视图，实现课程信息的增删改查
+
+### 如果仅使用 Django 而不使用 DRF
 
 修改 **drf_tutorial/course_api/views.py** 文件的内容为：
 ```py
@@ -560,13 +559,14 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 
+# 模拟从数据库中查询到的数据
 course_dict = {
     'name': '课程名称',
     'introduction': '课程介绍',
     'price': 0.11,
 }
 
-# Django FBV 编写API接口
+# Django原生 FBV 编写API接口
 @csrf_exempt
 def course_list(request):
     if request.method == 'GET':
@@ -578,7 +578,7 @@ def course_list(request):
         return JsonResponse(course, safe=False)
 
 
-# Django CBV 编写API接口
+# Django原生 CBV 编写API接口
 class CourseList(View):
     def get(self, request):
         return JsonResponse(course_dict)
@@ -616,7 +616,13 @@ urlpatterns = [
 ]
 ```
 
-### 函数式编程 Function Based View（FBV）
+### DRF的 函数视图 Function Based View（FBV）
+
+REST framework 允许使用基于函数的视图。它提供了一套简单的装饰器来包装你的函数视图，以确保它们接收 `Request`（而不是 Django `HttpRequest`）实例，并允许它们返回 `Response`（而不是 Django `HttpResponse`），并允许你配置该请求的处理方式
+
+#### 装饰器 `@api_view()`
+
+用法：`@api_view(http_method_names=['GET'])`（用 http_method_names 来设置视图允许响应的 HTTP 方法列表），也可简写为 `@api_view(['GET'])`
 
 #### 获取所有课程信息、新增一个课程 的接口
 
@@ -650,7 +656,7 @@ def course_list(request):
             return Response(s.errors, status=status.HTTP_400_BAD_REQUEST)
 ```
 
-#### 配置路由
+##### 配置路由
 
 修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
 ```py
@@ -667,34 +673,107 @@ urlpatterns = [
 ```sh
 python3 manage.py runserver
 ```
-进入 http://127.0.0.1:8000/course/fbv/list
-可以用 GET方法 获取所有课程信息
+进入 http://127.0.0.1:8000/course/fbv/list ，如果提示登录则登录
+可以用 **GET方法** 获取所有课程信息
 ![](resources/2024-01-31-23-29-00.png)
 
-可以用 POST方法 新增一个课程
+可以用 **POST方法** 新增一个课程
 ![](resources/2024-01-31-23-41-20.png)
 ![](resources/2024-01-31-23-40-28.png)
 
 #### 获取单个课程信息、更新课程信息、删除课程信息 的接口
 
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Course
+from .serializers import CourseSerializer
+
+# FBV
+@api_view(["GET", "POST"])
+def course_list(request):
+    # 省略
+  
+@api_view(["GET", "PUT", "DELETE"])
+def course_detail(request, pk):
+    try:
+        # 拿到对应的课程
+        course = Course.objects.get(pk=pk)
+    except Course.DoesNotExist:
+        return Response(data={"msg": "没有此课程信息"}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        if request.method == "GET":
+            s = CourseSerializer(instance=course)
+            return Response(data=s.data, status=status.HTTP_200_OK)
+        elif request.method == "PUT":
+            s = CourseSerializer(instance=course, data=request.data, partial=True)
+            if s.is_valid():
+                s.save()
+                return Response(data=s.data, status=status.HTTP_200_OK)
+        elif request.method == "DELETE":
+            course.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+注意 模型类序列化器 的 构造实例对象 方法的参数中：
+1. `instance` 参数，表示要 **序列化** 的 **模型类对象实例**
+2. `data` 参数，表示要 **反序列化** 的 **数据**
+
+##### 配置路由
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+
+urlpatterns = [
+    # FBV
+    path("fbv/list", views.course_list, name="fbv-list"),
+    path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+]
+```
+
+进入 http://127.0.0.1:8000/course/fbv/detail/1
+可以用 **GET方法** 获取id为1的课程信息
+![](resources/2024-02-03-17-31-51.png)
+
+接下来使用 Postman 来测试接口
+
+测试 **GET方法**
+
+如果不使用认证，会报错
+![](resources/2024-02-03-17-36-13.png)
+
+使用 Basic Auth 认证
+![](resources/2024-02-03-17-42-01.png)
+
+测试 **PUT方法**
+
+![](resources/2024-02-03-17-50-39.png)
+
+测试 **DELETE方法**
+
+![](resources/2024-02-03-17-52-26.png)
+
+### DRF的 类视图 Class Based View（CBV）
 
 
-### 类视图 Class Based View（CBV）
 
 
 
 
 
 
+### DRF的 通用类视图 Generic Class Based View
+
+GenericAPIView
+
+GenericAPIView是DRF中的通用视图类，它继承自DRF基础视图类APIView，通用视图类，可以让你只需要配置好类属性，就可以实现一整套的增删查改流程
 
 
-### 通用类视图 Generic Class Based View
-
-
-
-
-
-### 视图集 Viewset
+### DRF的 视图集 Viewset
 
 
 
