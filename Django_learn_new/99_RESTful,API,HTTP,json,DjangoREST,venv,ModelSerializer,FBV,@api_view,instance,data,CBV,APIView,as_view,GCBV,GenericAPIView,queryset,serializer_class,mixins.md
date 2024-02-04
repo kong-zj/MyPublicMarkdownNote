@@ -763,9 +763,11 @@ urlpatterns = [
 
 REST framework 允许使用基于类的视图。APIView 与 Django 的 View 类似，我们的业务类只需要**继承** `APIView`，在URL传递过程，我们只需要调用 APIView 的 `as_view()` 方法，然后 URL 就会调用业务类对应的 HTTP 方法
 
+和 FBV 相比，CBV 可以用到类的特性（封装、继承、多态）
+
 #### 需要继承 `APIView` 类
 
-APIView 是 DRF框架 视图的基本类，**继承自 View**，在 View 的基础上封装了大量基础功能
+`APIView` 是 DRF框架 视图的基本类，**继承自 View**，在 View 的基础上封装了大量基础功能
 
 ##### APIView 属性
 
@@ -934,33 +936,65 @@ urlpatterns = [
 
 ### DRF的 通用类视图 Generic Class Based View（GCBV）（generics）
 
-上面的 基础函数视图（FBV）和 基础类视图（CBV）中，代码的重复率还是比较高的，下面，我们使用更简洁的编写方法
+上面的 基础函数视图（FBV）和 基础类视图（CBV）中，各种功能都需要亲自实现，代码的重复率还是比较高的，下面，我们使用更简洁的写法
 
-通用类视图 就是把一些常见的增删改查操作对应的类，通过 **mixin混合**，然后通过继承，来快速实现这些功能
+通用类视图 就是把一些常见的增删改查操作对应的类，通过 **mixins混合**，然后通过**继承**，来快速实现这些功能
 
-#### 需要继承 `generics` 类
+#### 需要继承 `generics` 包里的类（高级通用类视图）
 
-GenericAPIView 是DRF中的通用视图类，**继承自 APIView**，通用视图类，可以让你只需要配置好类属性，就可以实现一整套的增删查改流程
+![](resources/2024-02-04-14-54-28.png)
 
+![](resources/2024-02-04-15-07-14.png)
 
-其中GenericAPIView直接继承APIView，其他类又直接继承GenericAPIView
+其中：
+`ListAPIView`
+`CreateAPIView`
+`UpdateAPIView`
+`DestroyAPIView`
+`RetrieveAPIView`
+`ListCreateAPIView`
+`RetrieveUpdateAPIView`
+`RetrieveDestroyAPIView`
+`RetrieveUpdateDestroyAPIView`
 
-##### queryset
+都继承自 `GenericAPIView`
 
-queryset 属性，用来指定查询集，queryset 属性是用来指定视图所要查询的数据集合
+而 `GenericAPIView` 继承自 `APIView`
 
-##### serializer_class
+##### 默认继承 `GenericAPIView` 类（基础通用类视图）
 
+`GenericAPIView` 是DRF中的通用视图类（**提供序列化器与数据库查询的方法**），**继承自 APIView**，通用视图类，可以让你只需要配置好类属性，就可以实现一整套的增删查改流程
 
+###### queryset
 
+`queryset` 属性，用来指定**查询集**
+
+###### serializer_class
+
+`serializer_class` 属性，用来指定**序列化器**
+
+##### mixins混合（模型混入类视图）
+
+![](resources/2024-02-04-15-16-16.png)
+
+`ListModelMixin`：提供 `list()` 方法，列出queryset
+`CreateModelMixin`： 提供 `create()` 方法，创建和保存一个Model对象
+`UpdateModelMixin`： 提供 `update()` 方法，更改一个Model对象
+`DestroyModelMixin`：提供 `destroy()` 方法，删除一个Model对象
+`RetrieveModelMixin`：提供 `retrieve()` 方法，获取一个存在的model对象
+
+![](resources/2024-02-04-15-07-14.png)
+
+总结：
+1. 视图工具类mixins 提供了**五大类**实现了**六大方法**
+2. 减少我们自己的代码量，他都给封装好了
+3. 必须与 `GenericAPIView` 一起使用
 
 #### 获取所有课程信息、新增一个课程 的接口（ListCreateAPIView）
 
 修改 **drf_tutorial/course_api/views.py** 文件的内容为：
 ```py
 from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import status
 from .models import Course
 from .serializers import CourseSerializer
 
@@ -1012,8 +1046,6 @@ urlpatterns = [
 修改 **drf_tutorial/course_api/views.py** 文件的内容为：
 ```py
 from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import status
 from .models import Course
 from .serializers import CourseSerializer
 
@@ -1033,6 +1065,10 @@ class GCourseDetail(generics.RetrieveUpdateDestroyAPIView):
 按住`Ctrl`点击 `RetrieveUpdateDestroyAPIView`，可以查看源代码
 ![](resources/2024-02-04-00-30-08.png)
 这里对 修改一条记录，提供了两种方法，分别是 **PUT方法**（整体修改）和 **PATCH方法**（部分修改）
+
+按住`Ctrl`点击 `RetrieveModelMixin`，可以查看源代码
+![](resources/2024-02-04-15-00-24.png)
+可见，符合上面所说的结构
 
 ##### 配置路由
 
@@ -1074,17 +1110,33 @@ urlpatterns = [
 
 ![](resources/2024-02-04-00-40-23.png)
 
-### DRF的 视图集 ViewSet（CBV）
+### DRF的 视图集 ViewSets（CBV）
+
+GCBV 中，我们分别通过 GCourseList类 和 GCourseDetail类 实现两个接口，能不能合二为一？
+
+#### 一步实现上述的两个接口（ModelViewSet）
+
+修改 **drf_tutorial/course_api/views.py** 文件的内容为：
+```py
+from rest_framework import viewsets
+from .models import Course
+from .serializers import CourseSerializer
+
+class CourseViewSet(viewsets.ModelViewSet):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    def perform_create(self, serializer):
+        serializer.save(teacher=self.request.user)
+```
 
 
 
+##### 配置路由
 
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
 
-
-
-
-
-
+```
 
 
 
@@ -1138,7 +1190,8 @@ djangoREST
 https://www.bilibili.com/video/BV1Dm4y1c7QQ/
 
 
-P15
+P17
+P22已完成
 
 
 
