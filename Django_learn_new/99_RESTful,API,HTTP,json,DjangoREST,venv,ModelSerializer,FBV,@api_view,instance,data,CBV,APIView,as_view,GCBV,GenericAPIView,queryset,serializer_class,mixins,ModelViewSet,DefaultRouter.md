@@ -1090,6 +1090,9 @@ urlpatterns = [
 ]
 ```
 
+这里这里的 `/<int:pk>` 中的变量名 `pk` 对应源代码中的
+![](resources/2024-02-04-16-05-11.png)
+
 使用 Postman 来测试接口 http://127.0.0.1:8000/course/gcbv/detail/3
 
 测试 **GET方法**
@@ -1110,11 +1113,36 @@ urlpatterns = [
 
 ![](resources/2024-02-04-00-40-23.png)
 
-### DRF的 视图集 ViewSets（CBV）
+### DRF的 视图集 ViewSet
 
-GCBV 中，我们分别通过 GCourseList类 和 GCourseDetail类 实现两个接口，能不能合二为一？
+GCBV 中，我们分别通过 `GCourseList`类 和 `GCourseDetail`类 实现两个接口，能不能两个接口能不能**合二为一**？
+
+REST framework 允许将一组相关的逻辑视图聚集在一个类，`ViewSet` 类是一个简单类型的基于类的视图，没有提供任何方法处理程序如`get()`，`post()`等，而提供代替方法比如`list()`，`retrieve()`，`create()`，`update()`，`destroy()`等
+
+#### 需要继承 `viewsets` 包里的类
+
+![](resources/2024-02-04-17-02-07.png)
+
+##### `GenericViewSet`
+
+`GenericViewSet` 继承 `GenericAPIView`，提供了默认的`get_queryset()`和`get_object()`等方法来获取model数据，但不提供任何请求处理方法
+
+##### `ModelViewSet`
+
+`ModelViewSet` 同时继承 `CreateModelMixin`、`RetrieveModelMixin`、`UpdateModelMixin`、`DestroyModelMixin`、`ListModelMixin`、`GenericViewSet` 类，增加了一些请求处理方法，如`list()`，`retrieve()`，`create()`，`update()`，`partial_update()`，`destroy()`等
+
+一连串的继承关系是：
+`ModelViewSet` -> `GenericViewSet` -> `GenericAPIView` -> `APIView` -> `View`
+
+##### `ReadOnlyModelViewSet`
+
+`ReadOnlyModelViewSet` 同时继承 `RetrieveModelMixin`、`ListModelMixin`、`GenericViewSet` 类，增加了一些请求处理方法，如`list()`，`retrieve()`等
 
 #### 一步实现上述的两个接口（ModelViewSet）
+
+只需要写一个视图类
+
+继承 `ModelViewSet` 可以同时实现增删改查方法，而不用我们自己去写，减少代码量
 
 修改 **drf_tutorial/course_api/views.py** 文件的内容为：
 ```py
@@ -1129,33 +1157,124 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(teacher=self.request.user)
 ```
 
+按住`Ctrl`点击 `ModelViewSet`，可以查看源代码
+![](resources/2024-02-04-15-54-09.png)
 
+按住`Ctrl`点击 `GenericViewSet`，可以查看源代码
+![](resources/2024-02-04-15-54-56.png)
 
 ##### 配置路由
 
+使用 ViewSet 类实现接口，配置路由的方法与上面的 FBV、CBV、GCBV 均不同
+
+###### 手动绑定
+
 修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
 ```py
+from django.urls import path, include
+from course_api import views
 
+urlpatterns = [
+    # FBV
+    # path("fbv/list", views.course_list, name="fbv-list"),
+    # path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+    # CBV
+    # path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+    # path("cbv/detail/<int:pk>", views.CourseDetail.as_view(), name="cbv-detail"),
+    # GCBV
+    # path("gcbv/list", views.GCourseList.as_view(), name="gcbv-list"),
+    # path("gcbv/detail/<int:pk>", views.GCourseDetail.as_view(), name="gcbv-detail"),
+    # DRF viewsets
+    path("viewsets", views.CourseViewSet.as_view(
+        {"get": "list", "post": "create"}
+        ), name="viewsets-list"),
+    path("viewsets/<int:pk>", views.CourseViewSet.as_view(
+        {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+        ), name="viewsets-detail"),
+]
 ```
 
+和 FBV、CBV、GCBV 中配置路由的区别是，这里是**同一个类视图，对应两个不同的URL**
+所以还需要，**指定要调用视图的哪些方法**，给`as_view()`方法传入一个字典，字典的 `key` 是 **HTTP方法**，`value` 则是该方法对应的 **视图方法**
 
+按住`Ctrl`点击 `ModelViewSet`，可以查看源代码
+![](resources/2024-02-04-15-54-09.png)
 
+按住`Ctrl`点击 `ListModelMixin`，可以查看源代码
+![](resources/2024-02-04-16-19-47.png)
+这里可以看到 `list()` 方法
 
-## 路由（routers）
+举个例子，`"get": "list"` 中的：
+- `get` 指的是 HTTP 的 GET方法
+- `list` 指的是 视图集 `CourseViewSet` 的父类 `ModelViewSet` 的父类 `ListModelMixin` 中的 `list()` 方法
 
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/viewsets
 
+测试 **GET方法**
 
+![](resources/2024-02-04-16-29-02.png)
 
+测试 **POST方法**
 
+![](resources/2024-02-04-16-30-30.png)
 
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/viewsets/6
 
+测试 **GET方法**
 
+![](resources/2024-02-04-16-34-46.png)
 
+测试 **PUT方法**
 
+![](resources/2024-02-04-16-35-43.png)
 
+测试 **PATCH方法**
 
+![](resources/2024-02-04-16-36-56.png)
 
+测试 **DELETE方法**
 
+![](resources/2024-02-04-16-37-22.png)
+
+###### 自动绑定（使用 DefaultRouter）
+
+这样实现起来，代码量少很多
+
+修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+```py
+from django.urls import path, include
+from course_api import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(prefix="viewsets", viewset=views.CourseViewSet)
+
+urlpatterns = [
+    # FBV
+    # path("fbv/list", views.course_list, name="fbv-list"),
+    # path("fbv/detail/<int:pk>", views.course_detail, name="fbv-detail"),
+    # CBV
+    # path("cbv/list", views.CourseList.as_view(), name="cbv-list"),
+    # path("cbv/detail/<int:pk>", views.CourseDetail.as_view(), name="cbv-detail"),
+    # GCBV
+    # path("gcbv/list", views.GCourseList.as_view(), name="gcbv-list"),
+    # path("gcbv/detail/<int:pk>", views.GCourseDetail.as_view(), name="gcbv-detail"),
+    # DRF viewsets
+    # path("viewsets", views.CourseViewSet.as_view(
+    #     {"get": "list", "post": "create"}
+    #     ), name="viewsets-list"),
+    # path("viewsets/<int:pk>", views.CourseViewSet.as_view(
+    #     {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+    #     ), name="viewsets-detail"),
+    path("", include(router.urls)),
+]
+```
+
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/viewsets
+效果不变
+
+使用 Postman 来测试接口 http://127.0.0.1:8000/course/viewsets/6
+效果不变
 
 ## 认证（authentication）
 
@@ -1190,7 +1309,7 @@ djangoREST
 https://www.bilibili.com/video/BV1Dm4y1c7QQ/
 
 
-P17
+开始：P17
 P22已完成
 
 
