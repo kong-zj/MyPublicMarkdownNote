@@ -789,7 +789,7 @@ class MysqlPipeline:
     
     def close_spider(self, spider):
         self.cursor.close()
-        self.connect.close()
+        self.conn.close()
 ```
 
 settings.py文件中对应位置修改如下

@@ -130,14 +130,18 @@ class Article(models.Model):
 
 ### 字段类型（内置 Field 类）
 
+[模型字段参考-官方文档](https://docs.djangoproject.com/zh-hans/4.2/ref/models/fields/)
+
 #### 数值型
 
-- `IntegerField()`：整数，对应数据库中 `int`
+- `IntegerField()`：32位整数，对应数据库中 `int`
 - `AutoField()`：自动增长的 `IntegerField()`，对应数据库中 `int`
 - `BooleanField()`：布尔类型字段，对应数据库中 `tinyint(1)`
 - `DecimalField()`：对应数据库中 `decimal(max_digits,decimal_places)`，开发对数据精准要求较高的业务时考虑使用
 - `PositiveIntegerField()`：只可是正数的 `IntegerField()`
 - `SmallIntegerField()`：只支持从 -32768 到 32767 的值的 `IntegerField()`
+- `FloatField()`：浮点数，对应数据库中 `double`
+- `BigIntegerField()`：64位整数，对应数据库中 `bigint`
 
 #### 字符型
 
@@ -148,6 +152,10 @@ class Article(models.Model):
 - `ImageField()`：继承自 `FileField()`，用来保存图片的路径（注意并不是图片本身）
 - `UUIDField()`：用于保存UUID格式的数据，对应数据库中 `varchar(32)`
 - `TextField()`：用于存放大量文本内容，对应数据库中 `longtext`
+
+#### JSON
+
+- `JSONField()`：用于保存JSON格式的数据，对应数据库中 `json`
 
 #### 日期型
 

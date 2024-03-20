@@ -160,6 +160,17 @@ obj.save()
 通常不会轻易在业务里把数据真的删除，取而代之的是做伪删除，即在表中增加一个布尔型字段`is_active`，默认是`True`，执行删除时，将欲删除数据的`is_active`字段设置为`False`即可
 注意：使用伪删除时，确保显示数据的地方，均增加了`is_active=True`的过滤查询
 
+## get_or_create()
+
+用于查询数据库中数据是否存在，如果不存在则创建新的一条数据，如果存在则返回已经存在的一条数据
+
+## bulk_create()
+
+高效地批量插入数据并避免重复数据的问题。bulk_create()方法可以接受一个包含待插入对象的列表，并尝试一次性将它们插入数据库
+
+---
+待完成
+
 # ORM 中的 F对象 和 Q对象
 
 ## F对象
@@ -366,7 +377,7 @@ MyModel.objects.raw(sql语句, 拼接参数)
 from django.db import connection
 # 用创建cursor类的构造函数创建cursor对象，再使用cursor对象，为保证在出现异常时能释放cursor资源，通常使用with语句
 with connection.cursor() as cursor:
-	cursor.execute(sql语句，拼接参数)
+	cursor.execute(sql语句, 拼接参数)
 ```
 
 ### 示例
@@ -404,3 +415,16 @@ with connection.cursor() as cursor:
 ![](resources/2024-01-21-21-30-02.png)
 ![](resources/2024-01-21-21-35-05.png)
 ![](resources/2024-01-21-21-36-12.png)
+
+
+
+
+---
+
+待学习
+
+[Django框架之ORM操作：多表查询，聚合查询、分组查询、F查询、Q查询、ORM查询优化](https://www.cnblogs.com/liupengfei1123/p/14815272.html#_lab2_1_0)
+
+
+[Django基于ListAPIView、序列化器Serializer完成多表联合查数据](https://blog.csdn.net/yangmingfu666/article/details/117588485)
+
