@@ -30,7 +30,10 @@
 
 需要先在WSL2子系统中安装chrome浏览器（和win11系统中的chrome浏览器无关）
 ```shell
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+# 最新的稳定版本
+# wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+# 手动指定版本
+wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
 sudo apt install ./google-chrome-stable_current_amd64.deb
 # 检测是否安装好
 google-chrome --version
@@ -47,6 +50,8 @@ fc-list :lang=zh-cn
 ##### 安装驱动程序
 
 [下载地址](https://chromedriver.storage.googleapis.com/)
+
+[另一个下载地址](https://googlechromelabs.github.io/chrome-for-testing/#stable)
 
 安装chromedriver
 ```shell
@@ -236,6 +241,16 @@ browser.quit()
 # 用来暂停，不然浏览器窗口会一闪而过
 input()
 ```
+
+### 模拟登录启信宝并获取cookie
+
+
+
+---
+
+https://blog.csdn.net/XianZhe_/article/details/119860391
+
+
 
 # 无界面浏览器（提高代码效率）
 
