@@ -1,4 +1,4 @@
-# 多表查询
+# 多表查询（关联查询）
 
 ![](resources/2022-12-09-22-21-29.png)
 
@@ -6,7 +6,7 @@
 
 ![](resources/2022-12-09-22-22-04.png)
 
-### 出现笛卡尔积的错误
+## 出现笛卡尔积的错误
 
 错误的实现方式：
 ![](resources/2022-12-09-22-39-08.png)
@@ -17,7 +17,7 @@
 
 ![](resources/2022-12-09-22-35-06.png)
 
-### 多表查询的正确方式
+## 多表查询的正确方式
 
 需要有连接条件
 
@@ -30,32 +30,32 @@
 n个表至少要有n-1个连接条件
 ![](resources/2022-12-09-22-51-01.png)
 
-### 多表查询的分类
+## 多表查询的分类
 
 ![](resources/2022-12-09-22-53-25.png)
 
-#### 非等值连接
+### 非等值连接
 
 ![](resources/2022-12-09-22-55-58.png)
 
-#### 自连接
+### 自连接
 
 之前的例子都是非自连接
 
 ![](resources/2022-12-09-23-04-54.png)
 ![](resources/2022-12-09-23-05-11.png)
 
-#### 内连接 vs 外连接
+### 内连接 vs 外连接
 
 ![](resources/2022-12-09-23-08-05.png)
 
-##### 内连接
+#### 内连接
 
 ![](resources/2022-12-09-23-09-39.png)
 员工的数据不全
 解决方法：外连接
 
-##### 外连接
+#### 外连接
 
 ![](resources/2022-12-09-23-30-41.png)
 
@@ -72,27 +72,10 @@ INNER JOIN 的方式实现内连接，INNER关键字可省略
 OUTER JOIN 的方式实现外连接
 ![](resources/2022-12-09-23-40-00.png)
 
-OUTER关键字可省略
+OUTER 关键字可省略
 ![](resources/2022-12-09-23-41-01.png)
 
-###### 使用 USING 关键字替换连接条件
-
-```sql
-SELECT employee_id, last_name, department_name
-FROM employees e JOIN departments d
-ON e.`department_id` = d.`department_id`;
-```
-
-可替换为
-```sql
-SELECT employee_id, last_name, department_name
-FROM employees e JOIN departments d
-USING (`department_id`);
-```
-
-不适用于自连接
-
-###### 除了左外连接、右外连接，还有满外连接
+##### 除了左外连接、右外连接，还有满外连接
 
 ![](resources/2022-12-09-23-43-47.png)
 
@@ -101,7 +84,24 @@ USING (`department_id`);
 ![](resources/2022-12-09-23-47-23.png)
 后面会重点实现这七种JOIN操作
 
-##### 自然连接
+### 使用 USING 关键字替换连接条件
+
+```sql
+SELECT employee_id, last_name, department_name
+FROM employees e JOIN departments d
+ON e.`department_id` = d.`department_id`;
+```
+
+当两个表中的字段名一致的时候，可替换为
+```sql
+SELECT employee_id, last_name, department_name
+FROM employees e JOIN departments d
+USING (`department_id`);
+```
+
+不适用于自连接
+
+### 自然连接
 
 ![](resources/2023-05-22-16-09-37.png)
 
@@ -112,6 +112,8 @@ USING (`department_id`);
 ![](resources/2023-05-22-15-23-32.png)
 
 ## 七种图的实现
+
+![](resources/2022-12-09-23-47-23.png)
 
 ### 中图：内连接
 
@@ -167,7 +169,7 @@ UNION ALL
 SELECT employee_id, department_name
 FROM employees e RIGHT JOIN departments d
 ON e.`department_id` = d.`department_id`
-WHERE e.`department_id` IS NULL ;
+WHERE e.`department_id` IS NULL;
 ```
 
 #### 方式2：左中图 UNION ALL 右上图
@@ -202,12 +204,4 @@ WHERE e.`department_id` IS NULL;
 # 总结
 
 ![](resources/2023-05-22-16-22-02.png)
-
-
-
-
-
----
-到P29
-
 

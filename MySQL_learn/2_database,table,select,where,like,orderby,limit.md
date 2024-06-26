@@ -3,24 +3,24 @@
 ## 导入现有数据
 
 ***.sql文件
-```source [文件的全路径名];```
+`source [文件的全路径名];`
 
 ## show 
 
-```show databases;```显示所有数据库
+`show databases;`显示所有数据库
 
-```show tables;```显示某个数据库中的所有表：
+`show tables;`显示某个数据库中的所有表：
 ![](resources/2022-12-08-15-50-51.png)
 
-```show create database [数据库名];```显示某个数据库的创建信息：
+`show create database [数据库名];`显示某个数据库的创建信息：
 ![](resources/2022-12-08-15-57-44.png)
 
-```show create table [表名];```显示某个表的创建信息：
+`show create table [表名];`显示某个表的创建信息：
 ![](resources/2022-12-08-15-49-00.png)
 
-```show columns from [表名];```显示某个表的结构：
+`show columns from [表名];`显示某个表的结构：
 ![](resources/2022-12-08-15-52-43.png)
-上面的语句可简写成```desc jobs;```
+上面的语句可简写成`desc jobs;`
 
 如果表名和MySQL保留的关键字冲突，要用着重号（``）括起来
 ![](resources/2022-12-08-16-16-51.png)
@@ -41,12 +41,12 @@
 
 ## select ... from ...
 
-```select [字段1,字段2, ... ] from [表名];```查询某个表的某些列的数据：
+`select [字段1,字段2, ... ] from [表名];`查询某个表的某些列的数据：
 ![](resources/2022-12-08-15-59-20.png)
 
 ## as 列的别名（alias）
 
-```select [全称] as [别名] from [表名];```
+`select [全称] as [别名] from [表名];`
 其中关键字as可省略
 ![](resources/2022-12-08-16-06-50.png)
 如果别名中有空格，要用双引号包起来，不要用单引号
@@ -79,7 +79,7 @@ null不等同于0
 
 ## where 过滤数据
 
-```select [字段] from [表名] where [过滤条件];```
+`select [字段] from [表名] where [过滤条件];`
 ![](resources/2022-12-08-16-43-45.png)
 
 ### 运算符
@@ -169,9 +169,9 @@ DESC:descend
 ![](resources/2022-12-08-23-48-13.png)
 
 #### 因为涉及到语句执行顺序问题：
-1. 先执行FROM、WHERE选出符合条件的行
-2. 在从这些行中SELECT相应的列数据
-3. 最后再用ORDER BY排序
+1. 先执行 **FROM**、**WHERE** 选出符合条件的行
+2. 在从这些行中 **SELECT** 相应的列数据
+3. 最后再用 **ORDER BY** 排序
 
 别名只能在SELECT之后的语句（ORDER BY）中才能使用，之前的语句（WHERE）执行时还没有这个别名
 
