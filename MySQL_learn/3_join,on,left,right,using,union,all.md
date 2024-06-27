@@ -105,6 +105,10 @@ USING (`department_id`);
 
 ![](resources/2023-05-22-16-09-37.png)
 
+## 总结
+
+![](resources/2023-05-22-16-22-02.png)
+
 # UNION 组合查询
 
 ![](resources/2023-05-22-15-20-54.png)
@@ -200,8 +204,4 @@ FROM employees e RIGHT JOIN departments d
 ON e.`department_id` = d.`department_id`
 WHERE e.`department_id` IS NULL;
 ```
-
-# 总结
-
-![](resources/2023-05-22-16-22-02.png)
 
