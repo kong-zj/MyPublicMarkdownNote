@@ -88,10 +88,53 @@
 
 # 聚合函数（多行函数）
 
+![](resources/2024-06-27-21-07-06.png)
 
+## 常见的聚合函数
 
+AVG()
+SUM()
+MAX()
+MIN()
+COUNT()
 
+![](resources/2024-06-27-21-40-14.png)
+![](resources/2024-06-27-21-41-10.png)
+注意：计算指定字段出现的次数时，是不包含NULL值的
 
+## GROUP BY 的使用
+
+![](resources/2024-06-27-21-55-46.png)
+![](resources/2024-06-27-22-05-34.png)
+![](resources/2024-06-27-22-11-19.png)
+
+### 使用 WITH ROLLUP
+
+![](resources/2024-06-27-22-13-02.png)
+
+## HAVING 的使用
+
+![](resources/2024-06-27-22-19-58.png)
+
+![](resources/2024-06-27-22-20-32.png)
+![](resources/2024-06-27-22-28-50.png)
+注意：WHERE 是分组前的过滤，HAVING 是对分组后的结果的过滤
+
+### WHERE 和 HAVING 的对比
+
+![](resources/2024-06-27-22-31-02.png)
+
+## SQL底层执行原理
+
+### SELECT 语句结构
+
+![](resources/2024-07-01-20-07-58.png)
+
+### SELECT 执行顺序
+
+![](resources/2024-07-01-20-10-06.png)
+
+![](resources/2024-07-01-20-17-49.png)
 
 
 
@@ -107,7 +150,9 @@
 
 
 ---
-到P39
+到P43
+
+
 
 
 
