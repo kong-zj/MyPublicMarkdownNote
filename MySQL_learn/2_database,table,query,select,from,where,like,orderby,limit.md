@@ -37,7 +37,7 @@
 
 删除数据库或删除表
 
-# 初步SELECT
+# 初步SELECT（query）
 
 ## select ... from ...
 
