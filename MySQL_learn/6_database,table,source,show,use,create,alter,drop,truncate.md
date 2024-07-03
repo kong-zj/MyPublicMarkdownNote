@@ -53,6 +53,10 @@
 
 ![](resources/2024-07-02-22-17-32.png)
 
+#### 计算列
+
+![](resources/2024-07-03-21-19-41.png)
+
 ## ALTER
 
 修改数据库或表
@@ -87,64 +91,15 @@
 
 ## DROP、TRUNCATE、DELETE 的区别
 
-DCL 事务简介
+DCL 中的 COMMIT 和 ROLLBACK
 ![](resources/2024-07-02-22-54-03.png)
+
 ![](resources/2024-07-02-23-23-54.png)
 其中：
 - DROP、TRUNCATE 是 **DDL** 语句
 - DELETE 是 **DML** 语句
 
+![](resources/2024-07-03-08-57-07.png)
+
 [MySQL删除表数据、清空表命令（truncate、drop、delete 区别）](https://cloud.tencent.com/developer/article/2389933)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-之后详细讲
-# DCL 中的 COMMIT 和 ROLLBACK
-
-
-
-
-
-
-
----
-
-# MySQL数据类型
-
-![](resources/2024-07-02-22-01-58.png)
-![](resources/2024-07-02-22-02-56.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-到P53
-
-
-
-
 
