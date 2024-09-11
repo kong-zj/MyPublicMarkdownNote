@@ -397,9 +397,9 @@ INSTALLED_APPS = [
 ]
 ```
 
-### urlpatterns 中加入 `path('api-auth/', include('rest_framework.urls'))`
+### 根urlpatterns 中加入 `path('api-auth/', include('rest_framework.urls'))`
 
-修改 **drf_tutorial/course_api/urls.py** 文件的内容为：
+修改 **drf_tutorial/drf_tutorial/urls.py** 文件的内容为：
 ```py
 from django.contrib import admin
 from django.urls import path, include
@@ -1118,6 +1118,12 @@ urlpatterns = [
 GCBV 中，我们分别通过 `GCourseList`类 和 `GCourseDetail`类 实现两个接口，能不能两个接口能不能**合二为一**？
 
 REST framework 允许将一组相关的逻辑视图聚集在一个类，`ViewSet` 类是一个简单类型的基于类的视图，没有提供任何方法处理程序如`get()`，`post()`等，而提供代替方法比如`list()`，`retrieve()`，`create()`，`update()`，`destroy()`等
+
+> list(): 提供一组数据
+> retrieve(): 提供单个数据
+> create(): 创建数据
+> update(): 保存数据
+> destory(): 删除数据
 
 #### 需要继承 `viewsets` 包里的类
 

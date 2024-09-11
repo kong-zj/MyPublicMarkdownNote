@@ -181,6 +181,7 @@ class Article(models.Model):
 - unique：如果为 True, 这个字段在表中是**唯一索引**，默认值是 False
 - db_column：指定**列的名称**（一般情况下用不到），如果不指定，则使用字段名
 - verbose_name：设置该字段在 Admin 界面上的显示名称，默认值为字段名
+- help_text：为字段提供额外的说明信息，帮助用户正确填写字段值
 
 ### 模型类的 Meta内部类
 
