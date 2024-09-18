@@ -134,6 +134,7 @@ JavaScript 能够以不同方式显示数据：
 ```js
 var carName = "porsche";
 ```
+
 `=` : **赋值运算符**
 `==` : **等于运算符**
 `===` : **严格等于运算符**
@@ -173,12 +174,136 @@ ES2015 引入了两个重要的 JavaScript 新关键词 `let` 和 `const`：
 ```js
 var length = 7;                                // 数字
 var bi1 = 9223372036854775807n;                // 大整数(整数后加一个 n)(精确表示比 2^53 还大的整数)
-var bi2 = BigInt(12345);                       // 大整数(使用 BigInt() 把Number和字符串转换成BigInt)
+var bi2 = BigInt(12345);                       // 大整数(使用 BigInt() 把Number或字符串转换成BigInt)
 var lastName = "Gates";                        // 字符串
 var y = false;                                 // 布尔值
 var person = undefined;                        // 未定义(当一个变量声明但未赋值时)
 var car = null;                                // 空值(用于表示变量被故意赋值为空)
 var s3 = Symbol('hello');                      // 符号
+```
+
+#### 数字（Number）
+
+> JavaScript 数值始终是 64 位的浮点数
+> 与许多其他编程语言不同，JavaScript 不会定义不同类型的数，比如整数、短的、长的、浮点的等等
+> JavaScript 数值始终以**双精度浮点数**来存储，根据国际 IEEE 754 标准
+> ![](resources/2024-09-19-00-18-18.png)
+
+![](resources/2024-09-19-00-05-33.png)
+
+```js
+var x1 = 34.1;                           
+var x2 = 34;                               
+var y = 123e5;                               // 12300000
+var z = 123e-5;                              // 0.00123
+var n1 = 0xFF;                               // 255
+var n2 = 0o11;                               // 9
+var n3 = 0b11;                               // 3
+var x2_2 = x2.toString(2)                    // 使用 toString() 方法把数输出为十六进制、八进制或二进制
+
+// 精度问题
+var big = 9999999999999999;                   // big 将是 10000000000000000，JavaScript 整数最多只能精确到 15 位
+var float = 0.2 + 0.1;                        // float 将是 0.30000000000000004，小数的最大数是 17 位，但是浮点的算数并不总是 100% 精准
+
+// JavaScript 的加法和级联（concatenation）都使用 + 运算符
+// 数字和字符串相加，JavaScript 会把数字转换为字符串，然后再连接
+var res1 = 10 + 20 + '30';                    // 返回 3030
+
+var res2 = '100' / '10';                      // 返回 10
+
+var res3 = 100 / "Apple";                     // res3 将是 NaN（Not a Number）
+isNaN(res3);                                  // 返回 true，因为 res3 不是数
+var res4 = res3 + 100;                        // 要小心 NaN，假如在数学运算中使用了 NaN，则结果也将是 NaN
+var res5 = res3 + '100';                      // 返回 NaN100
+typeof NaN;                                   // 返回 number
+
+// Infinity（或 -Infinity）是 JavaScript 在计算数时超出最大可能数范围时返回的值
+var res6 =  2 / 0;                            // x 将是 Infinity
+var res7 = -2 / 0;                            // y 将是 -Infinity
+typeof Infinity;                              // 返回 number
+```
+
+##### == 和 ===
+
+JavaScript在设计时，有两种比较运算符：
+1. == ，它会自动转换数据类型再比较，很多时候，会得到非常诡异的结果
+2. === ，它不会自动转换数据类型，如果数据类型不一致，返回false，如果一致，再比较
+
+由于JavaScript这个设计缺陷，不要使用 == 比较，始终坚持使用 === 比较
+
+一个例外是 NaN 这个特殊的Number与所有其他值都不相等，包括它自己：
+```js
+NaN === NaN; // false
+```
+
+唯一能判断 NaN 的方法是通过 isNaN() 函数：
+```js
+isNaN(NaN); // true
+```
+
+还要注意浮点数的相等比较：
+```js
+1 / 3 === (1 - 2 / 3); // false
+```
+
+这不是JavaScript的设计缺陷。浮点数在运算过程中会产生误差，因为计算机无法精确表示无限循环小数。要比较两个浮点数是否相等，只能计算它们之差的绝对值，看是否小于某个阈值：
+```js
+Math.abs(1 / 3 - (1 - 2 / 3)) < 0.0000001; // true
+```
+
+#### 大整数（BigInt）
+
+
+
+学到
+https://www.w3school.com.cn/js/js_bigint.asp
+
+
+
+#### 字符串（String）
+
+```js
+var lastName = "Gates";                          // 字符串
+var sln = lastName.length;                       // length 属性返回字符串的长度
+var pos1 = lastName.indexOf("es", 1);            // indexOf() 方法返回字符串中指定文本首次出现的索引，第二个参数为开始查找的位置
+var pos2 = lastName.lastIndexOf("es", 4);        // lastIndexOf() 方法返回指定文本在字符串中最后一次出现的索引，第二个参数为开始查找的位置
+var pos3 = lastName.search("es");                // search() 方法搜索字符串中的指定文本，可以使用正则表达式
+var res1 = lastName.slice(1, 3);                 // slice() 方法提取字符串的一部分，并返回一个新的字符串，两个参数为开始和结束位置
+var res2 = lastName.substring(1, 3);             // substring() 方法返回字符串中介于两个指定下标之间的字符，两个参数会比较大小来判断哪一个是起始位参数哪一个是结束位置参数
+var res3 = lastName.substr(1, 3);                // substr() 方法返回从指定位置开始的指定数量的字符
+var res4 = lastName.replace("e", "a");           // replace() 方法用一些字符替换字符串中的某些字符
+var res5 = lastName.toUpperCase();               // toUpperCase() 方法用于把字符串转换为大写
+var res6 = lastName.toLowerCase();               // toLowerCase() 方法用于把字符串转换为小写
+var res7 = lastName.concat(" and Bill Gates");   // concat() 方法用于连接两个或多个字符串
+var res8 = lastName.trim();                      // trim() 方法删除字符串两端的空白符
+var res9 = lastName.charAt(2);                   // charAt() 方法返回在指定位置的字符
+var res10 = lastName.charCodeAt(2);              // charCodeAt() 方法返回字符串中指定索引的字符 unicode 编码
+
+var txt = "a,b,c,d,e";                           // 字符串
+var res11 = txt.split(",");                      // split() 方法用于把字符串分割为字符串数组
+
+var text = "The rain in SPAIN stays mainly in the plain";
+var res12 = text.match(/ain/g)                   // 返回数组 [ain,ain,ain]，match() 方法根据正则表达式在字符串中搜索匹配项，并将匹配项作为 Array 对象返回
+
+var text = "Hello World!";                       // 字符串
+var res13 = text.includes("Hello");              // 返回 true，includes() 方法用于判断字符串是否包含指定的子字符串
+var res14 = text.startsWith("Hello");            // 返回 true，startsWith() 方法用于判断字符串是否以指定的子字符串开头
+var res15 = text.endsWith("World!");             // 返回 true，endsWith() 方法用于判断字符串是否以指定的子字符串结尾
+```
+
+##### 模板字符串
+
+使用反引号 (``) 而不是引号 ("") 来定义字符串
+
+> 可以跨行
+> 可以使用 `${...}` 语法进行**字符串插值**
+
+```js
+var firstName = "Bill";
+var lastName = "Gates";
+var text = `Welcome 
+            ${firstName},
+            ${lastName}!`;  // 模板字符串
 ```
 
 #### Undefined 与 Null 的区别
@@ -282,34 +407,6 @@ name = person.fullName();
 
 ---
 
-
-##### == 和 ===
-
-JavaScript在设计时，有两种比较运算符：
-1. == ，它会自动转换数据类型再比较，很多时候，会得到非常诡异的结果
-2. === ，它不会自动转换数据类型，如果数据类型不一致，返回false，如果一致，再比较
-
-由于JavaScript这个设计缺陷，不要使用 == 比较，始终坚持使用 === 比较
-
-一个例外是 NaN 这个特殊的Number与所有其他值都不相等，包括它自己：
-```js
-NaN === NaN; // false
-```
-
-唯一能判断 NaN 的方法是通过 isNaN() 函数：
-```js
-isNaN(NaN); // true
-```
-
-还要注意浮点数的相等比较：
-```js
-1 / 3 === (1 - 2 / 3); // false
-```
-
-这不是JavaScript的设计缺陷。浮点数在运算过程中会产生误差，因为计算机无法精确表示无限循环小数。要比较两个浮点数是否相等，只能计算它们之差的绝对值，看是否小于某个阈值：
-```js
-Math.abs(1 / 3 - (1 - 2 / 3)) < 0.0000001; // true
-```
 
 
 
