@@ -186,7 +186,7 @@ React.createElement(component,props,…children)
 
 ### 总结
 
-jsx 创建虚拟DOM的写法：
+**jsx** 创建虚拟DOM的写法：
 ```jsx
         const VDOM = (
             <h1 id="title">
@@ -194,7 +194,7 @@ jsx 创建虚拟DOM的写法：
             </h1>
         )
 ```
-是 js 创建虚拟DOM的写法：
+是 **js** 创建虚拟DOM的写法：
 ```js
         const VDOM = React.createElement('h1', {id:'title'}, 
                         React.createElement('span', {}, 'Hello,React')

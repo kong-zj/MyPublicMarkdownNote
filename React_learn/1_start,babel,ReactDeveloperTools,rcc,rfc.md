@@ -108,7 +108,7 @@
 
 ## rcc
 
-react class component 的简写，即 类式组件
+react class component 的简写，即 **类式组件**
 
 在文件中输入 rcc，会自动生成以下代码
 ```js
@@ -125,7 +125,7 @@ export default class index extends Component {
 
 ## rfc
 
-react function component 的简写，即 函数式组件
+react function component 的简写，即 **函数式组件**
 
 在文件中输入 rfc，会自动生成以下代码
 ```js
