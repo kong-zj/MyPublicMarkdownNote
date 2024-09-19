@@ -73,9 +73,14 @@ Number.isInteger(10);                         // 返回 true
 Number.isSafeInteger(12345678901234567890);   // 返回 false，安全整数是可以精确表示为双精度数的整数
 ```
 
+#### 数字方法
+
 ![](resources/2024-09-19-13-27-14.png)
 ![](resources/2024-09-19-13-28-05.png)
 ![](resources/2024-09-19-13-28-27.png)
+
+#### 数字属性
+
 ![](resources/2024-09-19-13-35-09.png)
 
 #### == 和 ===
@@ -521,6 +526,15 @@ function getRndInteger(min, max) {
 
 [链接](https://www.w3school.com.cn/js/js_regexp.asp)
 
+正则表达式是构成搜索模式（search pattern）的字符序列，正则表达式可用于执行所有类型的文本搜索和文本替换操作
+
+```js
+// 语法
+/pattern/modifiers;
+// 实例
+var patt = /w3school/i;
+```
+
 ### 注意
 
 对于引用类型，typeof 运算符可返回 function 或 object：
@@ -529,4 +543,23 @@ function getRndInteger(min, max) {
 
 ## typeof 总结
 
-https://www.w3school.com.cn/js/js_typeof.asp
+[链接](https://www.w3school.com.cn/js/js_typeof.asp)
+
+![](resources/2024-09-19-22-47-41.png)
+
+### constructor 属性
+
+![](resources/2024-09-19-22-51-59.png)
+
+# js的类型转换
+
+`Number()` 转换数值，`String()` 转换字符串，`Boolean()` 转换布尔值
+
+## 自动类型转换
+
+![](resources/2024-09-19-22-59-08.png)
+
+## 举例
+
+![](resources/2024-09-19-23-00-03.png)
+
