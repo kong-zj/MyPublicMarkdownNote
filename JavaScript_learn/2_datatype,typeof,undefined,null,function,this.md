@@ -198,6 +198,7 @@ null 和 undefined 在某种程度上是等价的，但 `null` 表示**缺少对
 - 数学（Math）
 - 正则（RegExp）
 - 函数（Function）
+- 错误（Error）
 
 ```js
 var cars = ["Porsche", "Volvo", "BMW"];        // 数组
