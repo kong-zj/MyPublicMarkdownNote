@@ -148,6 +148,52 @@ ES2015 引入了两个重要的 JavaScript 新关键词 `let` 和 `const`：
 
 块是由 `{}` 界定的代码块
 
+### js的作用域
+
+[链接](https://www.w3school.com.cn/js/js_scope.asp)
+
+### js的声明提升（Hoisting）
+
+[链接](https://www.w3school.com.cn/js/js_hoisting.asp)
+
+`Hoisting` 是 JavaScript **将所有声明提升到当前作用域顶部**的默认行为（提升到当前脚本或当前函数的顶部）
+
+可以在声明变量之前使用它：
+```js
+x = 5; // 把 5 赋值给 x
+console.log(x); // 使用 x
+var x; // 声明 x
+```
+
+注意：用 `let` 或 `const` 声明的变量和常量不会被提升
+
+只提升声明，不提升初始化：
+```js
+var x = 5; // 初始化 x
+console.log(x); // 使用 x
+console.log(y); // 使用 y
+var y = 7; // 初始化 y 
+```
+只有声明 `var y` 而不是初始化 `= 7` 被提升到顶部
+由于 `hoisting`，`y` 在其被使用前已经被声明，但是由于未对初始化进行提升，`y` 的值仍是未定义
+
+上面例子中的代码等价于：
+```js
+var x = 5; // 初始化 x
+var y; // 声明 y
+console.log(x);
+console.log(y);
+var y = 7; // 把 7 赋值给 y
+```
+
+注意：请始终在每个作用域的开头声明所有变量，以避免任何意外
+
+**严格模式**中的 JavaScript **不允许在未被声明的情况下使用变量**
+
+### js的严格模式
+
+[链接](https://www.w3school.com.cn/js/js_strict.asp)
+
 ## js的运算符
 
 ### 算术运算符
@@ -181,3 +227,8 @@ ES2015 引入了两个重要的 JavaScript 新关键词 `let` 和 `const`：
 
 ![](resources/2024-09-19-23-01-29.png)
 ![](resources/2024-09-19-23-02-22.png)
+
+### 运算符优先级
+
+[链接](https://www.w3school.com.cn/js/js_precedence.asp)
+

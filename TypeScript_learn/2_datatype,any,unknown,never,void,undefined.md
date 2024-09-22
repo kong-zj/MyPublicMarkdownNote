@@ -67,7 +67,7 @@ console.log(typeof str2); // 显示 object
 
 ![](resources/2024-09-20-21-12-25.png)
 
-# 常用类型
+# 常用类型与语法
 
 ## any
 
@@ -606,6 +606,21 @@ if (a === 999) { // 但是不能拿返回值进行任何逻辑上的操作
 ![](resources/2024-09-21-13-48-11.png)
 **箭头函数的副作用**：箭头函数的函数体如果只有一句，会把这句话的执行结果作为默认的返回值
 
+## 复习类相关知识
+
+```ts
+
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -623,15 +638,6 @@ if (a === 999) { // 但是不能拿返回值进行任何逻辑上的操作
 let someValue: any = 'this is a string';
 let strLength: number = (someValue as string).length;
 ```
-
-
-
-
-
-
-
-
-
 
 
 

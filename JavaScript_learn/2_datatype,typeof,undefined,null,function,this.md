@@ -232,12 +232,12 @@ var person = {
 JavaScript 的 `this` 关键词指的是它所属的对象
 
 它拥有不同的值，具体取决于它的使用位置：
-- 在方法中，this 指的是所有者对象
-- 单独的情况下，this 指的是全局对象
-- 在函数中，this 指的是全局对象
-- 在函数中，严格模式下，this 是 undefined
-- 在事件中，this 指的是接收事件的元素
-像 `call()` 和 `apply()` 这样的方法可以将 this 引用到任何对象
+- 在**方法**中，`this` 指的是所有者对象
+- **单独的情况下**，`this` 指的是全局对象
+- 在**函数**中，`this` 指的是全局对象
+- 在**函数**中，**严格模式**下，`this` 是 `undefined`
+- 在**事件**中，`this` 指的是接收事件的元素
+像 `call()` 和 `apply()` 这样的方法可以将 `this` 引用到任何对象
 
 #### 访问对象
 
@@ -527,6 +527,8 @@ function getRndInteger(min, max) {
 
 [链接](https://www.w3school.com.cn/js/js_regexp.asp)
 
+[参考手册](https://www.w3school.com.cn/jsref/jsref_obj_regexp.asp)
+
 正则表达式是构成搜索模式（search pattern）的字符序列，正则表达式可用于执行所有类型的文本搜索和文本替换操作
 
 ```js
@@ -534,6 +536,146 @@ function getRndInteger(min, max) {
 /pattern/modifiers;
 // 实例
 var patt = /w3school/i;
+// 其中 w3school 是模式，i 是修饰符
+```
+
+#### 配合`search()`和`replace()`
+
+在 JavaScript 中，正则表达式常用于两个字符串方法：`search()` 和 `replace()`
+- `search()` 方法使用表达式来搜索匹配，然后返回匹配的位置
+- `replace()` 方法返回模式被替换处修改后的字符串
+
+```js
+var str = "Visit W3School";
+var n = str.search(/w3school/i); 
+```
+
+```js
+var str = "Visit Microsoft!";
+var res = str.replace(/microsoft/i, "W3School"); 
+```
+
+#### 正则表达式修饰符
+
+![](resources/2024-09-21-14-30-58.png)
+
+#### 正则表达式模式
+
+![](resources/2024-09-21-14-31-56.png)
+
+#### 使用 RegExp 对象
+
+在 JavaScript 中，RegExp 对象是**带有预定义属性和方法的正则表达式对象**
+
+##### 使用 test()
+
+`test()` 是一个正则表达式方法，用于检测一个字符串是否匹配某个模式，然后返回 true 或 false
+
+```js
+var patt = /e/;
+patt.test("The best things in life are free!");
+```
+
+##### 使用 exec()
+
+`exec()` 方法是一个正则表达式方法，它通过指定的模式（pattern）搜索字符串，并返回已找到的文本，如果未找到匹配，则返回 null
+
+```js
+var patt = /e/;
+patt.exec("The best things in life are free!");
+```
+
+### 函数（Function）
+
+```js
+// 普通函数
+let func1 = function myFunction(p1, p2) {
+    return p1 * p2;
+}
+// 箭头函数
+let func2 = (p1, p2) => p1 * p2;
+```
+
+#### 箭头函数中的this
+
+[链接](https://www.w3school.com.cn/js/js_arrow_function.asp)
+
+与常规函数相比，箭头函数对 `this` 的处理也有所不同
+简而言之，使用箭头函数没有对 `this` 的绑定
+在**常规函数**中，关键字 `this` 表示**调用该函数的对象**，可以是窗口、文档、按钮或其他任何东西
+对于**箭头函数**，`this` 关键字始终表示**定义箭头函数的对象**
+
+让我们看两个例子来理解其中的差异
+这两个例子都调用了两次方法，第一次是在页面加载时，第二次是在用户单击按钮时
+第一个例子使用**常规函数**，第二个例子使用**箭头函数**
+结果显示第一个例子返回两个不同的对象（window 和 button），第二个例子返回两次 window 对象，因为 window 对象是函数的**所有者**
+
+案例1：对于**常规函数**，`this` 表示**调用该函数的对象**
+```html
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>JavaScript "this"</h2>
+
+<p>此例演示在常规函数中，“this”关键字代表不同的对象，具体取决于函数的调用方式。</p>
+
+<p>点击按钮再次执行“hello”函数，你会看到这次“this”代表的是 button 对象。</p>
+
+<button id="btn">点击我！</button>
+
+<p id="demo"></p>
+
+<script>
+var hello;
+
+hello = function() {
+  document.getElementById("demo").innerHTML += this;
+}
+
+//window 对象调用函数：
+window.addEventListener("load", hello);
+
+//button 对象调用函数：
+document.getElementById("btn").addEventListener("click", hello);
+</script>
+
+</body>
+</html>
+```
+
+案例2：用了**箭头函数**，则 `this` 表示**函数的拥有者**
+```html
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>JavaScript "this"</h2>
+
+<p>此例演示在箭头函数中，“this”关键字表示拥有该函数的对象，无论是谁调用该函数。</p>
+
+<p>点击按钮再次执行“hello”函数，你会看到“this”仍然代表 window 对象。</p>
+
+<button id="btn">点击我！</button>
+
+<p id="demo"></p>
+
+<script>
+var hello;
+
+hello = () => {
+  document.getElementById("demo").innerHTML += this;
+}
+
+//window 对象调用函数：
+window.addEventListener("load", hello);
+
+//button 对象调用函数：
+document.getElementById("btn").addEventListener("click", hello);
+</script>
+
+</body>
+</html>
 ```
 
 ### 注意
