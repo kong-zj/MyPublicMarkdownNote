@@ -141,11 +141,11 @@ finally {
 
 ![](resources/2024-09-21-15-10-18.png)
 
-# js的类
+# js的类（class）(ES6)
 
 [链接](https://www.w3school.com.cn/js/js_classes.asp)
 
-JavaScript 类是 JavaScript 对象的模板
+JavaScript类 是 JavaScript对象 的模板
 
 ```js
 class Car {
@@ -165,7 +165,7 @@ let myCar = new Car("Ford", 2014);
 let myCarStr = "My car is " + myCar.age(year) + " years old.";
 ```
 
-# js的模块
+# js的模块（module）
 
 [链接](https://www.w3school.com.cn/js/js_modules.asp)
 

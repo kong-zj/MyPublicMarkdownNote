@@ -210,6 +210,8 @@ function myFunction(p1, p2) {
 
 ### 对象（Object）
 
+[链接](https://www.w3school.com.cn/js/js_object_definition.asp)
+
 #### 定义对象
 
 对象有**属性**和**方法**
@@ -239,7 +241,7 @@ JavaScript 的 `this` 关键词指的是它所属的对象
 - 在**事件**中，`this` 指的是接收事件的元素
 像 `call()` 和 `apply()` 这样的方法可以将 `this` 引用到任何对象
 
-#### 访问对象
+#### 访问对象、操作对象
 
 ```js
 // 访问对象属性
@@ -250,7 +252,92 @@ person["lastName"];
 // 访问对象方法
 // objectName.methodName()
 name = person.fullName();
+// 添加新属性
+person.nationality = "English";
+// 删除属性
+delete person.nationality;
 ```
+
+#### 对象构造器函数
+
+> 在典型的面向对象的语言中，如java，都存在类（class）的概念，类就是对象的模板，对象就是类的实例
+> 但是在Javascript语言体系中，是**不存在类**（class）的概念的，javascript中不是基于"类"的（**ES6之前**），而是通过**构造函数**（constructor）和**原型链**（prototype chains）实现的
+
+上面的对象实例有限制的，只创建 **单一对象**
+有时我们需要创建相同"类型"的许多对象的"蓝图"
+创建一种"对象类型"的方法，是使用 **对象构造器函数**
+
+通过 new 关键词调用构造器函数可以创建 **相同类型的对象**
+
+```js
+// 对象构造器函数
+function Person(first, last, age, eye) {
+    this.firstName = first;
+    this.lastName = last;
+    this.age = age;
+    this.eyeColor = eye;
+    this.changeName = function (name) {
+        this.lastName = name;
+    };
+}
+// 通过 new 关键词调用构造器函数，创建相同类型的对象
+var myFather = new Person("Bill", "Gates", 62, "blue");
+var myMother = new Person("Steve", "Jobs", 56, "green");
+// 为了解决构造函数的对象实例之间无法共享属性的缺点，js提供了prototype属性
+Person.prototype.nationality = "English";
+Person.prototype.name = function() {
+    return this.firstName + " " + this.lastName;
+};
+```
+
+[详解Javascript中prototype属性](https://www.cnblogs.com/douyage/p/8630529.html)
+
+> 对于**构造函数**来说，prototype是作为构造函数的属性
+> 对于**对象实例**来说，prototype是对象实例的原型对象
+> 所以prototype即是**属性**，又是**对象**
+
+#### 可迭代对象（Iterables）
+
+可迭代对象（Iterables）是可以使用 `for..of` 进行迭代的对象
+
+从技术上讲，可迭代对象必须实现 `Symbol.iterator` 方法
+
+##### JavaScript 迭代器
+
+当一个对象实现了 `next()` 方法时，它就成为了一个迭代器
+`next()` 方法必须**返回**一个带有**两个属性**的对象：
+- **value**（迭代器返回的值）
+- **done**（true 或 false）
+
+##### 自制可迭代对象
+
+[迭代器和生成器的官方文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Iterators_and_generators)
+
+[Iterable object（可迭代对象）链接](https://zh.javascript.info/iterable)
+
+实现 `next()` 方法，并调用它：
+```js
+// 自制的可迭代对象
+function myNumbers() {
+  let n = 0;
+  return {
+    next: function() {
+      n += 10;
+      return {value:n, done:false};
+    }
+  };
+}
+// 创建可迭代对象
+const n = myNumbers();
+console.log(n.next().value);        // 输出 10
+console.log(n.next().value);        // 输出 20
+console.log(n.next().value);        // 输出 30
+```
+
+注意：
+
+---
+
 
 ### 数组（Array）
 
