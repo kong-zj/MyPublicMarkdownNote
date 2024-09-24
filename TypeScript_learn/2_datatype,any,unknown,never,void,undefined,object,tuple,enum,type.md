@@ -504,6 +504,13 @@ console.log(dir); // 显示 0
 ```ts
 type shuzi = number;
 let a:shuzi = 1;
+
+// 使用 type 定义 Person 对象
+type PersonType = {
+    name: string;
+    age: number;
+    speak(): void;
+}
 ```
 
 ### 联合类型（或类型）
@@ -605,57 +612,3 @@ if (a === 999) { // 但是不能拿返回值进行任何逻辑上的操作
 
 ![](resources/2024-09-21-13-48-11.png)
 **箭头函数的副作用**：箭头函数的函数体如果只有一句，会把这句话的执行结果作为默认的返回值
-
-## 复习类相关知识
-
-```ts
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-# 类型断言
-
-## 类型断言的两种方式
-
-```ts
-let someValue: any = 'this is a string';
-let strLength: number = (someValue as string).length;
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-学习视频
-https://www.bilibili.com/video/BV1YS411w7Bf
-
-P3
-

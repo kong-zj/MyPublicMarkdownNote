@@ -145,7 +145,10 @@ finally {
 
 [链接](https://www.w3school.com.cn/js/js_classes.asp)
 
+ECMAScript 2015，也称为 ES6，引入了 JavaScript 类
 JavaScript类 是 JavaScript对象 的模板
+
+使用关键字 `class` 创建一个类
 
 ```js
 class Car {
@@ -163,6 +166,58 @@ let year = date.getFullYear();
 
 let myCar = new Car("Ford", 2014);
 let myCarStr = "My car is " + myCar.age(year) + " years old.";
+```
+
+## 类继承（extends）
+
+使用关键字 `extends` 进行类继承
+`super()` 方法调用父类的构造函数
+
+```js
+class Car {
+  constructor(brand) {
+    this.carname = brand;
+  }
+  present() {
+    return 'I have a ' + this.carname;
+  }
+}
+
+class Model extends Car {
+  constructor(brand, mod) {
+    super(brand);
+    this.model = mod;
+  }
+  show() {
+    return this.present() + ', it is a ' + this.model;
+  }
+}
+
+let myCar = new Model("Ford", "Mustang");
+console.log(myCar.show());
+```
+
+继承对于代码可重用性很有用：在创建新类时**重用**现有类的**属性**和**方法**
+
+## static 类方法
+
+使用关键字 `static` 创建**静态方法**
+静态方法属于**类**，而不是类的**实例**
+静态方法通常用于**直接调用类的方法**，而不需要创建类的实例（不能在实例对象上调用 static 方法，只能在对象类上调用）
+
+```js
+class Car {
+  constructor(name) {
+    this.name = name;
+  }
+  static hello() {
+    return "Hello!!";
+  }
+}
+
+let myCar = new Car("Ford");
+console.log(Car.hello());			// 可以
+console.log(myCar.hello());			// 不可以
 ```
 
 # js的模块（module）

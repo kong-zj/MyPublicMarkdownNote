@@ -195,7 +195,6 @@ JSON 文本的 MIME 类型是 `application/json`
 https://www.w3school.com.cn/js/js_best_practices.asp
 
 函数
-类
 Async
 HTML DOM
 Browser DOM

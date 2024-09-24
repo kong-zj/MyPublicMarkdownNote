@@ -157,6 +157,7 @@ ES2015 引入了两个重要的 JavaScript 新关键词 `let` 和 `const`：
 [链接](https://www.w3school.com.cn/js/js_hoisting.asp)
 
 `Hoisting` 是 JavaScript **将所有声明提升到当前作用域顶部**的默认行为（提升到当前脚本或当前函数的顶部）
+> 与函数和其他 JavaScript 声明不同，类声明不会被提升
 
 可以在声明变量之前使用它：
 ```js
