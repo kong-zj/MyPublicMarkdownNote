@@ -165,5 +165,5 @@ export { add, mul };
 学习视频
 https://www.bilibili.com/video/BV1YS411w7Bf
 
-P4
+P4  装饰器
 

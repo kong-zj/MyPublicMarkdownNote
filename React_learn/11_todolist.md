@@ -159,7 +159,7 @@ root.render(
 
 #### src/components/Header/index.jsx
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css'
 
@@ -200,7 +200,7 @@ export default class Header extends Component {
 
 List组件中，包含多个 Item子组件
 
-```js
+```jsx
 import React, { Component } from 'react';
 import Item from '../Item';
 import './index.css';
@@ -245,7 +245,7 @@ export default class List extends Component {
 
 #### src/components/Item/index.jsx
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -309,7 +309,7 @@ li:last-child {
 
 #### src/components/Footer/index.jsx
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -412,7 +412,7 @@ export default class App extends Component{
 - 在 List组件 中**接收** **todos数组**
 - 把 todos数组 的每一项分别传递给各个 **Item子组件**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import Item from '../Item';
 import './index.css';
@@ -442,7 +442,7 @@ export default class List extends Component {
 
 - 在 Item组件 中**渲染** **todo对象**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -523,7 +523,7 @@ export default class App extends Component{
 
 - 在 Header组件 里，给回车键绑定一个键盘事件，把获取的**值传递**给 **父组件** **App组件**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import {nanoid} from 'nanoid';
 import './index.css';
@@ -571,7 +571,7 @@ export default class Header extends Component {
 
 - 在 Item组件 里，给列表项绑定 鼠标移入事件 和 鼠标移出事件，并在事件的回调函数中，更改状态 state
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -675,7 +675,7 @@ export default class App extends Component{
 - 在 List组件 中**接收** **updateTodo函数**
 - 把 updateTodo函数 继续传递给 **Item子组件**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import Item from '../Item';
 import './index.css';
@@ -702,7 +702,7 @@ export default class List extends Component {
 
 - 在 Item组件 里，给复选框绑定 onChange事件，并在事件的回调函数中，调用接收到的 **updateTodo函数**，把获取的**值传递**给 **祖先组件** **App组件**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -753,7 +753,7 @@ App组件 通过 props 给 Header子组件 和 List子组件 传递数据，但�
 
 - 在 Header组件 里，对接收到的 **addTodo函数** 进行限制
 
-```js
+```jsx
 import React, { Component } from 'react';
 import PropsTypes from 'prop-types';
 import {nanoid} from 'nanoid';
@@ -799,7 +799,7 @@ export default class Header extends Component {
 
 - 同理，在 List组件 里，对接收到的 **todos数组** 和 **updateTodo函数** 进行限制
 
-```js
+```jsx
 import React, { Component } from 'react';
 import PropsTypes from 'prop-types';
 import Item from '../Item';
@@ -831,7 +831,7 @@ export default class List extends Component {
 
 - 同理，在 Item组件 里，对接收到的 **todos数组** 和 **updateTodo函数** 进行限制
 
-```js
+```jsx
 import React, { Component } from 'react';
 import PropsTypes from 'prop-types';
 import './index.css';
@@ -952,7 +952,7 @@ export default class App extends Component{
 - 在 List组件 中**接收** **deleteTodo函数**
 - 把 deleteTodo函数 继续传递给 **Item子组件**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import PropsTypes from 'prop-types';
 import Item from '../Item';
@@ -985,7 +985,7 @@ export default class List extends Component {
 
 - 在 Item组件 里，给删除按钮绑定 onClick事件，并在事件的回调函数中，调用接收到的 **deleteTodo函数**，把要删除对象的id的**值传递**给 **祖先组件** **App组件**
 
-```js
+```jsx
 import React, { Component } from 'react';
 import PropsTypes from 'prop-types';
 import './index.css';
@@ -1114,7 +1114,7 @@ export default class App extends Component{
 - 在 Footer组件 中**接收** **todos数组**
 - 对 todos数组 进行统计
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -1156,7 +1156,7 @@ export default class Footer extends Component {
 
 - 实现底部组件的复选框**显示**是否全选的功能（暂时还**不能人为更改**底部组件的复选框是否被选中）
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -1265,7 +1265,7 @@ export default class App extends Component{
 - 实现**人为更改**底部组件的复选框是否被选中，并将状态同步到 todos 数组中
 - 在 Footer组件 里，给底部复选框绑定 onChange事件，并在事件的回调函数中，调用接收到的 **checkAllTodo函数**，实现全选或全不选的功能
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 
@@ -1311,7 +1311,7 @@ export default class Footer extends Component {
 
 [defaultChecked 跟 checked 及 defaultValue 跟 value 的区别](https://blog.csdn.net/TL18382950497/article/details/115425569)
 
-```js
+```jsx
 import React, { Component } from 'react';
 import PropsTypes from 'prop-types';
 import './index.css';
@@ -1457,7 +1457,7 @@ export default class App extends Component{
 
 - 在 Footer组件 里，给按钮绑定 onClick事件，并在事件的回调函数中，调用接收到的 **clearAllDone函数**，实现清除所有已完成任务的功能
 
-```js
+```jsx
 import React, { Component } from 'react';
 import './index.css';
 

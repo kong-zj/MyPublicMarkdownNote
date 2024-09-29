@@ -827,23 +827,23 @@ forceUpdate() 即强制更新，不用对 state 进行任何修改，直接调�
 
 ### 总结
 
-1. 初始化阶段：由 ReactDOM.render() 触发，组件第一次挂载
-    1. constructor()
-    2. componentWillMount()
-    3. render()
-    4. componentDidMount()
-2. 更新阶段：由组件内部 this.setState() 或父组件重新触发 render()
-    1. shouldComponentUpdate()
-    2. componentWillUpdate()
-    3. render()
-    4. componentDidUpdate()
-3. 卸载组件：由 ReactDOM.unmountComponentAtNode() 触发
-    1. componentWillUnmount()
+1. 初始化阶段：由 `ReactDOM.render()` 触发，组件第一次挂载
+    1. `constructor()`
+    2. `componentWillMount()`
+    3. `render()`
+    4. `componentDidMount()`
+2. 更新阶段：由组件内部 `this.setState()` 或父组件重新触发 `render()`
+    1. `shouldComponentUpdate()`
+    2. `componentWillUpdate()`
+    3. `render()`
+    4. `componentDidUpdate()`
+3. 卸载组件：由 `ReactDOM.unmountComponentAtNode()` 触发
+    1. `componentWillUnmount()`
 
 最常用的三个钩子：
-1. componentDidMount()：一般用这个钩子，做初始化的事，例如开启定时器、发送网络请求、订阅信息
-2. componentWillUnmount()，一般在这个钩子中做一些收尾的事，例如：关闭定时器、取消订阅信息
-3. render()：初始化渲染或更新渲染调用
+1. `componentDidMount()`：一般用这个钩子，做**初始化**的事，例如开启定时器、发送网络请求、订阅信息
+2. `componentWillUnmount()`：一般在这个钩子中做一些**收尾**的事，例如：关闭定时器、取消订阅信息
+3. `render()`：初始化渲染或更新**渲染**调用
 
 ## 生命周期（新）
 
@@ -1232,19 +1232,19 @@ getSnapshotBeforeUpdate 在最近一次渲染输出（提交到DOM节点）之�
 
 ### 总结
 
-1. 初始化阶段：由 ReactDOM.render() 触发，组件第一次挂载
-    1. constructor()
-    2. getDerivedStateFromProps()
-    3. render()
-    4. componentDidMount()
-2. 更新阶段：由组件内部 this.setState() 或父组件重新触发 render()
-    1. getDerivedStateFromProps()
-    2. shouldComponentUpdate()
-    3. render()
-    4. getSnapshotBeforeUpdate()
-    5. componentDidUpdate()
-3. 卸载组件：由 ReactDOM.unmountComponentAtNode() 触发
-    1. componentWillUnmount()
+1. 初始化阶段：由 `ReactDOM.render()` 触发，组件第一次挂载
+    1. `constructor()`
+    2. `getDerivedStateFromProps()`
+    3. `render()`
+    4. `componentDidMount()`
+2. 更新阶段：由组件内部 `this.setState()` 或父组件重新触发 `render()`
+    1. `getDerivedStateFromProps()`
+    2. `shouldComponentUpdate()`
+    3. `render()`
+    4. `getSnapshotBeforeUpdate()`
+    5. `componentDidUpdate()`
+3. 卸载组件：由 `ReactDOM.unmountComponentAtNode()` 触发
+    1. `componentWillUnmount()`
 
 最常用的三个钩子和旧的生命周期中相同
 

@@ -10,7 +10,7 @@
 ## 路由 的理解
 
 一个路由就是一个映射关系（key:value）
-其中，key 为 url 中的 path（路径），value 为 function（后端路由） 或 component（前端路由）
+其中，key 为 url 中的 **path（路径）**，value 为 **function（后端路由）** 或 **component（前端路由）**
 
 ### 路由分类
 
@@ -47,9 +47,9 @@
 用一个式子总结它们之间的关系：
 **JavaScript = ECMAscript + BOM + DOM**
 
-- ECMAscript：它是一种由 ECMA国际（前身为欧洲计算机制造商协会）通过 ECMA-262 标准化的脚本程序设计语言，它是JavaScript（简称JS）的标准，浏览器就是去执行这个标准
-- DOM（document 是其的一个对象）：即 Document Object Model（文档对象模型），它是一种独立于语言，用于操作**xml，html文档**的应用编程接口
-- BOM（window 是其的一个对象）：即 Browser Object Model（浏览器对象模型），它是为了控制**浏览器**的行为而出现的接口
+- **ECMAscript**：它是一种由 ECMA国际（前身为欧洲计算机制造商协会）通过 ECMA-262 标准化的脚本程序设计语言，它是JavaScript（简称JS）的标准，浏览器就是去执行这个标准
+- **DOM**（document 是其的一个对象）：即 Document Object Model（文档对象模型），它是一种独立于语言，用于操作**xml，html文档**的应用编程接口
+- **BOM**（window 是其的一个对象）：即 Browser Object Model（浏览器对象模型），它是为了控制**浏览器**的行为而出现的接口
 
 BOM 身上有 浏览器的历史记录 history
 ![](resources/2023-12-27-21-35-51.png)
@@ -270,7 +270,7 @@ export default class App extends Component {
 ![](resources/2024-01-02-21-51-27.png)
 ![](resources/2024-01-02-21-51-42.png)
 
-### src/App.js（Route组件）
+### src/App.js（Route组件）（路由组件）
 
 使用 **Route组件** 注册路由
 
@@ -320,7 +320,7 @@ export default class App extends Component {
 此时，点击路由链接，但是组件没有变，是什么问题？
 因为整个应用要用一个路由器管理，所以不要像上面代码中用两个路由器（两个路由器之间没有数据沟通），而是需要**将App组件改为路由器组件**
 
-### src/index.js（BrowserRouter组件）
+### src/index.js（BrowserRouter组件）（路由器组件）
 
 把 App组件 用 **BrowserRouter组件** 包住
 
@@ -593,8 +593,8 @@ route-demo/
    1. 一般组件：`<Demo/>`
    2. 路由组件：`<Route path="/demo" component={Demo} />`
 2. 存放位置不同：
-   1. 一般组件：components文件夹下
-   2. 路由组件：pages文件夹下
+   1. 一般组件：**components**文件夹下
+   2. 路由组件：**pages**文件夹下
 3. 接收到的**props**不同：
    1. 一般组件：写组件标签时传递了什么，就能收到什么
    2. 路由组件：比一般组件**多接收到三个固定的属性：history、location、match**
@@ -1803,6 +1803,7 @@ export default class Detail extends Component {
     console.log('Detail组件接收到的props：',this.props);
     // 接收search参数
     const {search} = this.props.location;
+    // search.substring(1) 是为了去掉第一个字符 '?'
     const {id,title} = qs.parse(search.substring(1));
     const findResult = detailData.find((detailObj)=>{
         return detailObj.id === id
