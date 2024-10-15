@@ -217,7 +217,7 @@ export default class Count extends Component {
 }
 ```
 
-## redux精简版
+## redux精简版（`store`、`reducer`）
 
 ### 安装 redux
 
@@ -516,7 +516,334 @@ store.subscribe(()=> {
 
 但是存在效率问题：虽然有 **DOM diffing 算法**，只会**刷新变化的部分组件**，但是diffing算法在组件很多的时候，自身会消耗一定的资源
 
-## redux完整版
+### 总结
+
+![](resources/2024-10-15-21-21-44.png)
+![](resources/2024-10-15-21-23-30.png)
+
+## redux完整版（`action`）
+
+### 新建 action creators
+
+在`redux`文件夹中创建`count_action.js`
+
+现在项目的目录结构如下
+```sh
+todolist/
+  README.md
+  node_modules/
+  package.json
+  .gitignore
+  public/
+    index.html
+  src/
+    App.js
+    index.jsx
+    components/
+      Count/
+        index.jsx
+    redux/
+      store.js
+      count_reducer.js
+      count_action.js
+```
+
+#### src/redux/count_action.js
+
+```js
+/*
+    该文件专门为Count组件生成action对象
+*/
+
+// function createIncrementAction(data) {
+//     return { type: 'increment', data };
+// }
+
+export const createIncrementAction = (data) => ({ type: 'increment', data });
+
+export const createDecrementAction = (data) => ({ type: 'decrement', data });
+```
+
+### 使用 action creators
+
+#### src/components/Count/index.jsx
+
+不要自己手动写`action`，而是调用`action creators`来自动生成
+
+```jsx
+import React, { Component } from 'react';
+// 引入store，用于获取redux中保存的状态
+import store from '../../redux/store';
+// 引入actionCreator，专门用于创建action对象
+import { createIncrementAction, createDecrementAction } from '../../redux/count_action';
+
+export default class Count extends Component {
+
+  // 加法
+  increment = () => {
+    const { value } = this.selectNumber;
+    // 通知redux加value
+    store.dispatch(createIncrementAction(value * 1));
+  }
+
+  // 减法
+  decrement = () => {
+    const { value } = this.selectNumber;
+    store.dispatch(createDecrementAction(value * 1));
+  }
+
+  // 奇数再加
+  incrementIfOdd = () => {
+    const { value } = this.selectNumber;
+    const count = store.getState();
+    if (count % 2 !== 0) {
+      store.dispatch(createIncrementAction(value * 1));
+    }
+  }
+
+  // 异步加
+  incrementAsync = () => {
+    const { value } = this.selectNumber;
+    setTimeout(() => {
+      store.dispatch(createIncrementAction(value * 1));
+    }, 500)
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>当前求和为：{store.getState()}</h1>
+        <select ref={c => this.selectNumber = c}>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>&nbsp;
+        <button onClick={this.increment}>+</button>&nbsp;
+        <button onClick={this.decrement}>-</button>&nbsp;
+        <button onClick={this.incrementIfOdd}>当前求和为奇数时再加</button>&nbsp;
+        <button onClick={this.incrementAsync}>异步加</button>&nbsp;
+      </div>
+    )
+  }
+}
+```
+
+但是还有些问题：`count_reducer.js`文件和`count_action.js`文件中的`type`都有`'increment'`、`'decrement'`，如果不小心拼错了，就会匹配不上
+改进：定义常量，将`'increment'`、`'decrement'`作为常量，在`count_reducer.js`文件和`count_action.js`文件中引入
+
+### 定义常量
+
+在`redux`文件夹中创建`constant.js`
+
+现在项目的目录结构如下
+```sh
+todolist/
+  README.md
+  node_modules/
+  package.json
+  .gitignore
+  public/
+    index.html
+  src/
+    App.js
+    index.jsx
+    components/
+      Count/
+        index.jsx
+    redux/
+      store.js
+      count_reducer.js
+      count_action.js
+      constant.js
+```
+
+#### src/redux/constant.js
+
+```js
+/*
+    该模块是用于定义action对象中type类型的常量值，目的：便于管理的同时避免程序员写错字符串
+*/
+
+export const INCREMENT = 'increment';
+export const DECREMENT = 'decrement';
+```
+
+### 引入常量
+
+#### src/redux/count_reducer.js
+
+```js
+/*
+    1. 该文件是用于创建一个为Count组件服务的reducer，reducer的本质就是一个函数
+    2. reducer函数会接到两个参数，分别为：之前的状态(preState)、动作对象(action)
+*/
+
+import { INCREMENT, DECREMENT } from './constant';
+
+const initState = 0;    // 初始化状态
+export default function countReducer(preState = initState, action) {
+    console.log(preState, action);
+    // 从action对象中获取type、data
+    const { type, data } = action;
+    // 根据type决定如何加工数据
+    switch (type) {
+        case INCREMENT:
+            return preState + data;
+        case DECREMENT:
+            return preState - data;
+        default:
+            return preState;
+    }
+}
+```
+
+#### src/redux/count_action.js
+
+```js
+/*
+    该文件专门为Count组件生成action对象
+*/
+
+import { INCREMENT, DECREMENT } from './constant';
+
+export const createIncrementAction = (data) => ({ type: INCREMENT, data });
+
+export const createDecrementAction = (data) => ({ type: DECREMENT, data });
+```
+
+## 异步action版
+
+### 同步action与异步action的区别
+
+前面的例子中都是同步action
+- **同步**action，即action的值为**Object类型的一般对象**
+- **异步**action，就是指action的值为**函数**，这个函数会**返回一个action对象**
+
+![](resources/2024-10-15-22-03-00.png)
+
+### 改为异步action
+
+前面例子中的 **异步加**，等待的500毫秒是在**组件**中等待的
+
+`src/components/Count/index.jsx`文件中的对应代码如下：
+```jsx
+  // 异步加
+  incrementAsync = () => {
+    const { value } = this.selectNumber;
+    setTimeout(() => {
+      store.dispatch(createIncrementAction(value * 1));
+    }, 500)
+  }
+```
+现在，我不想让组件参与等待，而是**把等待的动作交给action creators**，让action creators等待500毫秒，再返回一个action，让reducer处理
+
+区别就是，举个例子：
+- 顾客5分钟之后再喊服务员上菜
+- 顾客让服务员5分钟之后再上菜
+
+#### src/components/Count/index.jsx
+
+`src/components/Count/index.jsx`文件中的对应位置修改如下：
+```jsx
+// 引入actionCreator，专门用于创建action对象
+import { createIncrementAction, createDecrementAction, createIncrementAsyncAction } from '../../redux/count_action';
+
+  // 异步加
+  incrementAsync = () => {
+    const { value } = this.selectNumber;
+    // setTimeout(() => {
+    store.dispatch(createIncrementAsyncAction(value * 1, 500));
+    // }, 500)
+  }
+```
+
+#### src/redux/count_action.js（`dispatch`）
+
+```js
+/*
+    该文件专门为Count组件生成action对象
+*/
+
+import { INCREMENT, DECREMENT } from './constant';
+import store from './store';
+
+// 同步action，即action的值为Object类型的一般对象
+export const createIncrementAction = (data) => ({ type: INCREMENT, data });
+export const createDecrementAction = (data) => ({ type: DECREMENT, data });
+
+// 异步action，就是指action的值为函数，这个函数会返回一个action对象
+// 异步action 中一般都会调用 同步action
+export const createIncrementAsyncAction = (data, time) => {
+    return () => {
+        setTimeout(() => {
+            store.dispatch(createIncrementAction(data));
+        }, time)
+    }
+};
+```
+
+此时点击 异步加 按钮，效果如下
+![](resources/2024-10-15-22-41-25.png)
+
+### 配置中间件redux-thunk
+
+#### 安装redux-thunk
+
+`npm install redux-thunk`
+
+#### src/redux/store.js
+
+```js
+/*
+    该文件专门用于暴露一个store对象，整个应用只有一个store对象
+*/ 
+
+// 引入createStore，专门用于创建redux中最核心的store对象
+import { createStore, applyMiddleware } from 'redux';
+// 引入为Count组件服务的reducer
+import countReducer from './count_reducer';
+// 引入redux-thunk，用于支持异步action
+import {thunk} from 'redux-thunk';
+// 暴露store
+// 为了处理异步，使用applyMiddleware并把thunk传入使用
+export default createStore(countReducer, applyMiddleware(thunk));
+```
+
+此时 异步加 按钮功能正常
+
+### 小精简
+
+#### src/redux/count_action.js
+
+```js
+/*
+    该文件专门为Count组件生成action对象
+*/
+
+import { INCREMENT, DECREMENT } from './constant';
+
+// 同步action，即action的值为Object类型的一般对象
+export const createIncrementAction = (data) => ({ type: INCREMENT, data });
+export const createDecrementAction = (data) => ({ type: DECREMENT, data });
+
+// 异步action，就是指action的值为函数，这个函数会返回一个action对象
+// 异步action 中一般都会调用 同步action
+export const createIncrementAsyncAction = (data, time) => {
+    // store的dispatch方法会判断传入值是函数还是对象，如果是函数，那就给这个函数传参数，参数是store的dispatch方法，并且执行这个函数
+    return (dispatch) => {
+        setTimeout(() => {
+            dispatch(createIncrementAction(data));
+        }, time)
+    }
+};
+```
+
+### 总结
+
+![](resources/2024-10-15-23-10-14.png)
+
+
+
 
 
 
@@ -533,9 +860,9 @@ store.subscribe(()=> {
 
 --- 
 
-P101
+P103
 
-
+https://www.bilibili.com/video/BV1wy4y1D7JT?p=103
 
 
 
