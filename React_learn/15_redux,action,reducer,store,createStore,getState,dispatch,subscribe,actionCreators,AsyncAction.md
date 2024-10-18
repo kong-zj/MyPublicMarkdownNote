@@ -227,7 +227,7 @@ npm install redux
 
 ### 使用 redux
 
-在上面项目的基础上，创建`redux`文件夹，并创建`store.js`和`count_reducer.js`
+在上面项目的基础上，在`src`目录下创建`redux`文件夹，并创建`store.js`和`count_reducer.js`
 
 现在项目的目录结构如下
 ```sh
@@ -811,7 +811,7 @@ export default createStore(countReducer, applyMiddleware(thunk));
 
 此时 异步加 按钮功能正常
 
-### 小精简
+### 小精简（dispatch参数）
 
 #### src/redux/count_action.js
 
@@ -843,27 +843,3 @@ export const createIncrementAsyncAction = (data, time) => {
 ![](resources/2024-10-15-23-10-14.png)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---- 
-
-P103
-
-https://www.bilibili.com/video/BV1wy4y1D7JT?p=103
-
-
-
-[代码](https://github.com/xzlaptt/React)
