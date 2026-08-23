@@ -17,7 +17,7 @@
 
 ![](resources/2023-06-15-17-27-19.png)
 
-修改了快捷键为<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>
+快捷键为<kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>X</kbd>
 
 #### mac上的chrome安装xpath_helper插件
 

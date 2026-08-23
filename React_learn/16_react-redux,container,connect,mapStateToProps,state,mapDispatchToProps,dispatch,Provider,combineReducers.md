@@ -425,16 +425,470 @@ export default class Count extends Component {
 }
 ```
 
+## 总结
 
+![](resources/2024-10-21-20-58-39.png)
 
+## 优化
 
+### 优化编码
 
+#### src/containers/Count/index.jsx
 
+```jsx
+// 引入Count的UI组件
+import CountUI from "../../components/Count";
+// 引入connect用于连接UI组件与redux
+import { connect } from "react-redux";
 
+import {
+    createIncrementAction,
+    createDecrementAction,
+    createIncrementAsyncAction
+} from "../../redux/count_action";
 
+// 使用connect()()，创建并暴露一个Count容器组件
+export default connect(
+    state => ({ count: state }),
+    dispatch => ({
+        jia: number => dispatch(createIncrementAction(number)),
+        jian: number => dispatch(createDecrementAction(number)),
+        jiaAsync: (number, time) => dispatch(createIncrementAsyncAction(number, time)),
+    })
+)(CountUI);
+```
 
+### 简写 mapDispatchToProps（源代码API层级的优化）
 
+`mapDispatchToProps`是一个函数，也可以写成一个对象
 
+#### src/containers/Count/index.jsx
+
+不用自己写`dispatch`，`connect()()`会自动帮我们处理
+
+```jsx
+// 引入Count的UI组件
+import CountUI from "../../components/Count";
+// 引入connect用于连接UI组件与redux
+import { connect } from "react-redux";
+
+import {
+    createIncrementAction,
+    createDecrementAction,
+    createIncrementAsyncAction
+} from "../../redux/count_action";
+
+// 使用connect()()，创建并暴露一个Count容器组件
+export default connect(
+    state => ({ count: state }),
+    // mapDispatchToProps 的一般写法
+    // dispatch => ({
+    //     jia: number => dispatch(createIncrementAction(number)),
+    //     jian: number => dispatch(createDecrementAction(number)),
+    //     jiaAsync: (number, time) => dispatch(createIncrementAsyncAction(number, time)),
+    // })
+
+    // mapDispatchToProps 的简写：对象
+    {
+        jia: createIncrementAction,
+        jian: createDecrementAction,
+        jiaAsync: createIncrementAsyncAction,
+    }
+)(CountUI);
+```
+
+#### 总结
+
+![](resources/2024-10-21-21-25-33.png)
+
+### 使用 Provider 组件
+
+#### src/App.js
+
+如果有很多容器组件，要给每个容器组件都传递 `store`，太麻烦了
+
+```js
+import React, { Component } from 'react';
+import Count from './containers/Count';
+import store from './redux/store';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <Count store={store}/>
+        <Demo store={store}/>
+        <Demo store={store}/>
+        <Demo store={store}/>
+        <Demo store={store}/>
+        <Demo store={store}/>
+        <Demo store={store}/>
+      </div>
+    )
+  }
+}
+```
+
+删掉`store={store}`，不要自己一遍一遍传
+
+```js
+import React, { Component } from 'react';
+import Count from './containers/Count';
+import store from './redux/store';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <Count/>
+      </div>
+    )
+  }
+}
+```
+
+#### src/index.jsx
+
+在最外层使用 `Provider` 组件，给容器组件传递 `store`
+
+```jsx
+import React from "react";
+import ReactDOM from "react-dom";
+import App from './App';
+import store from './redux/store';
+import { Provider } from "react-redux";
+
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.getElementById('root')
+);
+
+// 不需要自己检测redux中状态的改变了
+```
+
+### 整合UI组件和容器组件
+
+删掉`components`目录及下面的文件
+保留`containers`目录
+
+#### src/containers/Count/index.jsx
+
+合二为一
+
+```jsx
+import React, { Component } from 'react';
+// 引入connect用于连接UI组件与redux
+import { connect } from "react-redux";
+
+import {
+    createIncrementAction,
+    createDecrementAction,
+    createIncrementAsyncAction
+} from "../../redux/count_action";
+
+// 定义UI组件
+class Count extends Component {
+
+  // 加法
+  increment = () => {
+    const { value } = this.selectNumber;
+    this.props.jia(value * 1);
+  }
+
+  // 减法
+  decrement = () => {
+    const { value } = this.selectNumber;
+    this.props.jian(value * 1);
+  }
+
+  // 奇数再加
+  incrementIfOdd = () => {
+    const { value } = this.selectNumber;
+    if (this.props.count % 2 !== 0) {
+      this.props.jia(value * 1);
+    }
+  }
+
+  // 异步加
+  incrementAsync = () => {
+    const { value } = this.selectNumber;
+    this.props.jiaAsync(value * 1, 500);
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>当前求和为：{this.props.count}</h1>
+        <select ref={c => this.selectNumber = c}>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>&nbsp;
+        <button onClick={this.increment}>+</button>&nbsp;
+        <button onClick={this.decrement}>-</button>&nbsp;
+        <button onClick={this.incrementIfOdd}>当前求和为奇数时再加</button>&nbsp;
+        <button onClick={this.incrementAsync}>异步加</button>&nbsp;
+      </div>
+    )
+  }
+}
+
+// 使用connect()()，创建并暴露一个Count容器组件
+export default connect(
+    state => ({ count: state }),
+    // mapDispatchToProps 的简写：对象
+    {
+        jia: createIncrementAction,
+        jian: createDecrementAction,
+        jiaAsync: createIncrementAsyncAction,
+    }
+)(Count);
+```
+
+### 总结
+
+![](resources/2024-10-21-21-59-30.png)
+
+# 数据共享
+
+上面的例子里，只有一个组件
+下面实现多个组件（Count组件、Person组件）共享状态
+继续使用上面的求和案例
+
+## 调整目录结构
+
+在`redux`目录下创建`reducers`文件夹，将`count_reducer.js`文件放入其中，重命名为`count.js`
+在`redux`目录下创建`actions`文件夹，将`count_action.js`文件放入其中，重命名为`count.js`
+并更改引入文件的路径
+
+现在项目的目录结构如下
+```sh
+todolist/
+  README.md
+  node_modules/
+  package.json
+  .gitignore
+  public/
+    index.html
+  src/
+    App.js
+    index.jsx
+    containers/
+      Count/
+        index.jsx
+    redux/
+      reducers/
+        count.js
+      actions/
+        count.js
+      store.js
+      constant.js
+```
+
+## 新增Person组件
+
+在`containers`目录下创建`Person`文件夹，在其中创建`index.jsx`文件
+
+现在项目的目录结构如下
+```sh
+todolist/
+  README.md
+  node_modules/
+  package.json
+  .gitignore
+  public/
+    index.html
+  src/
+    App.js
+    index.jsx
+    containers/
+      Count/
+        index.jsx
+      Person/
+        index.jsx
+    redux/
+      reducers/
+        count.js
+      actions/
+        count.js
+      store.js
+      constant.js
+```
+
+### src/containers/Person/index.jsx
+
+```jsx
+import React, { Component } from 'react';
+
+export default class Person extends Component {
+
+    addPerson = () => {
+        const name = this.nameNode.value;
+        const age = this.ageNode.value;
+        console.log(name, age);
+    }
+  render() {
+    return (
+      <div>
+        <h2>Person组件</h2>
+        <input ref={c => this.nameNode = c} type="text" placeholder='输入姓名'/>
+        <input ref={c => this.ageNode = c} type="text" placeholder='输入年龄'/>
+        <button onClick={this.addPerson}>添加</button>
+        <ul>
+            <li>姓名---年龄</li>
+            <li>姓名---年龄</li>
+            <li>姓名---年龄</li>
+        </ul>
+      </div>
+    )
+  }
+}
+```
+
+### src/App.js
+
+```js
+import React, { Component } from 'react';
+import Count from './containers/Count';
+import Person from './containers/Person';
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <Count/>
+        <hr/>
+        <Person/>
+      </div>
+    )
+  }
+}
+```
+
+效果如下
+![](resources/2024-10-23-22-26-40.png)
+
+## 给Person组件准备一套redux
+
+要准备好 **action**、**reducer**、**常量**
+
+### src/redux/constant.js
+
+```js
+/*
+    该模块是用于定义action对象中type类型的常量值，目的：便于管理的同时避免程序员写错字符串
+*/
+
+export const INCREMENT = 'increment';
+export const DECREMENT = 'decrement';
+export const ADD_PERSON = 'add_person';
+```
+
+### src/redux/actions/person.js
+
+```js
+import { ADD_PERSON } from "../constant";
+
+// 创建增加一个Person的action动作对象
+export const createAddPersonAction = (PersonObj) => ({ type: ADD_PERSON, data: PersonObj });
+```
+
+### src/redux/reducers/person.js
+
+```js
+import { ADD_PERSON } from "../constant";
+
+// 初始化Person的列表
+const initState = [{ id: 1, name: 'tom', age: 18 }];
+
+export default function personReducer(preState = initState, action) {
+    const { type, data } = action;
+    switch (type) {
+        // 添加一个Person
+        case ADD_PERSON:
+            // 新增的放到最前面
+            return [data, ...preState];
+        default:
+            return preState;
+    }
+}
+```
+
+现在项目的目录结构如下
+```sh
+todolist/
+  README.md
+  node_modules/
+  package.json
+  .gitignore
+  public/
+    index.html
+  src/
+    App.js
+    index.jsx
+    containers/
+      Count/
+        index.jsx
+      Person/
+        index.jsx
+    redux/
+      reducers/
+        count.js
+        person.js
+      actions/
+        count.js
+        person.js
+      store.js
+      constant.js
+```
+
+## 完成数据共享
+
+### src/redux/store.js
+
+#### 管理一个状态
+
+redux如果只管理**一个状态**时，直接存储这个状态就行
+
+```js
+/*
+    该文件专门用于暴露一个store对象，整个应用只有一个store对象
+*/ 
+
+// 引入createStore，专门用于创建redux中最核心的store对象
+import { createStore, applyMiddleware } from 'redux';
+// 引入为Count组件服务的reducer
+import countReducer from './reducers/count';
+// 引入redux-thunk，用于支持异步action
+import {thunk} from 'redux-thunk';
+// 暴露store
+// 为了处理异步，使用applyMiddleware并把thunk传入使用
+export default createStore(countReducer, applyMiddleware(thunk));
+```
+
+#### 管理多个状态
+
+redux要管理**多个状态**时，必须用**对象**去存储所有的状态
+
+要**合并多个reducer到一个字典中**，需要用到**combineReducers**，它是一个函数，接收一个对象作为参数，对象的属性就是各个reducer
+
+```js
+
+```
+
+### src/containers/Count/index.jsx
+
+```jsx
+
+```
+
+### src/containers/Person/index.jsx
+
+```jsx
+
+```
 
 
 
@@ -453,7 +907,7 @@ export default class Count extends Component {
 
 --- 
 
-P106
+P111 15min
 
 https://www.bilibili.com/video/BV1wy4y1D7JT?p=104
 

@@ -1282,6 +1282,13 @@ urlpatterns = [
 使用 Postman 来测试接口 http://127.0.0.1:8000/course/viewsets/6
 效果不变
 
+### 过滤器 django_filters
+
+
+### 搜索 SearchFilter
+
+
+
 ## 认证（authentication）
 
 
